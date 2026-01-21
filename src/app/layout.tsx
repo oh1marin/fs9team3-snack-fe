@@ -1,9 +1,19 @@
 import type { Metadata } from "next";
+import localFont from "next/font/local";
 import "./globals.css";
+import Header from "@/components/Header";
+import { AuthProvider } from "@/contexts/AuthContext";
+
+const pretendard = localFont({
+  src: "../assets/fonts/PretendardVariable.woff2",
+  variable: "--font-pretendard",
+  weight: "100 900",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "Snack",
-  description: "Snack",
+  description: "포토카드 마켓플레이스",
 };
 
 export default function RootLayout({
@@ -12,9 +22,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ko">
-      <body className="min-h-screen bg-[#FDF0DF] font-['Pretendard']">
-        {children}
+    <html lang="ko" className={pretendard.variable}>
+      <body className={pretendard.className}>
+        <AuthProvider>
+          <Header />
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );
