@@ -1,66 +1,44 @@
 import Image from "next/image";
-import styles from "./page.module.css";
 
-export default function Home() {
+export default function LandingPage() {
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
+    <div
+      className="relative mx-auto w-full max-w-[1920px] bg-[#FDF0DF]"
+      style={{ height: "calc(100vh - 88px)", minHeight: "992px" }}
+    >
+      <div className="flex flex-col items-center pt-8">
         <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
+          src="/snacklogo.png"
+          alt="Snack"
+          width={742}
+          height={248}
           priority
+          className="h-auto w-[150px] sm:w-[280px] md:w-[400px] lg:w-[500px]"
         />
-        <div className={styles.intro}>
-          <h1>To get started, edit the page.tsx file.</h1>
-          <p>
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+
+        <div className="mt-8">
+          <Image
+            src="/mid.png"
+            alt="mid"
+            width={740}
+            height={120}
+            priority
+            className="h-auto w-[300px] sm:w-[520px] md:w-[620px] lg:w-[740px]"
+          />
         </div>
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className={styles.secondary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+      </div>
+
+      <div className="mt-10 w-full px-6 lg:absolute lg:bottom-0 lg:left-1/2 lg:mt-0 lg:w-full lg:-translate-x-1/2">
+        <Image
+          src="/landingpageall.png"
+          alt="all"
+          width={1600}
+          height={900}
+          priority
+          className="mx-auto h-auto w-full max-w-[1600px]"
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 1600px"
+        />
+      </div>
     </div>
   );
 }
