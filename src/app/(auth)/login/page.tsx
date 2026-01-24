@@ -15,14 +15,35 @@ export default function LoginPage() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [emailError, setEmailError] = useState("");
+
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+
+    // 이메일 실시간 검증
+    if (name === "email") {
+      if (value && !validateEmail(value)) {
+        setEmailError("올바른 이메일 형식이 아닙니다.");
+      } else {
+        setEmailError("");
+      }
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!validateEmail(formData.email)) {
+      setEmailError("올바른 이메일 형식이 아닙니다.");
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -42,10 +63,10 @@ export default function LoginPage() {
   };
 
   const isFormValid =
-    formData.email.trim() !== "" && formData.password.trim() !== "";
+    formData.email.trim() !== "" && formData.password.trim() !== "" && !emailError;
 
   return (
-    <div className="mx-auto flex min-h-[calc(100vh-88px)] w-full max-w-[1920px] flex-col items-center justify-center bg-bg-400 px-6">
+    <div className="mx-auto flex min-h-[calc(100vh-88px)] w-full max-w-[1920px] flex-col items-center justify-center bg-background-peach px-6">
       <div className="w-full max-w-[560px]">
         <h1 className="text-left text-2xl-b text-black-500">로그인</h1>
 
@@ -60,7 +81,9 @@ export default function LoginPage() {
                   value={formData.email}
                   onChange={handleChange}
                   placeholder="이메일을 입력해주세요."
-                  className="h-[56px] w-full rounded-xl border border-primary-300 bg-bg-white px-5 pr-12 text-lg-r outline-none placeholder:text-gray-400"
+                  className={`h-[56px] w-full rounded-xl border bg-white px-5 pr-12 text-lg-r outline-none placeholder:text-gray-400 ${
+                    emailError ? "border-red-500" : "border-primary-300"
+                  }`}
                   required
                 />
                 <div className="absolute right-4 top-1/2 -translate-y-1/2">
@@ -73,6 +96,9 @@ export default function LoginPage() {
                   />
                 </div>
               </div>
+              {emailError && (
+                <span className="text-sm text-red-500">{emailError}</span>
+              )}
             </label>
 
             <label className="flex flex-col gap-3">
@@ -84,7 +110,7 @@ export default function LoginPage() {
                   value={formData.password}
                   onChange={handleChange}
                   placeholder="비밀번호를 입력해주세요."
-                  className="h-[56px] w-full rounded-xl border border-primary-300 bg-bg-white px-5 pr-12 text-lg-r outline-none placeholder:text-gray-400"
+                  className="h-[56px] w-full rounded-xl border border-primary-300 bg-white px-5 pr-12 text-lg-r outline-none placeholder:text-gray-400"
                   required
                 />
                 <button
