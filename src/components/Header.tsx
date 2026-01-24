@@ -44,7 +44,7 @@ export default function Header() {
 
   // 로그인 시 헤더
   return (
-    <header className="border-b border-line-gray bg-bg-400">
+    <header className="border-b border-line-gray bg-background-peach">
       <div className="mx-auto flex h-[88px] max-w-[1920px] items-center justify-between px-6">
         <div className="flex items-center gap-16">
           <Link href="/" className="flex items-center">

@@ -1,36 +1,226 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🍿 Snack - 간식 마켓플레이스
 
-## Getting Started
+기업용 간식 및 음료 마켓플레이스 프론트엔드 프로젝트
 
-First, run the development server:
+## 📋 목차
 
+- [프로젝트 소개](#프로젝트-소개)
+- [기술 스택](#기술-스택)
+- [시작하기](#시작하기)
+- [프로젝트 구조](#프로젝트-구조)
+- [주요 기능](#주요-기능)
+- [개발 가이드](#개발-가이드)
+
+---
+
+## 📖 프로젝트 소개
+
+**Snack**은 기업 담당자가 사내 간식 및 음료를 관리하고 주문할 수 있는 마켓플레이스 플랫폼입니다.
+
+### 주요 목표
+- 간편한 상품 검색 및 카테고리 분류
+- 직관적인 상품 등록 및 관리
+- 원활한 사용자 인증 시스템
+
+---
+
+## 🛠 기술 스택
+
+### Core
+- **Next.js** 16.1.1 - React 프레임워크
+- **React** 19.2.3 - UI 라이브러리
+- **TypeScript** 5.x - 타입 안정성
+
+### Styling
+- **Tailwind CSS** 4.1.18 - 유틸리티 CSS 프레임워크
+- **PostCSS** - CSS 후처리
+
+### Tools
+- **ESLint** - 코드 품질 관리
+- **JWT Decode** - 인증 토큰 처리
+
+### 설치 및 실행
+
+1. **의존성 설치**
+```bash
+npm install
+# or
+yarn install
+```
+
+2. **개발 서버 실행**
 ```bash
 npm run dev
 # or
 yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+3. **브라우저에서 확인**
+```
+http://localhost:3000
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 빌드 및 배포
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+# 프로덕션 빌드
+npm run build
 
-## Learn More
+# 프로덕션 서버 실행
+npm run start
 
-To learn more about Next.js, take a look at the following resources:
+# 린트 체크
+npm run lint
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 📁 프로젝트 구조
 
-## Deploy on Vercel
+```
+fs9team3-snack-fe/
+├── src/
+│   ├── app/                      # Next.js App Router
+│   │   ├── (auth)/              # 인증 관련 페이지
+│   │   │   ├── login/           # 로그인
+│   │   │   └── signup/          # 회원가입
+│   │   ├── (protected)/         # 인증 필요 페이지
+│   │   │   ├── items/           # 상품 목록
+│   │   │   │   └── [id]/        # 상품 상세
+│   │   │   └── profile/         # 프로필
+│   │   ├── layout.tsx           # 루트 레이아웃
+│   │   └── page.tsx             # 홈페이지
+│   ├── components/              # 재사용 컴포넌트
+│   │   ├── Modal.tsx            # 공통 모달 래퍼
+│   │   ├── ProductModal.tsx     # 상품 등록 모달
+│   │   ├── DeleteModal.tsx      # 삭제 확인 모달
+│   │   ├── Header.tsx           # 헤더
+│   │   ├── Footer.tsx           # 푸터
+│   │   └── Container.tsx        # 컨테이너
+│   ├── contexts/                # React Context
+│   │   ├── AuthContext.tsx      # 인증 상태 관리
+│   │   └── ModalContext.tsx     # 전역 모달 관리
+│   ├── lib/                     # 유틸리티 및 서비스
+│   │   ├── actions/             # Server Actions
+│   │   ├── api/                 # API 호출
+│   │   └── service/             # 비즈니스 로직
+│   └── assets/                  # 정적 리소스
+│       └── fonts/               # 폰트 파일
+├── public/                      # 공개 정적 파일
+└── README.md
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## ✨ 주요 기능
+
+### 1. 인증 시스템
+- ✅ 이메일 기반 회원가입
+  - 이메일 형식 검증 (정규식)
+  - 비밀번호 최소 8자 이상
+  - 실시간 유효성 검사
+- ✅ 로그인/로그아웃
+- ✅ JWT 토큰 기반 인증
+- ✅ 인증 상태 전역 관리 (Context API)
+
+### 2. 상품 관리
+- ✅ 상품 목록 조회
+  - 카테고리별 필터링
+  - 정렬 옵션 (최신순, 판매순, 가격순)
+- ✅ 상품 상세 정보
+- ✅ 상품 등록 (모달)
+- ✅ 상품 삭제 (모달)
+
+### 3. 전역 모달 시스템
+- ✅ Context API 기반 전역 모달 관리
+- ✅ 어디서든 호출 가능한 모달
+- ✅ 자동 이벤트 전파 차단 (stopPropagation)
+- ✅ 확장 가능한 모달 구조
+
+### 4. UI/UX
+- ✅ 반응형 디자인
+- ✅ Tailwind CSS 커스텀 디자인 시스템
+- ✅ Pretendard 폰트 적용
+- ✅ 직관적인 사용자 인터페이스
+
+---
+
+## 💻 개발 가이드
+
+### 전역 모달 사용법
+
+```typescript
+import { useModal } from "@/contexts/ModalContext";
+import ProductModal from "@/components/ProductModal";
+
+export default function Page() {
+  const { openModal, closeModal } = useModal();
+
+  const handleOpenModal = () => {
+    openModal(<ProductModal onClose={closeModal} />);
+  };
+
+  return <button onClick={handleOpenModal}>모달 열기</button>;
+}
+```
+
+### 이메일 검증 정규식
+
+```typescript
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+```
+
+- `@` 기호 필수
+- 도메인과 확장자 필수
+- 공백 불가
+
+### 비밀번호 검증
+
+```typescript
+// 최소 8자 이상
+if (password.length < 8) {
+  setError("비밀번호는 최소 8자 이상이어야 합니다.");
+}
+```
+
+### 라우트 구조
+
+- **Public Routes**: `/login`, `/signup`
+- **Protected Routes**: `/items`, `/items/[id]`, `/profile`
+- 인증이 필요한 페이지는 `(protected)` 폴더 내에 위치
+
+### 스타일링 가이드
+
+프로젝트는 Tailwind CSS 커스텀 설정을 사용합니다:
+
+```javascript
+// tailwind.config에 정의된 커스텀 컬러
+primary-300, primary-400    // 주요 색상
+background-peach            // 배경색
+illustration-mint           // 포인트 색상
+```
+
+---
+
+## 📝 코딩 컨벤션
+
+### 컴포넌트
+- PascalCase 사용
+- `export default function ComponentName() {}`
+
+### 파일명
+- 컴포넌트: PascalCase (예: `ProductModal.tsx`)
+- 유틸리티: camelCase (예: `authService.ts`)
+
+### 스타일
+- Tailwind CSS 유틸리티 클래스 우선 사용
+- 반응형 디자인: `sm:`, `md:`, `lg:` 브레이크포인트 활용
+
+---
+
+## 🔗 관련 링크
+
+- [Next.js 공식 문서](https://nextjs.org/docs)
+- [React 공식 문서](https://react.dev)
+- [Tailwind CSS 공식 문서](https://tailwindcss.com/docs)
+- [TypeScript 공식 문서](https://www.typescriptlang.org/docs)
