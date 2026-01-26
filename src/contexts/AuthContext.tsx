@@ -45,7 +45,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const response = await userService.getMe();
       // 백엔드 응답: { success: true, user: {...} }
-      setUser(response.user || response);
+      setUser(response.user || null);
     } catch (error) {
       console.error("사용자 정보를 가져오는데 실패했습니다:", error);
       setUser(null);
