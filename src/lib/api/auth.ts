@@ -17,12 +17,13 @@ export const signupAPI = async (data: {
     body: JSON.stringify(data),
   });
 
+  const result = await response.json();
+
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || "회원가입에 실패했습니다.");
+    throw new Error(result.message || "회원가입에 실패했습니다.");
   }
 
-  return response.json();
+  return result;
 };
 
 // 로그인 API 호출
@@ -36,12 +37,13 @@ export const loginAPI = async (email: string, password: string) => {
     body: JSON.stringify({ email, password }),
   });
 
+  const result = await response.json();
+
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || "로그인에 실패했습니다.");
+    throw new Error(result.message || "로그인에 실패했습니다.");
   }
 
-  return response.json();
+  return result;
 };
 
 // 현재 사용자 정보 조회 (쿠키 기반)
@@ -51,9 +53,31 @@ export const getCurrentUserAPI = async () => {
     credentials: "include", // ✅ 쿠키가 자동으로 전송됨
   });
 
+  const result = await response.json();
+
   if (!response.ok) {
-    throw new Error("사용자 정보를 가져올 수 없습니다.");
+    throw new Error(result.message || "사용자 정보를 가져올 수 없습니다.");
   }
 
-  return response.json();
+  return result;
+};
+
+// 비밀번호 변경 API 호출
+export const changePasswordAPI = async (password: string) => {
+  const response = await fetch(`${API_URL}/api/auth/password`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include", // ✅ 쿠키 전송 허용
+    body: JSON.stringify({ password }),
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(result.message || "비밀번호 변경에 실패했습니다.");
+  }
+
+  return result;
 };

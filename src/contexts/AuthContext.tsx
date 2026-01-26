@@ -18,14 +18,14 @@ interface User {
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string) => Promise<void>;
-  logout: () => Promise<void>;
+  login: (email: string, password: string) => Promise<string | undefined>;
+  logout: () => Promise<string | undefined>;
   register: (
     nickname: string,
     email: string,
     password: string,
     passwordConfirmation: string
-  ) => Promise<void>;
+  ) => Promise<string | undefined>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -43,8 +43,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const getUser = async () => {
     try {
-      const userData = await userService.getMe();
-      setUser(userData);
+      const response = await userService.getMe();
+      // 백엔드 응답: { success: true, user: {...} }
+      setUser(response.user || response);
     } catch (error) {
       console.error("사용자 정보를 가져오는데 실패했습니다:", error);
       setUser(null);
@@ -58,7 +59,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     passwordConfirmation: string
   ) => {
     // 회원가입 성공 시 유저데이터를 API 에서 응답해주는 경우, 즉시 로그인 처리 가능
-    const { userData, success } = await registerAction(
+    const { userData, success, message } = await registerAction(
       nickname,
       email,
       password,
@@ -69,24 +70,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       throw new Error("회원가입 실패");
     }
     setUser(userData);
+    return message;
   };
 
   const login = async (email: string, password: string) => {
     // 로그인 성공 시 유저데이터를 API 에서 응답해주는 경우, 유저 상태 변경
-    const { userData, success } = await loginAction(email, password);
+    const { userData, success, message } = await loginAction(email, password);
 
     if (!success) {
       throw new Error("로그인 실패");
     }
     setUser(userData);
+    return message;
   };
 
   const logout = async () => {
     try {
-      await authService.logout();
+      const message = await authService.logout();
       setUser(null);
+      return message;
     } catch (error) {
       console.error("로그아웃 실패:", error);
+      throw error;
     }
   };
 

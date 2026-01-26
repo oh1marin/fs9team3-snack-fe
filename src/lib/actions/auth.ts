@@ -79,7 +79,7 @@ export async function clearServerSideTokens() {
 }
 
 export async function loginAction(email: string, password: string) {
-  const { user, accessToken, refreshToken } = await authService.login(
+  const { user, accessToken, refreshToken, message } = await authService.login(
     email,
     password,
   );
@@ -89,7 +89,7 @@ export async function loginAction(email: string, password: string) {
   }
 
   await setServerSideTokens(accessToken, refreshToken);
-  return { success: true, userData: user };
+  return { success: true, userData: user, message };
 }
 
 export async function registerAction(
@@ -98,7 +98,7 @@ export async function registerAction(
   password: string,
   passwordConfirmation: string,
 ) {
-  const { user, accessToken, refreshToken } = await authService.register(
+  const { user, accessToken, refreshToken, message } = await authService.register(
     nickname,
     email,
     password,
@@ -110,7 +110,7 @@ export async function registerAction(
   }
 
   await setServerSideTokens(accessToken, refreshToken);
-  return { success: true, userData: user };
+  return { success: true, userData: user, message };
 }
 
 /**

@@ -9,6 +9,7 @@ export const authService = {
       user: response.user,
       accessToken: response.accessToken,
       refreshToken: response.refreshToken,
+      message: response.message,
     };
   },
 
@@ -28,18 +29,22 @@ export const authService = {
       user: response.user,
       accessToken: response.accessToken,
       refreshToken: response.refreshToken,
+      message: response.message,
     };
   },
 
   async logout() {
     // 서버에 로그아웃 요청
     try {
-      await fetch(`${API_URL}/api/auth/logout`, {
+      const response = await fetch(`${API_URL}/api/auth/logout`, {
         method: "POST",
         credentials: "include",
       });
+      const result = await response.json();
+      return result.message || "로그아웃 되었습니다.";
     } catch (error) {
       console.error("로그아웃 API 호출 실패:", error);
+      throw error;
     }
   },
 

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "react-toastify";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -14,7 +15,6 @@ export default function LoginPage() {
     password: "",
   });
   const [isLoading, setIsLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
   const [emailError, setEmailError] = useState("");
 
   const validateEmail = (email: string) => {
@@ -47,12 +47,12 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      await login(formData.email, formData.password);
-      alert("로그인 성공!");
+      const message = await login(formData.email, formData.password);
+      toast.success(message || "로그인 성공!");
       router.push("/");
     } catch (error) {
       console.error("로그인 오류:", error);
-      alert(
+      toast.error(
         error instanceof Error
           ? error.message
           : "로그인 중 오류가 발생했습니다.",
@@ -103,30 +103,15 @@ export default function LoginPage() {
 
             <label className="flex flex-col gap-3">
               <span className="text-lg-m text-black-400">비밀번호</span>
-              <div className="relative">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  placeholder="비밀번호를 입력해주세요."
-                  className="h-[56px] w-full rounded-xl border border-primary-300 bg-white px-5 pr-12 text-lg-r outline-none placeholder:text-gray-400"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2"
-                >
-                  <Image
-                    src="/closeeye.png"
-                    alt="비밀번호 표시/숨김"
-                    width={24}
-                    height={24}
-                    className="opacity-40"
-                  />
-                </button>
-              </div>
+              <input
+                type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="비밀번호를 입력해주세요."
+                className="h-[56px] w-full rounded-xl border border-primary-300 bg-white px-5 text-lg-r outline-none placeholder:text-gray-400"
+                required
+              />
             </label>
           </div>
 

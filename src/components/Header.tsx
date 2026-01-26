@@ -3,9 +3,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "react-toastify";
+import { useRouter } from "next/navigation";
 
 export default function Header() {
   const { user, logout } = useAuth();
+  const router = useRouter();
 
   // 미 로그인 헤더
   if (!user) {
@@ -74,7 +77,15 @@ export default function Header() {
             Profile
           </Link>
           <button
-            onClick={logout}
+            onClick={async () => {
+              try {
+                const message = await logout();
+                toast.success(message || "로그아웃 되었습니다.");
+                router.push("/");
+              } catch (error) {
+                toast.error("로그아웃 중 오류가 발생했습니다.");
+              }
+            }}
             className="text-base font-medium text-gray-400 transition-colors hover:text-black-400"
           >
             Logout

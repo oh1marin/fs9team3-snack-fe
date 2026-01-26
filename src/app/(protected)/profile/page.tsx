@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { userService } from "@/lib/service/userService";
+import { toast } from "react-toastify";
 
 export default function ProfilePage() {
   const { user } = useAuth();
@@ -29,17 +31,33 @@ export default function ProfilePage() {
     }
   }, [user]);
 
-  const handlePasswordChange = (e: React.FormEvent) => {
+  const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // 프론트엔드에서 비밀번호 확인 검증
     if (passwords.password !== passwords.passwordConfirm) {
-      alert("비밀번호가 일치하지 않습니다.");
+      toast.error("비밀번호가 일치하지 않습니다.");
       return;
     }
 
-    console.log("비밀번호 변경:", passwords.password);
-    alert("비밀번호가 변경되었습니다.");
-    setPasswords({ password: "", passwordConfirm: "" });
+    if (passwords.password.length < 8) {
+      toast.error("비밀번호는 최소 8자 이상이어야 합니다.");
+      return;
+    }
+
+    try {
+      // 백엔드에는 password만 전송
+      const message = await userService.changePassword(passwords.password);
+      toast.success(message);
+      setPasswords({ password: "", passwordConfirm: "" });
+    } catch (error) {
+      console.error("비밀번호 변경 오류:", error);
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "비밀번호 변경 중 오류가 발생했습니다."
+      );
+    }
   };
 
   const isFormValid =
