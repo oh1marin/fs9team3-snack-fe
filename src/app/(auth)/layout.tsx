@@ -1,24 +1,20 @@
-"use client";
-
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { useAuth } from "@/contexts/AuthContext";
+import { checkAuth } from "@/lib/actions/auth";
+import { redirect, RedirectType } from "next/navigation";
 
-export default function AuthLayout({
+export default async function AuthLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const router = useRouter();
-  const { user } = useAuth();
+  // 인증 체크 (accessToken 검사만)
+  const isAuthenticated = await checkAuth();
 
-  useEffect(() => {
-    if (user) {
-      router.push("/items");
-    }
-  }, [user, router]);
+  // 이미 인증된 사용자는 items로 리다이렉트
+  if (isAuthenticated) {
+    redirect("/items", RedirectType.replace);
+  }
 
   return (
     <>
