@@ -78,7 +78,11 @@ export default function ItemsPage() {
         credentials: "include", // 쿠키 전송
       });
 
-      if (!response.ok) throw new Error("데이터를 불러올 수 없습니다");
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("API 에러 응답:", errorText);
+        throw new Error(`데이터를 불러올 수 없습니다 (${response.status}): ${errorText}`);
+      }
 
       const data: ItemsResponse = await response.json();
 
@@ -104,7 +108,12 @@ export default function ItemsPage() {
   }, [categoryMain, categorySub, sortOption]);
 
   const handleOpenProductModal = () => {
-    openModal(<ProductModal onClose={closeModal} />);
+    openModal(
+      <ProductModal 
+        onClose={closeModal} 
+        onSuccess={() => fetchItems(true)} 
+      />
+    );
   };
 
   // 더보기 버튼 클릭
