@@ -1,0 +1,267 @@
+/* Tailwind v4 entry */
+@import "tailwindcss";
+
+/* Theme Configuration with Pretendard Typography System */
+@theme inline {
+
+  /* Font Sizes with Line Heights */
+  --font-size-3xl: 32px;
+  --font-size-2xl: 24px;
+  --font-size-xl: 20px;
+  --font-size-2lg: 18px;
+  --font-size-lg: 16px;
+  --font-size-md: 14px;
+  --font-size-sm: 13px;
+  --font-size-xs: 12px;
+  
+  /* Line Heights */
+  --line-height-3xl: 42px;
+  --line-height-2xl: 32px;
+  --line-height-xl: 32px;
+  --line-height-2lg: 26px;
+  --line-height-lg: 26px;
+  --line-height-md: 24px;
+  --line-height-sm: 22px;
+  --line-height-xs-sb: 20px;
+  --line-height-xs: 18px;
+  
+  /* Font Weights */
+  --font-weight-bold: 700;
+  --font-weight-semibold: 600;
+  --font-weight-medium: 500;
+  --font-weight-regular: 400;
+
+  /* Color System from Figma */
+  /* Primary Colors - Orange */
+  --color-primary-100: #FEF3EB;
+  --color-primary-200: #FDE1CD;
+  --color-primary-300: #FCC49C;
+  --color-primary-400: #F97B22;
+
+  /* Black Colors */
+  --color-black-100: #6B6B6B;
+  --color-black-200: #525252;
+  --color-black-300: #373737;
+  --color-black-400: #1F1F1F;
+  --color-black-500: #040404;
+
+  /* Gray Colors */
+  --color-gray-50: #FFFFFF;
+  --color-gray-100: #E9E9E9;
+  --color-gray-200: #E0E0E0;
+  --color-gray-300: #C4C4C4;
+  --color-gray-400: #ABABAB;
+  --color-gray-500: #999999;
+
+  /* Illustration Colors */
+  --color-illustration-pink: #FFBDE8;
+  --color-illustration-yellow: #FEE8B0;
+  --color-illustration-olive: #9CA777;
+  --color-illustration-green: #7C9070;
+  --color-illustration-mint: #5CB783;
+  --color-illustration-mint-bright: #64D396;
+
+  /* Background Colors */
+  --color-background-100: #FAFAFA;
+  --color-background-200: #F7F7F7;
+  --color-background-300: #EFEFEF;
+  --color-background-peach: #FBF8F4;
+  --color-background-peach-light: #FDF0DF;
+
+  /* Line Colors */
+  --color-line-100: #F2F2F2;
+  --color-line-gray: #E6E6E6;
+
+  /* State Colors */
+  --color-state-error: #F63B20;
+}
+
+/* Typography Utilities from Figma */
+.text-3xl-b {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-3xl);
+  letter-spacing: 0;
+}
+
+.text-3xl-sb {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-3xl);
+  letter-spacing: 0;
+}
+
+.text-2xl-b {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-2xl);
+  letter-spacing: 0;
+}
+
+.text-2xl-sb {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-2xl);
+  letter-spacing: 0;
+}
+
+.text-2xl-m {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-2xl);
+  letter-spacing: 0;
+}
+
+.text-2xl-r {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-2xl);
+  letter-spacing: 0;
+}
+
+.text-xl-b {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-xl);
+  letter-spacing: 0;
+}
+
+.text-xl-sb {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-xl);
+  letter-spacing: 0;
+}
+
+.text-xl-m {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-xl);
+  letter-spacing: 0;
+}
+
+.text-xl-r {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-xl);
+  letter-spacing: 0;
+}
+
+.text-2lg-b {
+  font-size: var(--font-size-2lg);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-2lg);
+  letter-spacing: 0;
+}
+
+.text-2lg-sb {
+  font-size: var(--font-size-2lg);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-2lg);
+  letter-spacing: 0;
+}
+
+.text-2lg-m {
+  font-size: var(--font-size-2lg);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-2lg);
+  letter-spacing: 0;
+}
+
+.text-2lg-r {
+  font-size: var(--font-size-2lg);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-2lg);
+  letter-spacing: 0;
+}
+
+.text-lg-b {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-lg);
+  letter-spacing: 0;
+}
+
+.text-lg-sb {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-lg);
+  letter-spacing: 0;
+}
+
+.text-lg-m {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-lg);
+  letter-spacing: 0;
+}
+
+.text-lg-r {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-lg);
+  letter-spacing: 0;
+}
+
+.text-md-b {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-md);
+  letter-spacing: 0;
+}
+
+.text-md-sb {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-md);
+  letter-spacing: 0;
+}
+
+.text-md-m {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-md);
+  letter-spacing: 0;
+}
+
+.text-md-r {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-md);
+  letter-spacing: 0;
+}
+
+.text-sm-sb {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-sm);
+  letter-spacing: 0;
+}
+
+.text-sm-m {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-sm);
+  letter-spacing: 0;
+}
+
+.text-xs-sb {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-xs-sb);
+  letter-spacing: 0;
+}
+
+.text-xs-m {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-xs);
+  letter-spacing: 0;
+}
+
+.text-xs-r {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-xs);
+  letter-spacing: 0;
+}
