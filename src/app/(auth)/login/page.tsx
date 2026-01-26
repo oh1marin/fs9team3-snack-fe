@@ -6,6 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "react-toastify";
+import { EyeIcon, EyeOffIcon } from "@/components/icons/EyeIcons";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -15,6 +16,8 @@ export default function LoginPage() {
     password: "",
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [showEmail, setShowEmail] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [emailError, setEmailError] = useState("");
 
   const validateEmail = (email: string) => {
@@ -76,7 +79,7 @@ export default function LoginPage() {
               <span className="text-lg-m text-black-400">이메일</span>
               <div className="relative">
                 <input
-                  type="email"
+                  type={showEmail ? "text" : "email"}
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
@@ -86,15 +89,13 @@ export default function LoginPage() {
                   }`}
                   required
                 />
-                <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                  <Image
-                    src="/closeeye.png"
-                    alt="아이콘"
-                    width={24}
-                    height={24}
-                    className="opacity-40"
-                  />
-                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowEmail(!showEmail)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"
+                >
+                  {showEmail ? <EyeIcon /> : <EyeOffIcon />}
+                </button>
               </div>
               {emailError && (
                 <span className="text-sm text-red-500">{emailError}</span>
@@ -103,15 +104,24 @@ export default function LoginPage() {
 
             <label className="flex flex-col gap-3">
               <span className="text-lg-m text-black-400">비밀번호</span>
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="비밀번호를 입력해주세요."
-                className="h-[56px] w-full rounded-xl border border-primary-300 bg-white px-5 text-lg-r outline-none placeholder:text-gray-400"
-                required
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  placeholder="비밀번호를 입력해주세요."
+                  className="h-[56px] w-full rounded-xl border border-primary-300 bg-white px-5 pr-12 text-lg-r outline-none placeholder:text-gray-400"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"
+                >
+                  {showPassword ? <EyeIcon /> : <EyeOffIcon />}
+                </button>
+              </div>
             </label>
           </div>
 
