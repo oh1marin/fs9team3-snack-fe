@@ -221,35 +221,49 @@ export default function ItemsPage() {
       {!loading || items.length > 0 ? (
         <div className="mb-12 grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {items.map((item) => (
-            <Link
-              key={item.id}
-              href={`/items/${item.id}`}
-              className="overflow-hidden rounded-2xl transition-transform hover:scale-105"
-            >
-              <div className="relative aspect-square w-full bg-white">
-                {item.image ? (
-                  <Image
-                    src={item.image}
-                    alt={item.title}
-                    fill
-                    className="object-contain"
-                  />
-                ) : (
-                  <div className="flex h-full items-center justify-center text-md-m text-gray-400">
-                    {item.title}
-                  </div>
-                )}
-              </div>
-              <div className="p-4 bg-white">
+            <div key={item.id} className="overflow-hidden rounded-2xl">
+              <Link
+                href={`/items/${item.id}`}
+                className="block transition-transform hover:scale-105"
+              >
+                <div className="relative aspect-square w-full bg-white">
+                  {item.image ? (
+                    <Image
+                      src={item.image}
+                      alt={item.title}
+                      fill
+                      className="object-contain"
+                    />
+                  ) : (
+                    <div className="flex h-full items-center justify-center text-md-m text-gray-400">
+                      {item.title}
+                    </div>
+                  )}
+                </div>
+              </Link>
+              <div className="p-4 bg-background-peach pointer-events-none">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-xs sm:text-sm text-gray-400">
+                    {item.category_sub}
+                  </p>
+                  <span 
+                    className="px-2 py-1 rounded text-primary-400 text-xs font-semibold"
+                    style={{ backgroundColor: '#FEE8B0' }}
+                  >
+                    {item.count}회 구매
+                  </span>
+                </div>
                 <h3 className="text-lg-b text-black-400 mb-2">{item.title}</h3>
                 <p className="text-md-b text-primary-400">
                   {item.price.toLocaleString()}원
                 </p>
-                <p className="text-sm text-gray-400 mt-1">
-                  {item.user?.company_name}
-                </p>
+                {item.user?.company_name && (
+                  <p className="text-sm text-gray-400 mt-1">
+                    {item.user.company_name}
+                  </p>
+                )}
               </div>
-            </Link>
+            </div>
           ))}
         </div>
       ) : null}

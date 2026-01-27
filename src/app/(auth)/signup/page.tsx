@@ -79,7 +79,7 @@ export default function SignupPage() {
         formData.passwordConfirm
       );
       toast.success(message || "회원가입이 완료되었습니다!");
-      router.push("/");
+      router.push("/items");
     } catch (error) {
       console.error("회원가입 오류:", error);
       toast.error(

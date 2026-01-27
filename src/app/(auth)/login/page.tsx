@@ -52,7 +52,7 @@ export default function LoginPage() {
     try {
       const message = await login(formData.email, formData.password);
       toast.success(message || "로그인 성공!");
-      router.push("/");
+      router.push("/items");
     } catch (error) {
       console.error("로그인 오류:", error);
       toast.error(
