@@ -5,21 +5,33 @@ import Image from "next/image";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
+interface Product {
+  id: string;
+  title: string;
+  price: number;
+  image: string;
+  category_main: string;
+  category_sub: string;
+  link?: string;
+}
+
 interface ProductModalProps {
   onClose: () => void;
   onSuccess?: () => void;
+  editMode?: boolean;
+  product?: Product;
 }
 
-export default function ProductModal({ onClose, onSuccess }: ProductModalProps) {
+export default function ProductModal({ onClose, onSuccess, editMode = false, product }: ProductModalProps) {
   const [formData, setFormData] = useState({
-    productName: "",
-    category: "음료",
-    subCategory: "청량·탄산음료",
-    price: "",
-    productLink: "",
+    productName: product?.title || "",
+    category: product?.category_main || "음료",
+    subCategory: product?.category_sub || "청량·탄산음료",
+    price: product?.price?.toString() || "",
+    productLink: product?.link || "",
   });
 
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(product?.image || null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
@@ -83,8 +95,11 @@ export default function ProductModal({ onClose, onSuccess }: ProductModalProps) 
       }
       
       // API 호출
-      const response = await fetch(`${API_URL}/api/items`, {
-        method: "POST",
+      const url = editMode && product ? `${API_URL}/api/items/${product.id}` : `${API_URL}/api/items`;
+      const method = editMode ? "PUT" : "POST";
+      
+      const response = await fetch(url, {
+        method,
         credentials: "include",
         headers: {
           "Content-Type": "application/json",
@@ -100,16 +115,16 @@ export default function ProductModal({ onClose, onSuccess }: ProductModalProps) 
         }
         const errorText = await response.text();
         console.error("API 에러 응답:", errorText);
-        throw new Error(`상품 등록에 실패했습니다 (${response.status})`);
+        throw new Error(`상품 ${editMode ? '수정' : '등록'}에 실패했습니다 (${response.status})`);
       }
       
       // 성공 시 콜백 호출 및 모달 닫기
       onSuccess?.();
       onClose();
     } catch (error) {
-      console.error("상품 등록 실패:", error);
+      console.error(`상품 ${editMode ? '수정' : '등록'} 실패:`, error);
       if (error instanceof Error && !error.message.includes("401")) {
-        alert(error.message || "상품 등록에 실패했습니다. 다시 시도해주세요.");
+        alert(error.message || `상품 ${editMode ? '수정' : '등록'}에 실패했습니다. 다시 시도해주세요.`);
       }
     } finally {
       setIsSubmitting(false);
@@ -125,7 +140,9 @@ export default function ProductModal({ onClose, onSuccess }: ProductModalProps) 
         boxShadow: "4px 4px 10px 0 rgba(169, 169, 169, 0.20)",
       }}
     >
-      <h2 className="mb-4 sm:mb-6 text-xl-b sm:text-2xl-b text-black-500">상품 등록</h2>
+      <h2 className="mb-4 sm:mb-6 text-xl-b sm:text-2xl-b text-black-500">
+        {editMode ? "상품 수정" : "상품 등록"}
+      </h2>
 
         <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
           {/* 상품명 */}
@@ -315,7 +332,10 @@ export default function ProductModal({ onClose, onSuccess }: ProductModalProps) 
               disabled={isSubmitting}
               className="h-12 sm:h-14 flex-1 rounded-lg sm:rounded-xl bg-primary-400 text-md-sb sm:text-lg-sb text-white transition-colors hover:bg-primary-300 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isSubmitting ? "등록 중..." : "등록하기"}
+              {isSubmitting 
+                ? (editMode ? "수정 중..." : "등록 중...") 
+                : (editMode ? "수정하기" : "등록하기")
+              }
             </button>
           </div>
         </form>
