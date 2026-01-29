@@ -6,7 +6,7 @@ import { userService } from "@/lib/service/userService";
 import { toast } from "react-toastify";
 
 export default function ProfilePage() {
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
   const [userData, setUserData] = useState({
     company: "코드잇",
     name: "",
@@ -30,6 +30,37 @@ export default function ProfilePage() {
       });
     }
   }, [user]);
+
+  // 로딩 중일 때 스켈레톤 표시
+  if (isLoading) {
+    return (
+      <div className="mx-auto flex min-h-[calc(100vh-88px)] w-full max-w-[1920px] items-center justify-center bg-background-peach px-4 sm:px-6 py-8 sm:py-12">
+        <div className="w-full max-w-[560px]">
+          <div className="mb-8 sm:mb-12 h-9 w-40 animate-pulse rounded bg-gray-200 mx-auto" />
+          <div className="space-y-4 sm:space-y-6">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div key={i}>
+                <div className="mb-2 sm:mb-3 h-6 w-20 animate-pulse rounded bg-gray-200" />
+                <div className="h-14 sm:h-16 w-full animate-pulse rounded-xl sm:rounded-2xl bg-gray-200" />
+              </div>
+            ))}
+            <div className="mt-6 sm:mt-8 h-14 sm:h-16 w-full animate-pulse rounded-xl sm:rounded-2xl bg-gray-200" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // 사용자 정보가 없을 때 (로그인 안됨)
+  if (!user) {
+    return (
+      <div className="mx-auto flex min-h-[calc(100vh-88px)] w-full max-w-[1920px] items-center justify-center bg-background-peach px-4 sm:px-6 py-8 sm:py-12">
+        <div className="text-center">
+          <p className="text-xl-r text-gray-400">로그인이 필요한 페이지입니다.</p>
+        </div>
+      </div>
+    );
+  }
 
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();

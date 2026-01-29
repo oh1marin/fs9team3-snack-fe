@@ -7,8 +7,25 @@ import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 
 export default function Header() {
-  const { user, logout } = useAuth();
+  const { user, isLoading, logout } = useAuth();
   const router = useRouter();
+
+  console.log("[Header] user:", user, "isLoading:", isLoading);
+
+  // 로딩 중일 때는 스켈레톤 헤더 표시
+  if (isLoading) {
+    return (
+      <header className="w-full bg-primary-400">
+        <div className="mx-auto flex h-[88px] w-full max-w-[1920px] items-center justify-between px-6">
+          <div className="h-10 w-[180px] animate-pulse rounded bg-white/20" />
+          <div className="flex items-center gap-10">
+            <div className="h-6 w-16 animate-pulse rounded bg-white/20" />
+            <div className="h-6 w-20 animate-pulse rounded bg-white/20" />
+          </div>
+        </div>
+      </header>
+    );
+  }
 
   // 미 로그인 헤더
   if (!user) {

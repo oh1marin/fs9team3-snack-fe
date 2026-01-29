@@ -56,6 +56,12 @@ export const getCurrentUserAPI = async () => {
   const result = await response.json();
 
   if (!response.ok) {
+    // 401 에러는 특별히 표시
+    if (response.status === 401) {
+      const error = new Error(result.message || "인증이 만료되었습니다.");
+      (error as any).status = 401;
+      throw error;
+    }
     throw new Error(result.message || "사용자 정보를 가져올 수 없습니다.");
   }
 

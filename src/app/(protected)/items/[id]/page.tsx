@@ -24,6 +24,7 @@ interface Product {
   user?: {
     company_name: string;
   };
+  isOwner?: boolean;
 }
 
 export default function ProductDetailPage() {
@@ -209,12 +210,14 @@ export default function ProductDetailPage() {
             <p className="text-2xl-b sm:text-3xl-b text-black-500">
               {product.price.toLocaleString()}원
             </p>
-            <button
-              onClick={handleEditProduct}
-              className="px-4 py-2 rounded-lg border-2 border-primary-300 bg-white text-md-sb text-primary-400 transition-colors hover:bg-primary-100"
-            >
-              상품 수정
-            </button>
+            {product.isOwner && (
+              <button
+                onClick={handleEditProduct}
+                className="px-4 py-2 rounded-lg border-2 border-primary-300 bg-white text-md-sb text-primary-400 transition-colors hover:bg-primary-100"
+              >
+                상품 수정
+              </button>
+            )}
           </div>
 
           {/* 상품 정보 */}
@@ -269,18 +272,29 @@ export default function ProductDetailPage() {
           {/* 버튼 영역 */}
           <div className="border-t border-line-gray pt-4 sm:pt-6">
             <div className="flex gap-3">
-              <button
-                onClick={handleDeleteProduct}
-                className="h-12 sm:h-14 flex-[1] rounded-lg sm:rounded-xl border-2 border-primary-400 bg-white text-md-sb sm:text-lg-sb text-primary-400 transition-colors hover:bg-primary-50"
-              >
-                삭제하기
-              </button>
-              <button
-                onClick={handleAddToCart}
-                className="h-12 sm:h-14 flex-[2] rounded-lg sm:rounded-xl bg-primary-400 text-md-sb sm:text-lg-sb text-white transition-colors hover:bg-primary-300"
-              >
-                장바구니 담기
-              </button>
+              {product.isOwner ? (
+                <>
+                  <button
+                    onClick={handleDeleteProduct}
+                    className="h-12 sm:h-14 flex-[1] rounded-lg sm:rounded-xl border-2 border-primary-400 bg-white text-md-sb sm:text-lg-sb text-primary-400 transition-colors hover:bg-primary-50"
+                  >
+                    삭제하기
+                  </button>
+                  <button
+                    onClick={handleAddToCart}
+                    className="h-12 sm:h-14 flex-[2] rounded-lg sm:rounded-xl bg-primary-400 text-md-sb sm:text-lg-sb text-white transition-colors hover:bg-primary-300"
+                  >
+                    장바구니 담기
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={handleAddToCart}
+                  className="h-12 sm:h-14 w-full rounded-lg sm:rounded-xl bg-primary-400 text-md-sb sm:text-lg-sb text-white transition-colors hover:bg-primary-300"
+                >
+                  장바구니 담기
+                </button>
+              )}
             </div>
           </div>
         </div>
