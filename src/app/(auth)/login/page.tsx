@@ -53,6 +53,7 @@ export default function LoginPage() {
       const message = await login(formData.email, formData.password);
       toast.success(message || "로그인 성공!");
       router.push("/items");
+      router.refresh();
     } catch (error) {
       console.error("로그인 오류:", error);
       toast.error(
