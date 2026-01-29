@@ -265,3 +265,12 @@
   line-height: var(--line-height-xs);
   letter-spacing: 0;
 }
+
+/* Global Button Styles */
+button:not(:disabled) {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
