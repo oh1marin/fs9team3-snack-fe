@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { userService } from "@/lib/service/userService";
 import { toast } from "react-toastify";
+import PasswordEyeBtn from "@/app/ui/PasswordEyeBtn";
 
 export default function ProfilePage() {
   const { user, isLoading } = useAuth();
@@ -152,46 +153,11 @@ export default function ProfilePage() {
                 placeholder="비밀번호를 입력해주세요."
                 className="h-14 sm:h-16 w-full rounded-xl sm:rounded-2xl border-2 border-primary-300 bg-white px-4 sm:px-6 pr-12 sm:pr-14 text-lg-r sm:text-xl-r outline-none placeholder:text-gray-400 focus:border-primary-400"
               />
-              <button
-                type="button"
+              <PasswordEyeBtn
+                visible={showPassword}
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-4 sm:right-6 top-1/2 -translate-y-1/2 text-gray-400"
-              >
-                {showPassword ? (
-                  <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    className="sm:w-6 sm:h-6"
-                  >
-                    <path
-                      d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    <circle cx="12" cy="12" r="3" strokeWidth="2" />
-                  </svg>
-                ) : (
-                  <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    className="sm:w-6 sm:h-6"
-                  >
-                    <path
-                      d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24M1 1l22 22"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                )}
-              </button>
+              />
             </div>
           </div>
 
@@ -212,46 +178,11 @@ export default function ProfilePage() {
                 placeholder="비밀번호를 다시 한 번 입력해주세요."
                 className="h-14 sm:h-16 w-full rounded-xl sm:rounded-2xl border-2 border-primary-300 bg-white px-4 sm:px-6 pr-12 sm:pr-14 text-lg-r sm:text-xl-r outline-none placeholder:text-gray-400 focus:border-primary-400"
               />
-              <button
-                type="button"
+              <PasswordEyeBtn
+                visible={showPasswordConfirm}
                 onClick={() => setShowPasswordConfirm(!showPasswordConfirm)}
                 className="absolute right-4 sm:right-6 top-1/2 -translate-y-1/2 text-gray-400"
-              >
-                {showPasswordConfirm ? (
-                  <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    className="sm:w-6 sm:h-6"
-                  >
-                    <path
-                      d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    <circle cx="12" cy="12" r="3" strokeWidth="2" />
-                  </svg>
-                ) : (
-                  <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    className="sm:w-6 sm:h-6"
-                  >
-                    <path
-                      d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24M1 1l22 22"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                )}
-              </button>
+              />
             </div>
           </div>
 
