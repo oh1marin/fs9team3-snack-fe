@@ -266,11 +266,14 @@
   letter-spacing: 0;
 }
 
-/* Global Button Styles */
-button:not(:disabled) {
+/* 전역 클릭 가능 요소 커서 (한 곳에서 일괄 적용) */
+button:not(:disabled),
+a,
+[role="button"]:not(:disabled) {
   cursor: pointer;
 }
 
-button:disabled {
+button:disabled,
+[role="button"]:disabled {
   cursor: not-allowed;
 }

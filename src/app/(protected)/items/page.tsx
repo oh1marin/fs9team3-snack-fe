@@ -5,6 +5,8 @@ import Image from "next/image";
 import Link from "next/link";
 import ProductModal from "@/components/ProductModal";
 import { useModal } from "@/contexts/ModalContext";
+import SortButton from "@/app/ui/SortButton";
+import AddProductBtn from "@/app/ui/AddProductBtn";
 
 // API URL 설정
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
@@ -169,27 +171,7 @@ export default function ItemsPage() {
 
         {/* 정렬 드롭다운 */}
         <div className="relative flex-shrink-0">
-          <button
-            onClick={() => setShowSortDropdown(!showSortDropdown)}
-            className="flex items-center gap-2 rounded-lg border border-line-gray bg-white px-3 sm:px-4 py-2 text-sm sm:text-md-m text-black-400"
-          >
-            {sortOption}
-            <svg
-              width="12"
-              height="12"
-              viewBox="0 0 12 12"
-              fill="none"
-              className={`transition-transform ${showSortDropdown ? "rotate-180" : ""}`}
-            >
-              <path
-                d="M2.5 4.5L6 8L9.5 4.5"
-                stroke="#999"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
+          <SortButton sortOption={sortOption} setShowSortDropdown={setShowSortDropdown} showSortDropdown={showSortDropdown} />
 
           {showSortDropdown && (
             <div className="absolute right-0 top-full z-10 mt-2 w-28 sm:w-32 rounded-lg border border-line-gray bg-white shadow-lg">
@@ -296,27 +278,7 @@ export default function ItemsPage() {
       )}
 
       {/* 플로팅 상품 등록 버튼 */}
-      <button
-        onClick={handleOpenProductModal}
-        className="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 flex items-center gap-2 rounded-full bg-illustration-mint px-4 py-3 sm:px-6 sm:py-4 text-md-sb sm:text-lg-sb text-white shadow-lg transition-transform hover:scale-105"
-      >
-        <svg
-          width="18"
-          height="18"
-          viewBox="0 0 20 20"
-          fill="none"
-          className="sm:w-5 sm:h-5"
-        >
-          <path
-            d="M10 4V16M4 10H16"
-            stroke="white"
-            strokeWidth="2"
-            strokeLinecap="round"
-          />
-        </svg>
-        <span className="hidden sm:inline">상품 등록</span>
-        <span className="sm:hidden">등록</span>
-      </button>
+      <AddProductBtn onClick={handleOpenProductModal} />
     </div>
   );
 }
