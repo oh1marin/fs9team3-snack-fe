@@ -13,7 +13,7 @@ export const signupAPI = async (data: {
     headers: {
       "Content-Type": "application/json",
     },
-    credentials: "include", // ✅ 쿠키 전송 허용
+    credentials: "include", // 쿠키 전송 허용
     body: JSON.stringify(data),
   });
 
@@ -33,7 +33,7 @@ export const loginAPI = async (email: string, password: string) => {
     headers: {
       "Content-Type": "application/json",
     },
-    credentials: "include", // ✅ 쿠키 전송 허용
+    credentials: "include", // 쿠키 전송 허용
     body: JSON.stringify({ email, password }),
   });
 
@@ -50,7 +50,7 @@ export const loginAPI = async (email: string, password: string) => {
 export const getCurrentUserAPI = async () => {
   const response = await fetch(`${API_URL}/api/auth/me`, {
     method: "GET",
-    credentials: "include", // ✅ 쿠키가 자동으로 전송됨
+    credentials: "include", // 쿠키가 자동으로 전송됨
   });
 
   const result = await response.json();
@@ -75,7 +75,7 @@ export const changePasswordAPI = async (password: string) => {
     headers: {
       "Content-Type": "application/json",
     },
-    credentials: "include", // ✅ 쿠키 전송 허용
+    credentials: "include", // 쿠키 전송 허용
     body: JSON.stringify({ password }),
   });
 
