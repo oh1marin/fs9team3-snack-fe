@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import ProductModal from "@/components/ProductModal";
 import { useModal } from "@/contexts/ModalContext";
 import SortButton from "@/app/ui/SortButton";
@@ -48,12 +49,6 @@ interface ItemsResponse {
 }
 
 export default function ItemsPage() {
-  const [sortOption, setSortOption] = useState("최신순");
-  const [showSortDropdown, setShowSortDropdown] = useState(false);
-  const [categoryMain, setCategoryMain] = useState("음료");
-  const [categorySub, setCategorySub] = useState("청량·탄산음료");
-  const [page, setPage] = useState(1);
-
   // API 데이터 상태 (타입 명시)
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(false);
@@ -62,6 +57,45 @@ export default function ItemsPage() {
   const { openModal, closeModal } = useModal();
 
   const sortOptions = ["최신순", "판매순", "낮은가격순", "높은가격순"];
+
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  // URL 쿼리 → 초기 state (상세에서 돌아올 때 정렬/카테고리 유지)
+  const sortFromUrl = searchParams.get("sort");
+  const mainFromUrl = searchParams.get("main");
+  const subFromUrl = searchParams.get("sub");
+  const [sortOption, setSortOption] = useState(() =>
+    sortFromUrl && sortOptions.includes(sortFromUrl) ? sortFromUrl : "최신순"
+  );
+  const [categoryMain, setCategoryMain] = useState(mainFromUrl || "음료");
+  const [categorySub, setCategorySub] = useState(subFromUrl || "청량·탄산음료");
+  const [showSortDropdown, setShowSortDropdown] = useState(false);
+  const [page, setPage] = useState(1);
+
+  // URL이 바뀌었을 때(뒤로가기 등) state 동기화
+  useEffect(() => {
+    const s = searchParams.get("sort");
+    const m = searchParams.get("main");
+    const n = searchParams.get("sub");
+    if (s && sortOptions.includes(s)) setSortOption(s);
+    if (m) setCategoryMain(m);
+    if (n) setCategorySub(n);
+  }, [searchParams]);
+
+  // 정렬/카테고리 변경 시 URL 업데이트 (replace로 히스토리 한 칸만)
+  const updateListUrl = useCallback(
+    (updates: { sort?: string; main?: string; sub?: string }) => {
+      const params = new URLSearchParams(searchParams.toString());
+      if (updates.sort !== undefined) (updates.sort ? params.set("sort", updates.sort) : params.delete("sort"));
+      if (updates.main !== undefined) (updates.main ? params.set("main", updates.main) : params.delete("main"));
+      if (updates.sub !== undefined) (updates.sub ? params.set("sub", updates.sub) : params.delete("sub"));
+      const q = params.toString();
+      router.replace(q ? `${pathname}?${q}` : pathname, { scroll: false });
+    },
+    [searchParams, pathname, router]
+  );
 
   // API 호출 함수
   const fetchItems = async (resetPage = false) => {
@@ -132,7 +166,10 @@ export default function ItemsPage() {
           (category) => (
             <button
               key={category}
-              onClick={() => setCategoryMain(category)}
+              onClick={() => {
+                setCategoryMain(category);
+                updateListUrl({ main: category });
+              }}
               className={`whitespace-nowrap text-md-m sm:text-lg-m ${
                 categoryMain === category
                   ? "border-b-2 border-primary-400 pb-4 text-md-b sm:text-lg-b text-primary-400"
@@ -155,9 +192,12 @@ export default function ItemsPage() {
             "원두커피",
             "건강음료",
           ].map((subCategory) => (
-            <button
-              key={subCategory}
-              onClick={() => setCategorySub(subCategory)}
+<button
+                  key={subCategory}
+                  onClick={() => {
+                    setCategorySub(subCategory);
+                    updateListUrl({ sub: subCategory });
+                  }}
               className={`whitespace-nowrap text-md-m sm:text-lg-m ${
                 categorySub === subCategory
                   ? "text-md-b sm:text-lg-b text-primary-400"
@@ -181,6 +221,7 @@ export default function ItemsPage() {
                   onClick={() => {
                     setSortOption(option);
                     setShowSortDropdown(false);
+                    updateListUrl({ sort: option });
                   }}
                   className="w-full px-3 sm:px-4 py-2 text-left text-sm sm:text-md-r hover:bg-primary-100"
                 >
@@ -205,7 +246,7 @@ export default function ItemsPage() {
           {items.map((item) => (
             <div key={item.id} className="overflow-hidden rounded-2xl">
               <Link
-                href={`/items/${item.id}`}
+                href={`/items/${item.id}?from=${encodeURIComponent(`${pathname}${searchParams.toString() ? `?${searchParams.toString()}` : ""}`)}`}
                 className="block transition-transform hover:scale-105"
               >
                 <div className="relative aspect-square w-full bg-white">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
@@ -29,8 +29,10 @@ interface Product {
 
 export default function ProductDetailPage() {
   const params = useParams();
+  const searchParams = useSearchParams();
   const productId = params.id;
   const router = useRouter();
+  const listReturnUrl = searchParams.get("from") || "/items";
   
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
@@ -99,7 +101,7 @@ export default function ProductDetailPage() {
 
               toast.success("상품이 삭제되었습니다");
               closeModal();
-              router.push("/items");
+              router.push(listReturnUrl);
             } catch (error) {
               console.error("상품 삭제 실패:", error);
               toast.error("상품 삭제에 실패했습니다");
@@ -131,7 +133,7 @@ export default function ProductDetailPage() {
       <div className="mx-auto min-h-screen w-full max-w-[1920px] bg-background-peach px-4 py-8">
         <div className="flex flex-col justify-center items-center h-96 gap-4">
           <p className="text-lg-m text-gray-400">{error || "상품을 찾을 수 없습니다"}</p>
-          <Link href="/items" className="text-primary-400 underline">
+          <Link href={listReturnUrl} className="text-primary-400 underline">
             목록으로 돌아가기
           </Link>
         </div>
@@ -147,7 +149,7 @@ export default function ProductDetailPage() {
           홈
         </Link>
         <span>&gt;</span>
-        <Link href="/items" className="hover:text-black-400">
+        <Link href={listReturnUrl} className="hover:text-black-400">
           {product.category_main}
         </Link>
         <span>&gt;</span>
