@@ -2,18 +2,21 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 
-export default function Header() {
+export default function Header({ hasToken = false }: { hasToken?: boolean }) {
+  const pathname = usePathname();
   const { user, isLoading, logout } = useAuth();
   const router = useRouter();
 
-  console.log("[Header] user:", user, "isLoading:", isLoading);
+  const isLanding = pathname === "/";
+  const showLoggedIn = isLanding ? !!user : hasToken || !!user;
+  const showSkeleton = isLoading && (isLanding || !hasToken);
 
-  // 로딩 중일 때는 스켈레톤 헤더 표시
-  if (isLoading) {
+  if (showSkeleton) {
     return (
       <header className="w-full bg-primary-400">
         <div className="mx-auto flex h-[88px] w-full max-w-[1920px] items-center justify-between px-6">
@@ -27,8 +30,7 @@ export default function Header() {
     );
   }
 
-  // 미 로그인 헤더
-  if (!user) {
+  if (!showLoggedIn) {
     return (
       <header className="w-full bg-primary-400">
         <div className="mx-auto flex h-[88px] w-full max-w-[1920px] items-center justify-between px-6">
