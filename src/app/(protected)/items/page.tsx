@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import ProductModal from "@/components/ProductModal";
+import ProductCardSkeleton from "@/components/ProductCardSkeleton";
 import { useModal } from "@/contexts/ModalContext";
 import SortButton from "@/app/ui/SortButton";
 import AddProductBtn from "@/app/ui/AddProductBtn";
@@ -233,15 +234,17 @@ export default function ItemsPage() {
         </div>
       </div>
 
-      {/* 로딩 상태 */}
+      {/* 로딩 스켈레톤 (첫 로딩 시) */}
       {loading && items.length === 0 && (
-        <div className="flex justify-center py-20">
-          <p className="text-lg-m text-gray-400">로딩 중...</p>
+        <div className="mb-12 grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <ProductCardSkeleton key={i} />
+          ))}
         </div>
       )}
 
       {/* 상품 카드 그리드 */}
-      {!loading || items.length > 0 ? (
+      {(!loading || items.length > 0) && (
         <div className="mb-12 grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {items.map((item) => (
             <div key={item.id} className="overflow-hidden rounded-2xl">
@@ -289,7 +292,7 @@ export default function ItemsPage() {
             </div>
           ))}
         </div>
-      ) : null}
+      )}
 
       {/* 상품 없음 */}
       {!loading && items.length === 0 && (
