@@ -125,6 +125,28 @@ export async function checkAuth() {
   return !!accessToken;
 }
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+
+/**
+ * 서버에서 쿠키로 /api/auth/me 호출해 user 반환 (protected 레이아웃용)
+ */
+export async function getServerUser() {
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get("accessToken")?.value;
+  if (!accessToken) return null;
+  try {
+    const res = await fetch(`${API_URL}/api/auth/me`, {
+      headers: { Cookie: `accessToken=${accessToken}` },
+      cache: "no-store",
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data?.user ?? data?.data ?? (data?.id ? data : null) ?? null;
+  } catch {
+    return null;
+  }
+}
+
 /**
  * 인증 상태를 확인합니다 (accessToken 또는 refreshToken 중 하나라도 있으면 통과)
  * @returns {Promise<boolean>} 인증 성공 여부

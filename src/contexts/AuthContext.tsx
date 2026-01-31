@@ -19,6 +19,8 @@ interface User {
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
+  refreshUser: () => Promise<void>;
+  setInitialUser: (user: User | null) => void;
   login: (email: string, password: string) => Promise<string | undefined>;
   logout: () => Promise<string | undefined>;
   register: (
@@ -43,29 +45,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const getUser = useCallback(async () => {
-    console.log("[AuthContext] getUser 호출");
+  const getUser = useCallback(async (retryCount = 0) => {
+    const maxRetries = 2;
     try {
       setIsLoading(true);
       const response = await userService.getMe();
-      console.log("[AuthContext] getUser 성공:", response.user);
-      // 백엔드 응답: { success: true, user: {...} }
-      setUser(response.user || null);
+      const userData =
+        response?.user ?? response?.data ?? (response?.id ? response : null);
+      setUser(userData || null);
+      setIsLoading(false);
     } catch (error: any) {
-      console.error("[AuthContext] getUser 실패:", error);
-      // 401 에러(세션 만료)는 무조건 로그아웃
       if (error.status === 401) {
-        console.log("[AuthContext] 세션 만료 → 로그아웃 처리");
         setUser(null);
       } else {
-        // 이미 로그인된 상태(user가 있음)에서 네트워크 오류가 발생하면 user 유지
-        // 초기 로딩 시(user가 null)에 오류가 발생하면 null 유지 (로그인 안됨으로 처리)
-        console.log("[AuthContext] 네트워크 오류 → 현재 user 상태 유지");
-        // user 상태 변경 없음 (현재 상태 유지)
+        setUser((prev) => prev);
+        if (retryCount < maxRetries && typeof window !== "undefined") {
+          setTimeout(() => getUser(retryCount + 1), 500 * (retryCount + 1));
+        }
       }
-    } finally {
       setIsLoading(false);
     }
+  }, []);
+
+  const refreshUser = useCallback(() => getUser(0), [getUser]);
+
+  const setInitialUser = useCallback((u: User | null) => {
+    setUser(u);
+    setIsLoading(false);
   }, []);
 
   const register = async (
@@ -120,7 +126,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [getUser]);
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, logout, register }}>
+    <AuthContext.Provider value={{ user, isLoading, refreshUser, setInitialUser, login, logout, register }}>
       {children}
     </AuthContext.Provider>
   );
