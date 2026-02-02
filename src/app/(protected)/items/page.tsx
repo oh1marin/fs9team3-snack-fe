@@ -171,10 +171,10 @@ export default function ItemsPage() {
                 setCategoryMain(category);
                 updateListUrl({ main: category });
               }}
-              className={`whitespace-nowrap text-md-m sm:text-lg-m ${
+              className={`whitespace-nowrap text-md-m sm:text-lg-m border-b-2 pb-4 ${
                 categoryMain === category
-                  ? "border-b-2 border-primary-400 pb-4 text-md-b sm:text-lg-b text-primary-400"
-                  : "text-gray-400"
+                  ? "border-primary-400 text-md-b sm:text-lg-b text-primary-400"
+                  : "border-transparent text-gray-400"
               }`}
             >
               {category}
