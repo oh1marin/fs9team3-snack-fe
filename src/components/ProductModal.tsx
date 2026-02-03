@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { getClientAccessToken } from "@/lib/api/authToken";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
@@ -69,42 +70,37 @@ export default function ProductModal({ onClose, onSuccess, editMode = false, pro
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
+
     try {
-      // 제품링크가 있고 프로토콜이 없으면 https:// 추가
       let productLink = formData.productLink.trim();
       if (productLink && !productLink.startsWith("http://") && !productLink.startsWith("https://")) {
         productLink = `https://${productLink}`;
       }
-      
-      // JSON 데이터 생성
-      const dataToSend: any = {
-        title: formData.productName,
-        category_main: formData.category,
-        category_sub: formData.subCategory,
-        price: Number(formData.price),
-      };
-      
-      if (productLink) {
-        dataToSend.link = productLink;
-      }
-      
-      // 이미지를 base64로 인코딩 (이미지가 있는 경우)
-      if (imagePreview) {
-        dataToSend.image = imagePreview; // 이미 base64 형식임
-      }
-      
-      // API 호출
+
       const url = editMode && product ? `${API_URL}/api/items/${product.id}` : `${API_URL}/api/items`;
       const method = editMode ? "PUT" : "POST";
-      
+      const token = getClientAccessToken();
+
+      // FormData로 전송 → 백엔드 multer-s3가 파일을 S3에 업로드
+      const formDataToSend = new FormData();
+      formDataToSend.append("title", formData.productName);
+      formDataToSend.append("category_main", formData.category);
+      formDataToSend.append("category_sub", formData.subCategory);
+      formDataToSend.append("price", formData.price);
+      if (productLink) formDataToSend.append("link", productLink);
+
+      if (imageFile) {
+        formDataToSend.append("image", imageFile);
+      } else if (imagePreview && (imagePreview.startsWith("http://") || imagePreview.startsWith("https://"))) {
+        // 수정 시 기존 S3 URL만 유지하는 경우
+        formDataToSend.append("image", imagePreview);
+      }
+
       const response = await fetch(url, {
         method,
         credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(dataToSend),
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formDataToSend,
       });
       
       if (!response.ok) {
@@ -115,7 +111,12 @@ export default function ProductModal({ onClose, onSuccess, editMode = false, pro
         }
         const errorText = await response.text();
         console.error("API 에러 응답:", errorText);
-        throw new Error(`상품 ${editMode ? '수정' : '등록'}에 실패했습니다 (${response.status})`);
+        let detail = "";
+        try {
+          const json = JSON.parse(errorText);
+          if (json?.error) detail = `\n${json.error}`;
+        } catch {}
+        throw new Error(`상품 ${editMode ? "수정" : "등록"}에 실패했습니다 (${response.status})${detail}`);
       }
       
       // 성공 시 콜백 호출 및 모달 닫기

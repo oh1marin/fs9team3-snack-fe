@@ -1,18 +1,22 @@
+import { getClientAccessToken } from "./authToken";
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
 /**
  * API 호출 헬퍼 함수
- * 401 에러 발생 시 자동으로 로그인 페이지로 리다이렉트
+ * cross-origin 시 쿠키가 안 가므로 Authorization 헤더로 토큰 전송
  */
 export async function apiClient(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<Response> {
+  const token = getClientAccessToken();
   const defaultOptions: RequestInit = {
-    credentials: "include", // 쿠키 자동 전송
+    credentials: "include",
     ...options,
     headers: {
       "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...options.headers,
     },
   };
