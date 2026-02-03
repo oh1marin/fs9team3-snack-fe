@@ -1,0 +1,55 @@
+import { loginAPI, signupAPI, getCurrentUserAPI } from "../api/auth";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+
+export const authService = {
+  async login(email: string, password: string) {
+    const response = await loginAPI(email, password);
+    return {
+      user: response.user,
+      accessToken: response.accessToken,
+      refreshToken: response.refreshToken,
+      message: response.message,
+    };
+  },
+
+  async register(
+    nickname: string,
+    email: string,
+    password: string,
+    passwordConfirmation: string
+  ) {
+    const response = await signupAPI({
+      email,
+      password,
+      passwordConfirm: passwordConfirmation,
+      name: nickname,
+    });
+    return {
+      user: response.user,
+      accessToken: response.accessToken,
+      refreshToken: response.refreshToken,
+      message: response.message,
+    };
+  },
+
+  async logout() {
+    const { getClientAccessToken } = await import("../api/authToken");
+    const token = getClientAccessToken();
+    try {
+      const response = await fetch(`${API_URL}/api/auth/logout`, {
+        method: "POST",
+        credentials: "include",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      const result = await response.json();
+      return result.message || "로그아웃 되었습니다.";
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  async getMe() {
+    return await getCurrentUserAPI();
+  },
+};
