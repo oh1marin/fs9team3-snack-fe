@@ -11,10 +11,8 @@ import SortButton from "@/app/ui/SortButton";
 import AddProductBtn from "@/app/ui/AddProductBtn";
 import { getClientAccessToken } from "@/lib/api/authToken";
 
-// API URL 설정
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
-// 타입 정의
 interface User {
   id: string;
   name: string | null;
@@ -51,7 +49,6 @@ interface ItemsResponse {
 }
 
 export default function ItemsPage() {
-  // API 데이터 상태 (타입 명시)
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState<Pagination | null>(null);
@@ -64,7 +61,6 @@ export default function ItemsPage() {
   const router = useRouter();
   const pathname = usePathname();
 
-  // URL 쿼리 → 초기 state (상세에서 돌아올 때 정렬/카테고리 유지)
   const sortFromUrl = searchParams.get("sort");
   const mainFromUrl = searchParams.get("main");
   const subFromUrl = searchParams.get("sub");
@@ -76,7 +72,6 @@ export default function ItemsPage() {
   const [showSortDropdown, setShowSortDropdown] = useState(false);
   const [page, setPage] = useState(1);
 
-  // URL이 바뀌었을 때(뒤로가기 등) state 동기화
   useEffect(() => {
     const s = searchParams.get("sort");
     const m = searchParams.get("main");
@@ -86,7 +81,6 @@ export default function ItemsPage() {
     if (n) setCategorySub(n);
   }, [searchParams]);
 
-  // 정렬/카테고리 변경 시 URL 업데이트 (replace로 히스토리 한 칸만)
   const updateListUrl = useCallback(
     (updates: { sort?: string; main?: string; sub?: string }) => {
       const params = new URLSearchParams(searchParams.toString());
@@ -99,7 +93,6 @@ export default function ItemsPage() {
     [searchParams, pathname, router]
   );
 
-  // API 호출 함수
   const fetchItems = async (resetPage = false, pageOverride?: number) => {
     setLoading(true);
     try {
@@ -123,7 +116,6 @@ export default function ItemsPage() {
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error("API 에러 응답:", errorText);
         throw new Error(`데이터를 불러올 수 없습니다 (${response.status}): ${errorText}`);
       }
 
@@ -143,13 +135,12 @@ export default function ItemsPage() {
 
       setPagination(data.pagination);
     } catch (error) {
-      console.error("API 호출 실패:", error);
+      setItems([]);
     } finally {
       setLoading(false);
     }
   };
 
-  // 컴포넌트 마운트 시 & 필터 변경 시 데이터 불러오기
   useEffect(() => {
     fetchItems(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -164,7 +155,6 @@ export default function ItemsPage() {
     );
   };
 
-  // 더보기 버튼 클릭 (page는 비동기라 곧바로 반영되지 않으므로 명시적으로 전달)
   const handleLoadMore = () => {
     const nextPage = page + 1;
     setPage(nextPage);
@@ -173,7 +163,6 @@ export default function ItemsPage() {
 
   return (
     <div className="mx-auto w-full max-w-[1920px] bg-background-peach px-4 sm:px-6 py-6 sm:py-8">
-      {/* 카테고리 네비게이션 */}
       <nav className="mb-6 flex gap-4 sm:gap-6 md:gap-8 overflow-x-auto border-b border-line-gray pb-4 scrollbar-hide">
         {["스낵", "음료", "생수", "간편식", "신선식품", "원두커피", "비품"].map(
           (category) => (
@@ -195,7 +184,6 @@ export default function ItemsPage() {
         )}
       </nav>
 
-      {/* 서브 카테고리 */}
       <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex gap-4 sm:gap-6 overflow-x-auto scrollbar-hide w-full sm:w-auto">
           {[
@@ -222,7 +210,6 @@ export default function ItemsPage() {
           ))}
         </div>
 
-        {/* 정렬 드롭다운 */}
         <div className="relative flex-shrink-0">
           <SortButton sortOption={sortOption} setShowSortDropdown={setShowSortDropdown} showSortDropdown={showSortDropdown} />
 
@@ -246,7 +233,6 @@ export default function ItemsPage() {
         </div>
       </div>
 
-      {/* 로딩 스켈레톤 (첫 로딩 시) */}
       {loading && items.length === 0 && (
         <div className="mb-12 grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {Array.from({ length: 8 }).map((_, i) => (
@@ -255,7 +241,6 @@ export default function ItemsPage() {
         </div>
       )}
 
-      {/* 상품 카드 그리드 */}
       {(!loading || items.length > 0) && (
         <div className="mb-12 grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {items.map((item) => (
@@ -306,14 +291,12 @@ export default function ItemsPage() {
         </div>
       )}
 
-      {/* 상품 없음 */}
       {!loading && items.length === 0 && (
         <div className="flex justify-center py-20">
           <p className="text-lg-m text-gray-400">상품이 없습니다</p>
         </div>
       )}
 
-      {/* 더보기 버튼 */}
       {pagination?.hasNextPage && (
         <div className="flex justify-center px-4">
           <button
@@ -333,7 +316,6 @@ export default function ItemsPage() {
         </div>
       )}
 
-      {/* 플로팅 상품 등록 버튼 */}
       <AddProductBtn onClick={handleOpenProductModal} />
     </div>
   );

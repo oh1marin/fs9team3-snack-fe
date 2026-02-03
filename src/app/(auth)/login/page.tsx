@@ -29,7 +29,6 @@ export default function LoginPage() {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
 
-    // 이메일 실시간 검증
     if (name === "email") {
       if (value && !validateEmail(value)) {
         setEmailError("올바른 이메일 형식이 아닙니다.");
@@ -55,7 +54,6 @@ export default function LoginPage() {
       router.push("/items");
       router.refresh();
     } catch (error) {
-      console.error("로그인 오류:", error);
       toast.error(
         error instanceof Error
           ? error.message

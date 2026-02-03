@@ -200,15 +200,11 @@ export async function checkAndRefreshAuth() {
     if (response.ok) {
       const { accessToken: newAccessToken } = await response.json();
 
-      // 새 토큰 저장
       await updateAccessToken(newAccessToken);
-
-      return true; // 갱신 성공
+      return true;
     }
-
-    return false; // 갱신 실패
+    return false;
   } catch (error) {
-    console.error("토큰 갱신 중 오류:", error);
     return false;
   }
 }
