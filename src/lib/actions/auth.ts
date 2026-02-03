@@ -89,7 +89,12 @@ export async function loginAction(email: string, password: string) {
   }
 
   await setServerSideTokens(accessToken, refreshToken);
-  return { success: true, userData: user, message };
+  return { success: true, userData: user, message, accessToken };
+}
+
+export async function logoutAction() {
+  await clearServerSideTokens();
+  return { success: true };
 }
 
 export async function registerAction(
@@ -110,7 +115,7 @@ export async function registerAction(
   }
 
   await setServerSideTokens(accessToken, refreshToken);
-  return { success: true, userData: user, message };
+  return { success: true, userData: user, message, accessToken };
 }
 
 /**

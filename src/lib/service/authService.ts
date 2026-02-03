@@ -34,11 +34,13 @@ export const authService = {
   },
 
   async logout() {
-    // 서버에 로그아웃 요청
+    const { getClientAccessToken } = await import("../api/authToken");
+    const token = getClientAccessToken();
     try {
       const response = await fetch(`${API_URL}/api/auth/logout`, {
         method: "POST",
         credentials: "include",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
       const result = await response.json();
       return result.message || "로그아웃 되었습니다.";

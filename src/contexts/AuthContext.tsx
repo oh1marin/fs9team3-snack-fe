@@ -3,7 +3,9 @@
 import {
   loginAction,
   registerAction,
+  logoutAction,
 } from "@/lib/actions/auth";
+import { setClientAccessToken } from "@/lib/api/authToken";
 import { authService } from "@/lib/service/authService";
 import { userService } from "@/lib/service/userService";
 
@@ -81,7 +83,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     passwordConfirmation: string
   ) => {
     // 회원가입 성공 시 유저데이터를 API 에서 응답해주는 경우, 즉시 로그인 처리 가능
-    const { userData, success, message } = await registerAction(
+    const { userData, success, message, accessToken } = await registerAction(
       nickname,
       email,
       password,
@@ -91,18 +93,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!success) {
       throw new Error(message || "회원가입 실패");
     }
+    if (accessToken) setClientAccessToken(accessToken);
     setUser(userData);
     setIsLoading(false);
     return message;
   };
 
   const login = async (email: string, password: string) => {
-    // 로그인 성공 시 유저데이터를 API 에서 응답해주는 경우, 유저 상태 변경
-    const { userData, success, message } = await loginAction(email, password);
+    const { userData, success, message, accessToken } = await loginAction(email, password);
 
     if (!success) {
       throw new Error(message || "로그인 실패");
     }
+    if (accessToken) setClientAccessToken(accessToken);
     setUser(userData);
     setIsLoading(false);
     return message;
@@ -110,13 +113,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async () => {
     try {
-      const message = await authService.logout();
-      setUser(null);
-      return message;
-    } catch (error) {
-      console.error("로그아웃 실패:", error);
-      throw error;
+      await authService.logout();
+    } catch (e) {
+      // 백엔드 실패해도 로컬은 로그아웃 처리
     }
+    setClientAccessToken(null);
+    await logoutAction();
+    setUser(null);
+    return "로그아웃되었습니다.";
   };
 
   useEffect(() => {

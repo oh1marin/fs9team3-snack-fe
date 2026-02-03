@@ -9,6 +9,7 @@ import DeleteModal from "@/components/DeleteModal";
 import { useModal } from "@/contexts/ModalContext";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
+import { getClientAccessToken } from "@/lib/api/authToken";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
@@ -43,8 +44,12 @@ export default function ProductDetailPage() {
   const fetchProduct = async () => {
     try {
       setLoading(true);
+      const token = getClientAccessToken();
+      const headers: HeadersInit = {};
+      if (token) headers.Authorization = `Bearer ${token}`;
       const response = await fetch(`${API_URL}/api/items/${productId}`, {
         credentials: "include",
+        headers,
       });
 
       if (!response.ok) {
@@ -90,9 +95,11 @@ export default function ProductDetailPage() {
           onClose={closeModal}
           onConfirm={async () => {
             try {
+              const token = getClientAccessToken();
               const response = await fetch(`${API_URL}/api/items/${productId}`, {
                 method: "DELETE",
                 credentials: "include",
+                headers: token ? { Authorization: `Bearer ${token}` } : {},
               });
 
               if (!response.ok) {

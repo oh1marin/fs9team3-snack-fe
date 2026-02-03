@@ -9,6 +9,7 @@ import ProductCardSkeleton from "@/components/ProductCardSkeleton";
 import { useModal } from "@/contexts/ModalContext";
 import SortButton from "@/app/ui/SortButton";
 import AddProductBtn from "@/app/ui/AddProductBtn";
+import { getClientAccessToken } from "@/lib/api/authToken";
 
 // API URL 설정
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
@@ -99,10 +100,10 @@ export default function ItemsPage() {
   );
 
   // API 호출 함수
-  const fetchItems = async (resetPage = false) => {
+  const fetchItems = async (resetPage = false, pageOverride?: number) => {
     setLoading(true);
     try {
-      const currentPage = resetPage ? 1 : page;
+      const currentPage = resetPage ? 1 : (pageOverride ?? page);
       const params = new URLSearchParams({
         category_main: categoryMain,
         category_sub: categorySub,
@@ -111,8 +112,13 @@ export default function ItemsPage() {
         limit: "8",
       });
 
+      const token = getClientAccessToken();
+      const headers: HeadersInit = {};
+      if (token) headers.Authorization = `Bearer ${token}`;
+
       const response = await fetch(`${API_URL}/api/items?${params}`, {
-        credentials: "include", // 쿠키 전송
+        credentials: "include",
+        headers,
       });
 
       if (!response.ok) {
@@ -127,7 +133,12 @@ export default function ItemsPage() {
         setItems(data.data); // 새로 시작
         setPage(1);
       } else {
-        setItems([...items, ...data.data]); // 기존 데이터에 추가
+        setItems((prev) => {
+          const ids = new Set(prev.map((i) => i.id));
+          const newItems = data.data.filter((i) => !ids.has(i.id));
+          return [...prev, ...newItems];
+        });
+        setPage(currentPage);
       }
 
       setPagination(data.pagination);
@@ -153,10 +164,11 @@ export default function ItemsPage() {
     );
   };
 
-  // 더보기 버튼 클릭
+  // 더보기 버튼 클릭 (page는 비동기라 곧바로 반영되지 않으므로 명시적으로 전달)
   const handleLoadMore = () => {
-    setPage(page + 1);
-    fetchItems(false);
+    const nextPage = page + 1;
+    setPage(nextPage);
+    fetchItems(false, nextPage);
   };
 
   return (

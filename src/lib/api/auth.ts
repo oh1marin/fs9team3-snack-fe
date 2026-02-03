@@ -46,11 +46,14 @@ export const loginAPI = async (email: string, password: string) => {
   return result;
 };
 
-// 현재 사용자 정보 조회 (쿠키 기반)
+// 현재 사용자 정보 조회 (토큰/쿠키)
 export const getCurrentUserAPI = async () => {
+  const { getClientAccessToken } = await import("./authToken");
+  const token = getClientAccessToken();
   const response = await fetch(`${API_URL}/api/auth/me`, {
     method: "GET",
-    credentials: "include", // 쿠키가 자동으로 전송됨
+    credentials: "include",
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
   });
 
   const result = await response.json();
@@ -70,12 +73,15 @@ export const getCurrentUserAPI = async () => {
 
 // 비밀번호 변경 API 호출
 export const changePasswordAPI = async (password: string) => {
+  const { getClientAccessToken } = await import("./authToken");
+  const token = getClientAccessToken();
   const response = await fetch(`${API_URL}/api/auth/password`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
-    credentials: "include", // 쿠키 전송 허용
+    credentials: "include",
     body: JSON.stringify({ password }),
   });
 
