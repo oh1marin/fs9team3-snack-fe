@@ -32,7 +32,6 @@ export default function SignupPage() {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
 
-    // 이메일 실시간 검증
     if (name === "email") {
       if (value && !validateEmail(value)) {
         setEmailError("올바른 이메일 형식이 아닙니다.");
@@ -41,7 +40,6 @@ export default function SignupPage() {
       }
     }
 
-    // 비밀번호 실시간 검증
     if (name === "password") {
       if (value && value.length < 8) {
         setPasswordError("비밀번호는 최소 8자 이상이어야 합니다.");
@@ -81,7 +79,6 @@ export default function SignupPage() {
       toast.success(message || "회원가입이 완료되었습니다!");
       router.push("/items");
     } catch (error) {
-      console.error("회원가입 오류:", error);
       toast.error(
         error instanceof Error
           ? error.message

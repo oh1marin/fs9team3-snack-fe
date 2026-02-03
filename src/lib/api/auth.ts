@@ -1,6 +1,5 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
-// 회원가입 API 호출
 export const signupAPI = async (data: {
   email: string;
   password: string;
@@ -13,7 +12,7 @@ export const signupAPI = async (data: {
     headers: {
       "Content-Type": "application/json",
     },
-    credentials: "include", // 쿠키 전송 허용
+    credentials: "include",
     body: JSON.stringify(data),
   });
 
@@ -26,14 +25,13 @@ export const signupAPI = async (data: {
   return result;
 };
 
-// 로그인 API 호출
 export const loginAPI = async (email: string, password: string) => {
   const response = await fetch(`${API_URL}/api/auth/login`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    credentials: "include", // 쿠키 전송 허용
+    credentials: "include",
     body: JSON.stringify({ email, password }),
   });
 
@@ -46,7 +44,6 @@ export const loginAPI = async (email: string, password: string) => {
   return result;
 };
 
-// 현재 사용자 정보 조회 (토큰/쿠키)
 export const getCurrentUserAPI = async () => {
   const { getClientAccessToken } = await import("./authToken");
   const token = getClientAccessToken();
@@ -59,7 +56,6 @@ export const getCurrentUserAPI = async () => {
   const result = await response.json();
 
   if (!response.ok) {
-    // 401 에러는 특별히 표시
     if (response.status === 401) {
       const error = new Error(result.message || "인증이 만료되었습니다.");
       (error as any).status = 401;
@@ -71,7 +67,6 @@ export const getCurrentUserAPI = async () => {
   return result;
 };
 
-// 비밀번호 변경 API 호출
 export const changePasswordAPI = async (password: string) => {
   const { getClientAccessToken } = await import("./authToken");
   const token = getClientAccessToken();
