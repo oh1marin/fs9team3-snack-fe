@@ -82,7 +82,6 @@ export default function ProfilePage() {
     );
   }
 
-  // 사용자 정보가 없을 때 (로그인 안됨)
   if (!user) {
     return (
       <div className="mx-auto flex min-h-[calc(100vh-88px)] w-full max-w-[1920px] items-center justify-center bg-background-peach px-4 sm:px-6 py-8 sm:py-12">
@@ -96,7 +95,6 @@ export default function ProfilePage() {
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // 프론트엔드에서 비밀번호 확인 검증
     if (passwords.password !== passwords.passwordConfirm) {
       toast.error("비밀번호가 일치하지 않습니다.");
       return;
@@ -108,14 +106,12 @@ export default function ProfilePage() {
     }
 
     try {
-      // 백엔드에는 password만 전송
       const message = await userService.changePassword(passwords.password);
       toast.success(message);
       setPasswords({ password: "", passwordConfirm: "" });
       setPasswordError("");
       setPasswordConfirmError("");
     } catch (error) {
-      console.error("비밀번호 변경 오류:", error);
       toast.error(
         error instanceof Error
           ? error.message

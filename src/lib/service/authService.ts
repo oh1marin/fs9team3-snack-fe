@@ -45,7 +45,6 @@ export const authService = {
       const result = await response.json();
       return result.message || "로그아웃 되었습니다.";
     } catch (error) {
-      console.error("로그아웃 API 호출 실패:", error);
       throw error;
     }
   },
