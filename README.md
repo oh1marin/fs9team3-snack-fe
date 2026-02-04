@@ -86,32 +86,30 @@ npm run lint
 fs9team3-snack-fe/
 ├── src/
 │   ├── app/                      # Next.js App Router
-│   │   ├── (auth)/              # 인증 관련 페이지
-│   │   │   ├── login/           # 로그인
-│   │   │   └── signup/          # 회원가입
-│   │   ├── (protected)/         # 인증 필요 페이지
-│   │   │   ├── items/           # 상품 목록
-│   │   │   │   └── [id]/        # 상품 상세
-│   │   │   └── profile/         # 프로필
-│   │   ├── layout.tsx           # 루트 레이아웃
-│   │   └── page.tsx             # 홈페이지
-│   ├── components/              # 재사용 컴포넌트
-│   │   ├── Modal.tsx            # 공통 모달 래퍼
-│   │   ├── ProductModal.tsx     # 상품 등록 모달
-│   │   ├── DeleteModal.tsx      # 삭제 확인 모달
-│   │   ├── Header.tsx           # 헤더
-│   │   ├── Footer.tsx           # 푸터
-│   │   └── Container.tsx        # 컨테이너
-│   ├── contexts/                # React Context
-│   │   ├── AuthContext.tsx      # 인증 상태 관리
-│   │   └── ModalContext.tsx     # 전역 모달 관리
-│   ├── lib/                     # 유틸리티 및 서비스
-│   │   ├── actions/             # Server Actions
-│   │   ├── api/                 # API 호출
-│   │   └── service/             # 비즈니스 로직
-│   └── assets/                  # 정적 리소스
-│       └── fonts/               # 폰트 파일
-├── public/                      # 공개 정적 파일
+│   │   ├── (auth)/               # 인증 관련 페이지
+│   │   │   ├── login/
+│   │   │   └── signup/
+│   │   ├── (protected)/          # 인증 필요 페이지
+│   │   │   ├── items/
+│   │   │   │   └── [id]/         # 상품 상세
+│   │   │   └── profile/
+│   │   ├── ui/                   # 페이지용 UI (AddProductBtn, SortButton, PasswordEyeBtn)
+│   │   ├── layout.tsx
+│   │   └── page.tsx
+│   ├── components/
+│   │   ├── Modal.tsx
+│   │   ├── ProductModal.tsx
+│   │   ├── DeleteModal.tsx
+│   │   ├── ProductCardSkeleton.tsx
+│   │   ├── AuthInitializer.tsx
+│   │   ├── ProtectedUserSync.tsx
+│   │   ├── Header.tsx, Footer.tsx, Container.tsx
+│   │   └── icons/
+│   ├── layout/                  # NavBar 등
+│   ├── contexts/                 # AuthContext, ModalContext
+│   ├── lib/                      # actions, api, service
+│   └── assets/fonts/
+├── public/
 └── README.md
 ```
 
@@ -131,7 +129,7 @@ fs9team3-snack-fe/
 ### 2. 상품 관리
 - ✅ 상품 목록 조회
   - 카테고리별 필터링
-  - 정렬 옵션 (최신순, 판매순, 가격순)
+  - 정렬 옵션 (최신순, 판매순, 낮은가격순, 높은가격순)
 - ✅ 상품 상세 정보
 - ✅ 상품 등록 (모달)
 - ✅ 상품 삭제 (모달)
@@ -196,13 +194,13 @@ if (password.length < 8) {
 
 ### 스타일링 가이드
 
-프로젝트는 Tailwind CSS 커스텀 설정을 사용합니다:
+프로젝트는 Tailwind v4 + `globals.css`의 `@theme`로 커스텀 컬러를 정의합니다:
 
-```javascript
-// tailwind.config에 정의된 커스텀 컬러
-primary-300, primary-400    // 주요 색상
-background-peach            // 배경색
-illustration-mint           // 포인트 색상
+```css
+/* globals.css @theme 예시 */
+primary-300, primary-400    /* 주요 색상 */
+background-peach            /* 배경색 */
+illustration-mint           /* 포인트 색상 */
 ```
 
 ---
