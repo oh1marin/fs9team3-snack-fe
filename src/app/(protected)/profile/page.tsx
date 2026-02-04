@@ -21,6 +21,8 @@ export default function ProfilePage() {
 
   const [showPassword, setShowPassword] = useState(false);
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
+  const [passwordError, setPasswordError] = useState("");
+  const [passwordConfirmError, setPasswordConfirmError] = useState("");
 
   useEffect(() => {
     if (user) {
@@ -31,6 +33,34 @@ export default function ProfilePage() {
       });
     }
   }, [user]);
+
+  const handlePasswordInputChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    field: "password" | "passwordConfirm"
+  ) => {
+    const value = e.target.value;
+    if (field === "password") {
+      setPasswords((prev) => ({ ...prev, password: value }));
+      if (value && value.length < 8) {
+        setPasswordError("비밀번호는 최소 8자 이상이어야 합니다.");
+      } else {
+        setPasswordError("");
+      }
+      // 비밀번호 변경 시 확인 필드도 다시 검증
+      if (passwords.passwordConfirm && value !== passwords.passwordConfirm) {
+        setPasswordConfirmError("비밀번호가 일치하지 않습니다.");
+      } else if (passwords.passwordConfirm) {
+        setPasswordConfirmError("");
+      }
+    } else {
+      setPasswords((prev) => ({ ...prev, passwordConfirm: value }));
+      if (value && value !== passwords.password) {
+        setPasswordConfirmError("비밀번호가 일치하지 않습니다.");
+      } else {
+        setPasswordConfirmError("");
+      }
+    }
+  };
 
   // 로딩 중일 때 스켈레톤 표시
   if (isLoading) {
@@ -82,6 +112,8 @@ export default function ProfilePage() {
       const message = await userService.changePassword(passwords.password);
       toast.success(message);
       setPasswords({ password: "", passwordConfirm: "" });
+      setPasswordError("");
+      setPasswordConfirmError("");
     } catch (error) {
       console.error("비밀번호 변경 오류:", error);
       toast.error(
@@ -95,7 +127,10 @@ export default function ProfilePage() {
   const isFormValid =
     passwords.password.length > 0 &&
     passwords.passwordConfirm.length > 0 &&
-    passwords.password === passwords.passwordConfirm;
+    passwords.password.length >= 8 &&
+    passwords.password === passwords.passwordConfirm &&
+    !passwordError &&
+    !passwordConfirmError;
 
   return (
     <div className="mx-auto flex min-h-[calc(100vh-88px)] w-full max-w-[1920px] items-center justify-center bg-background-peach px-4 sm:px-6 py-8 sm:py-12">
@@ -147,11 +182,13 @@ export default function ProfilePage() {
               <input
                 type={showPassword ? "text" : "password"}
                 value={passwords.password}
-                onChange={(e) =>
-                  setPasswords({ ...passwords, password: e.target.value })
-                }
+                onChange={(e) => handlePasswordInputChange(e, "password")}
                 placeholder="비밀번호를 입력해주세요."
-                className="h-14 sm:h-16 w-full rounded-xl sm:rounded-2xl border-2 border-primary-300 bg-white px-4 sm:px-6 pr-12 sm:pr-14 text-lg-r sm:text-xl-r outline-none placeholder:text-gray-400 focus:border-primary-400"
+                className={`h-14 sm:h-16 w-full rounded-xl sm:rounded-2xl border-2 bg-white px-4 sm:px-6 pr-12 sm:pr-14 text-lg-r sm:text-xl-r outline-none placeholder:text-gray-400 focus:border-primary-400 ${
+                  passwordError
+                    ? "border-red-500 focus:border-red-500"
+                    : "border-primary-300"
+                }`}
               />
               <PasswordEyeBtn
                 visible={showPassword}
@@ -159,6 +196,11 @@ export default function ProfilePage() {
                 className="absolute right-4 sm:right-6 top-1/2 -translate-y-1/2 text-gray-400"
               />
             </div>
+            {passwordError && (
+              <span className="mt-2 block text-sm text-red-500">
+                {passwordError}
+              </span>
+            )}
           </div>
 
           <div>
@@ -170,13 +212,14 @@ export default function ProfilePage() {
                 type={showPasswordConfirm ? "text" : "password"}
                 value={passwords.passwordConfirm}
                 onChange={(e) =>
-                  setPasswords({
-                    ...passwords,
-                    passwordConfirm: e.target.value,
-                  })
+                  handlePasswordInputChange(e, "passwordConfirm")
                 }
                 placeholder="비밀번호를 다시 한 번 입력해주세요."
-                className="h-14 sm:h-16 w-full rounded-xl sm:rounded-2xl border-2 border-primary-300 bg-white px-4 sm:px-6 pr-12 sm:pr-14 text-lg-r sm:text-xl-r outline-none placeholder:text-gray-400 focus:border-primary-400"
+                className={`h-14 sm:h-16 w-full rounded-xl sm:rounded-2xl border-2 bg-white px-4 sm:px-6 pr-12 sm:pr-14 text-lg-r sm:text-xl-r outline-none placeholder:text-gray-400 focus:border-primary-400 ${
+                  passwordConfirmError
+                    ? "border-red-500 focus:border-red-500"
+                    : "border-primary-300"
+                }`}
               />
               <PasswordEyeBtn
                 visible={showPasswordConfirm}
@@ -184,6 +227,11 @@ export default function ProfilePage() {
                 className="absolute right-4 sm:right-6 top-1/2 -translate-y-1/2 text-gray-400"
               />
             </div>
+            {passwordConfirmError && (
+              <span className="mt-2 block text-sm text-red-500">
+                {passwordConfirmError}
+              </span>
+            )}
           </div>
 
           <button
