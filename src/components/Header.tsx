@@ -67,28 +67,26 @@ export default function Header({ hasToken = false }: { hasToken?: boolean }) {
   // 로그인 시 헤더
   return (
     <header className="border-b border-line-gray bg-background-peach">
-      <div className="mx-auto flex h-[88px] max-w-[1920px] items-center justify-between px-6">
-        <div className="flex items-center gap-16">
-          <Link href="/" className="flex items-center">
-            <Image
-              src="/smallSnacklogo.png"
-              alt="Snack"
-              width={126}
-              height={32}
-              priority
-              className="h-8 w-auto"
-            />
-          </Link>
+      <div className="relative mx-auto flex h-[88px] max-w-[1920px] items-center justify-between px-4 sm:px-6">
+        <Link href="/" className="flex flex-shrink-0 items-center">
+          <Image
+            src="/smallSnacklogo.png"
+            alt="Snack"
+            width={126}
+            height={32}
+            priority
+            className="h-6 w-auto sm:h-8"
+          />
+        </Link>
 
-          <Link
-            href="/items"
-            className="text-xl font-semibold text-primary-400 transition-colors hover:text-primary-300"
-          >
-            상품 리스트
-          </Link>
-        </div>
+        <Link
+          href="/items"
+          className="absolute left-1/2 -translate-x-1/2 text-sm font-semibold text-primary-400 transition-colors hover:text-primary-300 sm:static sm:translate-x-0 sm:text-xl"
+        >
+          상품 리스트
+        </Link>
 
-        <div className="flex items-center gap-6">
+        <div className="flex flex-shrink-0 items-center gap-4 sm:gap-6">
           <Link
             href="/profile"
             className="text-base font-medium text-gray-400 transition-colors hover:text-black-400"
