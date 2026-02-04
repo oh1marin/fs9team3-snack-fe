@@ -81,7 +81,6 @@ export default function ProductModal({ onClose, onSuccess, editMode = false, pro
       const method = editMode ? "PUT" : "POST";
       const token = getClientAccessToken();
 
-      // FormData로 전송 → 백엔드 multer-s3가 파일을 S3에 업로드
       const formDataToSend = new FormData();
       formDataToSend.append("title", formData.productName);
       formDataToSend.append("category_main", formData.category);
@@ -92,7 +91,6 @@ export default function ProductModal({ onClose, onSuccess, editMode = false, pro
       if (imageFile) {
         formDataToSend.append("image", imageFile);
       } else if (imagePreview && (imagePreview.startsWith("http://") || imagePreview.startsWith("https://"))) {
-        // 수정 시 기존 S3 URL만 유지하는 경우
         formDataToSend.append("image", imagePreview);
       }
 
@@ -110,7 +108,6 @@ export default function ProductModal({ onClose, onSuccess, editMode = false, pro
           return;
         }
         const errorText = await response.text();
-        console.error("API 에러 응답:", errorText);
         let detail = "";
         try {
           const json = JSON.parse(errorText);
@@ -118,12 +115,9 @@ export default function ProductModal({ onClose, onSuccess, editMode = false, pro
         } catch {}
         throw new Error(`상품 ${editMode ? "수정" : "등록"}에 실패했습니다 (${response.status})${detail}`);
       }
-      
-      // 성공 시 콜백 호출 및 모달 닫기
       onSuccess?.();
       onClose();
     } catch (error) {
-      console.error(`상품 ${editMode ? '수정' : '등록'} 실패:`, error);
       if (error instanceof Error && !error.message.includes("401")) {
         alert(error.message || `상품 ${editMode ? '수정' : '등록'}에 실패했습니다. 다시 시도해주세요.`);
       }
@@ -146,7 +140,6 @@ export default function ProductModal({ onClose, onSuccess, editMode = false, pro
       </h2>
 
         <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
-          {/* 상품명 */}
           <div>
             <label className="mb-1.5 sm:mb-2 block text-md-sb sm:text-lg-sb text-black-500">
               상품명
@@ -163,13 +156,11 @@ export default function ProductModal({ onClose, onSuccess, editMode = false, pro
             />
           </div>
 
-          {/* 카테고리 */}
           <div>
             <label className="mb-1.5 sm:mb-2 block text-md-sb sm:text-lg-sb text-black-500">
               카테고리
             </label>
             <div className="grid grid-cols-2 gap-2 sm:gap-4">
-              {/* 대카테고리 */}
               <div className="relative">
                 <button
                   type="button"
@@ -207,7 +198,6 @@ export default function ProductModal({ onClose, onSuccess, editMode = false, pro
                 )}
               </div>
 
-              {/* 소카테고리 */}
               <div className="relative">
                 <button
                   type="button"
@@ -249,7 +239,6 @@ export default function ProductModal({ onClose, onSuccess, editMode = false, pro
             </div>
           </div>
 
-          {/* 가격 */}
           <div>
             <label className="mb-1.5 sm:mb-2 block text-md-sb sm:text-lg-sb text-black-500">
               가격
@@ -266,7 +255,6 @@ export default function ProductModal({ onClose, onSuccess, editMode = false, pro
             />
           </div>
 
-          {/* 상품 이미지 */}
           <div>
             <label className="mb-1.5 sm:mb-2 block text-md-sb sm:text-lg-sb text-black-500">
               상품 이미지
@@ -302,7 +290,6 @@ export default function ProductModal({ onClose, onSuccess, editMode = false, pro
             </div>
           </div>
 
-          {/* 제품링크 */}
           <div>
             <label className="mb-1.5 sm:mb-2 block text-md-sb sm:text-lg-sb text-black-500">
               제품링크
@@ -318,7 +305,6 @@ export default function ProductModal({ onClose, onSuccess, editMode = false, pro
             />
           </div>
 
-          {/* 버튼 */}
           <div className="flex gap-2 sm:gap-3 pt-2">
             <button
               type="button"

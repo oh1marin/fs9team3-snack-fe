@@ -59,7 +59,6 @@ export default function ProductDetailPage() {
       const data = await response.json();
       setProduct(data);
     } catch (err) {
-      console.error("상품 조회 실패:", err);
       setError(err instanceof Error ? err.message : "상품을 불러올 수 없습니다");
     } finally {
       setLoading(false);
@@ -110,7 +109,6 @@ export default function ProductDetailPage() {
               closeModal();
               router.push(listReturnUrl);
             } catch (error) {
-              console.error("상품 삭제 실패:", error);
               toast.error("상품 삭제에 실패했습니다");
             }
           }}
@@ -121,7 +119,6 @@ export default function ProductDetailPage() {
   };
 
   const handleAddToCart = () => {
-    // TODO: 장바구니 기능 구현
     toast.success("장바구니에 담겼습니다!");
   };
 
@@ -150,7 +147,6 @@ export default function ProductDetailPage() {
 
   return (
     <div className="mx-auto min-h-screen w-full max-w-[1920px] bg-background-peach px-4 py-4 sm:px-6 sm:py-8">
-      {/* 브레드크럼 네비게이션 */}
       <nav className="mb-4 flex items-center gap-2 text-sm sm:mb-8 sm:text-base text-md-r text-gray-400">
         <Link href="/" className="hover:text-black-400">
           홈
@@ -163,9 +159,7 @@ export default function ProductDetailPage() {
         <span className="text-black-400">{product.category_sub}</span>
       </nav>
 
-      {/* 메인 콘텐츠 - 2컬럼 레이아웃 */}
       <div className="grid grid-cols-1 gap-6 sm:gap-8 lg:grid-cols-2 lg:gap-12">
-        {/* 좌측: 상품 이미지 */}
         <div className="flex items-start justify-center">
           <div className="aspect-square w-full max-w-[600px] rounded-xl sm:rounded-2xl bg-white p-6 sm:p-12">
             {product.image ? (
@@ -185,17 +179,13 @@ export default function ProductDetailPage() {
           </div>
         </div>
 
-        {/* 우측: 상품 정보 */}
         <div className="flex flex-col gap-4 sm:gap-6">
-          {/* 카테고리 */}
-          <p className="text-md-m sm:text-lg-m text-gray-400">{product.category_sub}</p>
+          <p className="text-md-m sm:text-lg-m text-gray-400">{product.category_sub}          </p>
 
-          {/* 상품명 */}
           <h1 className="text-2xl-b sm:text-3xl-b text-black-500">
             {product.title}
           </h1>
 
-          {/* 구매 횟수 뱃지 */}
           <div>
             <span 
               className="inline-block px-3 py-1.5 rounded text-primary-400 text-sm sm:text-md-sb"
@@ -205,7 +195,6 @@ export default function ProductDetailPage() {
             </span>
           </div>
 
-          {/* 판매자 정보 */}
           {product.user?.company_name && (
             <div className="inline-flex w-fit items-center rounded bg-primary-100 px-3 py-1">
               <span className="text-sm sm:text-md-sb text-primary-400">
@@ -214,7 +203,6 @@ export default function ProductDetailPage() {
             </div>
           )}
 
-          {/* 가격 */}
           <div className="flex items-center justify-between pt-4 sm:pt-6">
             <p className="text-2xl-b sm:text-3xl-b text-black-500">
               {product.price.toLocaleString()}원
@@ -229,7 +217,6 @@ export default function ProductDetailPage() {
             )}
           </div>
 
-          {/* 상품 정보 */}
           <div className="flex flex-col gap-3 sm:gap-4 border-t border-line-gray pt-4 sm:pt-6">
             <div className="flex items-start gap-3 sm:gap-4">
               <span className="w-20 sm:w-24 flex-shrink-0 text-md-m sm:text-lg-m text-black-300">
@@ -259,7 +246,6 @@ export default function ProductDetailPage() {
             </div>
           </div>
 
-          {/* 상품 링크 */}
           {product.link && (
             <div className="flex flex-col gap-3 sm:gap-4 border-t border-line-gray pt-4 sm:pt-6">
               <div className="flex items-start gap-3 sm:gap-4">
@@ -278,7 +264,6 @@ export default function ProductDetailPage() {
             </div>
           )}
 
-          {/* 버튼 영역 */}
           <div className="border-t border-line-gray pt-4 sm:pt-6">
             <div className="flex gap-3">
               {product.isOwner ? (
