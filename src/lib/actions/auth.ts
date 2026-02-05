@@ -138,23 +138,26 @@ export async function registerAction(
  * @returns {Promise<boolean>} 인증 성공 여부
  */
 export async function checkAuth() {
-  const cookieStore = await cookies();
-  const accessToken = cookieStore.get("accessToken")?.value;
-
-  // accessToken이 있으면 인증됨
-  return !!accessToken;
+  try {
+    const cookieStore = await cookies();
+    const accessToken = cookieStore.get("accessToken")?.value;
+    return !!accessToken;
+  } catch {
+    return false;
+  }
 }
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
 /**
  * 서버에서 쿠키로 /api/auth/me 호출해 user 반환 (protected 레이아웃용)
+ * 에러 시 null 반환 (서버에서 throw 방지)
  */
 export async function getServerUser() {
-  const cookieStore = await cookies();
-  const accessToken = cookieStore.get("accessToken")?.value;
-  if (!accessToken) return null;
   try {
+    const cookieStore = await cookies();
+    const accessToken = cookieStore.get("accessToken")?.value;
+    if (!accessToken) return null;
     const res = await fetch(`${API_URL}/api/auth/me`, {
       headers: { Cookie: `accessToken=${accessToken}` },
       cache: "no-store",
