@@ -79,17 +79,23 @@ export async function clearServerSideTokens() {
 }
 
 export async function loginAction(email: string, password: string) {
-  const { user, accessToken, refreshToken, message } = await authService.login(
-    email,
-    password,
-  );
+  try {
+    const { user, accessToken, refreshToken, message } = await authService.login(
+      email,
+      password,
+    );
 
-  if (!accessToken || !refreshToken) {
-    return { success: false, error: "토큰 저장 실패" };
+    if (!accessToken || !refreshToken) {
+      return { success: false, message: "토큰 저장에 실패했습니다." };
+    }
+
+    await setServerSideTokens(accessToken, refreshToken);
+    return { success: true, userData: user, message, accessToken };
+  } catch (e) {
+    const message =
+      e instanceof Error ? e.message : "로그인에 실패했습니다. 다시 시도해 주세요.";
+    return { success: false, message };
   }
-
-  await setServerSideTokens(accessToken, refreshToken);
-  return { success: true, userData: user, message, accessToken };
 }
 
 export async function logoutAction() {
@@ -103,19 +109,28 @@ export async function registerAction(
   password: string,
   passwordConfirmation: string,
 ) {
-  const { user, accessToken, refreshToken, message } = await authService.register(
-    nickname,
-    email,
-    password,
-    passwordConfirmation,
-  );
-  // 토큰 저장 로직 추가
-  if (!accessToken || !refreshToken) {
-    return { success: false, error: "토큰 저장 실패" };
-  }
+  try {
+    const { user, accessToken, refreshToken, message } =
+      await authService.register(
+        nickname,
+        email,
+        password,
+        passwordConfirmation,
+      );
 
-  await setServerSideTokens(accessToken, refreshToken);
-  return { success: true, userData: user, message, accessToken };
+    if (!accessToken || !refreshToken) {
+      return { success: false, message: "토큰 저장에 실패했습니다." };
+    }
+
+    await setServerSideTokens(accessToken, refreshToken);
+    return { success: true, userData: user, message, accessToken };
+  } catch (e) {
+    const message =
+      e instanceof Error
+        ? e.message
+        : "회원가입에 실패했습니다. 다시 시도해 주세요.";
+    return { success: false, message };
+  }
 }
 
 /**
@@ -187,8 +202,8 @@ export async function checkAndRefreshAuth() {
 
   // 3. refreshToken으로 갱신 시도
   try {
-    const baseURL = process.env.NEXT_PUBLIC_API_URL;
-    const response = await fetch(`${baseURL}/auth/refresh`, {
+    const baseURL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+    const response = await fetch(`${baseURL}/api/auth/refresh`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
