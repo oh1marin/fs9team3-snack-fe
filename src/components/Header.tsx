@@ -81,7 +81,7 @@ export default function Header({ hasToken = false }: { hasToken?: boolean }) {
 
         <Link
           href="/items"
-          className="absolute left-1/2 -translate-x-1/2 text-sm font-semibold text-primary-400 transition-colors hover:text-primary-300 sm:static sm:translate-x-0 sm:text-xl"
+          className="static left-auto translate-x-0 text-sm font-semibold text-primary-400 transition-colors hover:text-primary-300 min-[376px]:text-xl max-[375px]:absolute max-[375px]:left-1/2 max-[375px]:-translate-x-1/2"
         >
           상품 리스트
         </Link>
