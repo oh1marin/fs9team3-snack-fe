@@ -82,31 +82,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     password: string,
     passwordConfirmation: string
   ) => {
-    // 회원가입 성공 시 유저데이터를 API 에서 응답해주는 경우, 즉시 로그인 처리 가능
-    const { userData, success, message, accessToken } = await registerAction(
+    const result = await registerAction(
       nickname,
       email,
       password,
       passwordConfirmation,
     );
+    const { userData, success, message, accessToken } = result;
 
     if (!success) {
-      throw new Error(message || "회원가입 실패");
+      const msg =
+        "message" in result
+          ? (result as { message?: string }).message
+          : (result as { error?: string }).error;
+      throw new Error(msg ?? "회원가입에 실패했습니다.");
     }
     if (accessToken) setClientAccessToken(accessToken);
-    setUser(userData);
+    setUser(userData ?? null);
     setIsLoading(false);
     return message;
   };
 
   const login = async (email: string, password: string) => {
-    const { userData, success, message, accessToken } = await loginAction(email, password);
+    const result = await loginAction(email, password);
+    const { userData, success, message, accessToken } = result;
 
     if (!success) {
-      throw new Error(message || "로그인 실패");
+      const msg =
+        "message" in result
+          ? (result as { message?: string }).message
+          : (result as { error?: string }).error;
+      throw new Error(msg ?? "로그인에 실패했습니다.");
     }
     if (accessToken) setClientAccessToken(accessToken);
-    setUser(userData);
+    setUser(userData ?? null);
     setIsLoading(false);
     return message;
   };
