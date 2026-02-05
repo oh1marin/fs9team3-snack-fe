@@ -68,23 +68,24 @@ export default function Header({ hasToken = false }: { hasToken?: boolean }) {
   return (
     <header className="border-b border-line-gray bg-background-peach">
       <div className="relative mx-auto flex h-[88px] max-w-[1920px] items-center justify-between px-4 sm:px-6">
-        <Link href="/" className="flex flex-shrink-0 items-center">
-          <Image
-            src="/smallSnacklogo.png"
-            alt="Snack"
-            width={126}
-            height={32}
-            priority
-            className="h-6 w-auto sm:h-8"
-          />
-        </Link>
-
-        <Link
-          href="/items"
-          className="static left-auto translate-x-0 text-sm font-semibold text-primary-400 transition-colors hover:text-primary-300 min-[376px]:text-xl max-[375px]:absolute max-[375px]:left-1/2 max-[375px]:-translate-x-1/2"
-        >
-          상품 리스트
-        </Link>
+        <div className="flex min-w-0 flex-shrink-0 items-center gap-3 sm:gap-4">
+          <Link href="/" className="flex items-center">
+            <Image
+              src="/smallSnacklogo.png"
+              alt="Snack"
+              width={126}
+              height={32}
+              priority
+              className="h-6 w-auto sm:h-8"
+            />
+          </Link>
+          <Link
+            href="/items"
+            className="text-sm font-semibold text-primary-400 transition-colors hover:text-primary-300 min-[376px]:text-xl max-[375px]:absolute max-[375px]:left-1/2 max-[375px]:top-1/2 max-[375px]:-translate-x-1/2 max-[375px]:-translate-y-1/2"
+          >
+            상품 리스트
+          </Link>
+        </div>
 
         <div className="flex flex-shrink-0 items-center gap-4 sm:gap-6">
           <Link
