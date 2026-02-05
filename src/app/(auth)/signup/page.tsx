@@ -100,7 +100,7 @@ export default function SignupPage() {
     <div className="mx-auto flex min-h-[calc(100vh-88px)] w-full max-w-[1920px] flex-col items-center justify-center bg-background-peach px-6 py-12">
       <div className="w-full max-w-[560px]">
         <h1 className="text-left text-2xl-b text-black-500">
-          안녕하세요, 스넥에 오신 걸 환영합니다
+          안녕하세요, 스낵에 오신 걸 환영합니다
         </h1>
 
         <form onSubmit={handleSubmit} className="mt-16 w-full">

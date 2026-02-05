@@ -70,7 +70,7 @@ export default function LoginPage() {
   return (
     <div className="mx-auto flex min-h-[calc(100vh-88px)] w-full max-w-[1920px] flex-col items-center justify-center bg-background-peach px-6">
       <div className="w-full max-w-[560px]">
-        <h1 className="text-left text-2xl-b text-black-500">로그인</h1>
+        <h1 className="text-center text-2xl-b text-black-500">로그인</h1>
 
         <form onSubmit={handleSubmit} className="mt-16 w-full">
           <div className="flex flex-col gap-5">
