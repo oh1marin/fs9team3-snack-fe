@@ -68,7 +68,7 @@ export default function Header({ hasToken = false }: { hasToken?: boolean }) {
   return (
     <header className="border-b border-line-gray bg-background-peach">
       <div className="relative mx-auto flex h-[88px] max-w-[1920px] items-center justify-between px-4 sm:px-6">
-        <div className="flex min-w-0 flex-shrink-0 items-center gap-3 sm:gap-4">
+        <div className="flex min-w-0 flex-shrink-0 items-center gap-16">
           <Link href="/" className="flex items-center">
             <Image
               src="/smallSnacklogo.png"
