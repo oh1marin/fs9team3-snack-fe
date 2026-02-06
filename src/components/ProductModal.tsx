@@ -44,16 +44,16 @@ export default function ProductModal({ onClose, onSuccess, editMode = false, pro
     const name = formData.productName.trim();
     if (!name) {
       newErrors.productName = "상품명을 입력해주세요.";
-    } else if (name.length > 100) {
-      newErrors.productName = "상품명은 100자 이내로 입력해주세요.";
+    } else if (name.length > 12) {
+      newErrors.productName = "상품명은 12자 이내로 입력해주세요.";
     }
     const priceNum = Number(formData.price);
     if (formData.price === "" || formData.price === null || formData.price === undefined) {
       newErrors.price = "가격을 입력해주세요.";
     } else if (Number.isNaN(priceNum) || priceNum < 0) {
       newErrors.price = "올바른 가격을 입력해주세요. (0 이상)";
-    } else if (priceNum > 99_999_999) {
-      newErrors.price = "가격은 99,999,999원 이하여야 합니다.";
+    } else if (priceNum > 1_000_000) {
+      newErrors.price = "가격은 100만원 이하여야 합니다.";
     }
     if (!editMode && !imageFile && !imagePreview) {
       newErrors.image = "상품 이미지를 등록해주세요.";
@@ -172,6 +172,7 @@ export default function ProductModal({ onClose, onSuccess, editMode = false, pro
             </label>
             <input
               type="text"
+              maxLength={12}
               value={formData.productName}
               onChange={(e) => {
                 setFormData({ ...formData, productName: e.target.value });
@@ -277,7 +278,7 @@ export default function ProductModal({ onClose, onSuccess, editMode = false, pro
             <input
               type="number"
               min={0}
-              max={99999999}
+              max={1000000}
               value={formData.price}
               onChange={(e) => {
                 setFormData({ ...formData, price: e.target.value });
