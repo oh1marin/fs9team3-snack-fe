@@ -45,7 +45,7 @@ export default function ProductModal({ onClose, onSuccess, editMode = false, pro
     if (!name) {
       newErrors.productName = "상품명을 입력해주세요.";
     } else if (name.length > 12) {
-      newErrors.productName = "상품명은 12자 이내로 입력해주세요.";
+      newErrors.productName = "12자리를 넘었습니다.";
     }
     const priceNum = Number(formData.price);
     if (formData.price === "" || formData.price === null || formData.price === undefined) {
@@ -55,7 +55,7 @@ export default function ProductModal({ onClose, onSuccess, editMode = false, pro
     } else if (priceNum > 1_000_000) {
       newErrors.price = "가격은 100만원 이하여야 합니다.";
     }
-    if (!editMode && !imageFile && !imagePreview) {
+    if (!imageFile && !imagePreview) {
       newErrors.image = "상품 이미지를 등록해주세요.";
     }
     setErrors(newErrors);
@@ -172,19 +172,20 @@ export default function ProductModal({ onClose, onSuccess, editMode = false, pro
             </label>
             <input
               type="text"
-              maxLength={12}
               value={formData.productName}
               onChange={(e) => {
                 setFormData({ ...formData, productName: e.target.value });
                 if (errors.productName) setErrors((prev) => ({ ...prev, productName: "" }));
               }}
               placeholder="스프라이트 제로"
+              maxLength={12}
               className={`h-12 sm:h-14 w-full rounded-lg sm:rounded-xl border-2 bg-white px-4 sm:px-5 text-md-r sm:text-lg-r outline-none placeholder:text-gray-400 focus:border-primary-400 ${
                 errors.productName ? "border-red-400" : "border-primary-300"
               }`}
             />
+            <p className="mt-1.5 text-sm text-gray-500">12자 이내로 입력해주세요.</p>
             {errors.productName && (
-              <p className="mt-1.5 text-sm text-red-500">{errors.productName}</p>
+              <p className="mt-1 text-sm text-red-500">{errors.productName}</p>
             )}
           </div>
 
@@ -278,10 +279,15 @@ export default function ProductModal({ onClose, onSuccess, editMode = false, pro
             <input
               type="number"
               min={0}
-              max={1000000}
               value={formData.price}
               onChange={(e) => {
-                setFormData({ ...formData, price: e.target.value });
+                const raw = e.target.value;
+                const num = Number(raw);
+                const capped =
+                  raw !== "" && !Number.isNaN(num) && num > 1_000_000
+                    ? "1000000"
+                    : raw;
+                setFormData({ ...formData, price: capped });
                 if (errors.price) setErrors((prev) => ({ ...prev, price: "" }));
               }}
               placeholder="1,900"
@@ -289,8 +295,9 @@ export default function ProductModal({ onClose, onSuccess, editMode = false, pro
                 errors.price ? "border-red-400" : "border-primary-300"
               }`}
             />
+            <p className="mt-1.5 text-sm text-gray-500">100만원 이하로 입력해주세요.</p>
             {errors.price && (
-              <p className="mt-1.5 text-sm text-red-500">{errors.price}</p>
+              <p className="mt-1 text-sm text-red-500">{errors.price}</p>
             )}
           </div>
 
@@ -330,6 +337,9 @@ export default function ProductModal({ onClose, onSuccess, editMode = false, pro
             {errors.image && (
               <p className="mt-1.5 text-sm text-red-500">{errors.image}</p>
             )}
+            {!imagePreview && !imageFile && !errors.image && (
+              <p className="mt-1.5 text-sm text-gray-500">상품 이미지를 등록해주세요.</p>
+            )}
           </div>
 
           <div>
@@ -345,6 +355,11 @@ export default function ProductModal({ onClose, onSuccess, editMode = false, pro
               placeholder="naver.com 또는 https://naver.com"
               className="h-12 sm:h-14 w-full rounded-lg sm:rounded-xl border-2 border-primary-300 bg-white px-4 sm:px-5 text-md-r sm:text-lg-r outline-none placeholder:text-gray-400 focus:border-primary-400"
             />
+            {formData.productLink.trim() !== "" &&
+              !formData.productLink.includes("@") &&
+              !formData.productLink.includes(".") && (
+                <p className="mt-1.5 text-sm text-red-500">제품링크가 없습니다.</p>
+              )}
           </div>
 
           <div className="flex gap-2 sm:gap-3 pt-2">
