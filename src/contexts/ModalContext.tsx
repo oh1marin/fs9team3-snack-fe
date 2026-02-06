@@ -41,7 +41,7 @@ export function ModalProvider({ children }: { children: ReactNode }) {
           style={{ backgroundColor: "rgba(0, 0, 0, 0.7)" }}
           onClick={handleBackdropClick}
         >
-          <div className="w-[95vw] sm:w-[90vw] md:w-[600px] max-h-[90vh] overflow-y-auto min-[800px]:overflow-y-visible">
+          <div className="w-[85vw] sm:w-[80vw] md:w-[540px] lg:w-[600px] max-h-[90vh] overflow-y-auto min-[800px]:overflow-y-visible">
             {modalContent}
           </div>
         </div>
