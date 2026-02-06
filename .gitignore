@@ -39,3 +39,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# 이번 add 제외 (나중에 커밋할 때 아래 2줄 삭제 후 git add)
+src/app/(protected)/admin/
+src/app/(protected)/cart/

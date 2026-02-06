@@ -1,10 +1,6 @@
 "use client";
 
-import {
-  loginAction,
-  registerAction,
-  logoutAction,
-} from "@/lib/actions/auth";
+import { logoutAction } from "@/lib/actions/auth";
 import { setClientAccessToken } from "@/lib/api/authToken";
 import { authService } from "@/lib/service/authService";
 import { userService } from "@/lib/service/userService";
@@ -82,42 +78,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     password: string,
     passwordConfirmation: string
   ) => {
-    const result = await registerAction(
-      nickname,
-      email,
-      password,
-      passwordConfirmation,
-    );
-    const { userData, success, message, accessToken } = result;
-
-    if (!success) {
-      const msg =
-        "message" in result
-          ? (result as { message?: string }).message
-          : (result as { error?: string }).error;
-      throw new Error(msg ?? "회원가입에 실패했습니다.");
+    const res = await fetch("/api/auth/signup", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        nickname,
+        email,
+        password,
+        passwordConfirmation,
+      }),
+    });
+    const result = await res.json();
+    if (!res.ok) {
+      throw new Error(result.message ?? result.error ?? "회원가입에 실패했습니다.");
     }
-    if (accessToken) setClientAccessToken(accessToken);
-    setUser(userData ?? null);
+    if (result.accessToken) setClientAccessToken(result.accessToken);
+    setUser(result.user ?? result.userData ?? null);
     setIsLoading(false);
-    return message;
+    return result.message;
   };
 
   const login = async (email: string, password: string) => {
-    const result = await loginAction(email, password);
-    const { userData, success, message, accessToken } = result;
-
-    if (!success) {
-      const msg =
-        "message" in result
-          ? (result as { message?: string }).message
-          : (result as { error?: string }).error;
-      throw new Error(msg ?? "로그인에 실패했습니다.");
+    const res = await fetch("/api/auth/login", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+    const result = await res.json();
+    if (!res.ok) {
+      throw new Error(result.message ?? result.error ?? "로그인에 실패했습니다.");
     }
-    if (accessToken) setClientAccessToken(accessToken);
-    setUser(userData ?? null);
+    if (result.accessToken) setClientAccessToken(result.accessToken);
+    setUser(result.user ?? result.userData ?? null);
     setIsLoading(false);
-    return message;
+    return result.message;
   };
 
   const logout = async () => {
