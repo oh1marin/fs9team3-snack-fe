@@ -37,6 +37,30 @@ export default function ProductModal({ onClose, onSuccess, editMode = false, pro
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [showSubCategoryDropdown, setShowSubCategoryDropdown] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const validateForm = (): boolean => {
+    const newErrors: Record<string, string> = {};
+    const name = formData.productName.trim();
+    if (!name) {
+      newErrors.productName = "상품명을 입력해주세요.";
+    } else if (name.length > 100) {
+      newErrors.productName = "상품명은 100자 이내로 입력해주세요.";
+    }
+    const priceNum = Number(formData.price);
+    if (formData.price === "" || formData.price === null || formData.price === undefined) {
+      newErrors.price = "가격을 입력해주세요.";
+    } else if (Number.isNaN(priceNum) || priceNum < 0) {
+      newErrors.price = "올바른 가격을 입력해주세요. (0 이상)";
+    } else if (priceNum > 99_999_999) {
+      newErrors.price = "가격은 99,999,999원 이하여야 합니다.";
+    }
+    if (!editMode && !imageFile && !imagePreview) {
+      newErrors.image = "상품 이미지를 등록해주세요.";
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const categories = [
     "스낵",
@@ -59,6 +83,7 @@ export default function ProductModal({ onClose, onSuccess, editMode = false, pro
     const file = e.target.files?.[0];
     if (file) {
       setImageFile(file);
+      if (errors.image) setErrors((prev) => ({ ...prev, image: "" }));
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result as string);
@@ -69,6 +94,7 @@ export default function ProductModal({ onClose, onSuccess, editMode = false, pro
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validateForm()) return;
     setIsSubmitting(true);
 
     try {
@@ -147,13 +173,18 @@ export default function ProductModal({ onClose, onSuccess, editMode = false, pro
             <input
               type="text"
               value={formData.productName}
-              onChange={(e) =>
-                setFormData({ ...formData, productName: e.target.value })
-              }
+              onChange={(e) => {
+                setFormData({ ...formData, productName: e.target.value });
+                if (errors.productName) setErrors((prev) => ({ ...prev, productName: "" }));
+              }}
               placeholder="스프라이트 제로"
-              className="h-12 sm:h-14 w-full rounded-lg sm:rounded-xl border-2 border-primary-300 bg-white px-4 sm:px-5 text-md-r sm:text-lg-r outline-none placeholder:text-gray-400 focus:border-primary-400"
-              required
+              className={`h-12 sm:h-14 w-full rounded-lg sm:rounded-xl border-2 bg-white px-4 sm:px-5 text-md-r sm:text-lg-r outline-none placeholder:text-gray-400 focus:border-primary-400 ${
+                errors.productName ? "border-red-400" : "border-primary-300"
+              }`}
             />
+            {errors.productName && (
+              <p className="mt-1.5 text-sm text-red-500">{errors.productName}</p>
+            )}
           </div>
 
           <div>
@@ -245,14 +276,21 @@ export default function ProductModal({ onClose, onSuccess, editMode = false, pro
             </label>
             <input
               type="number"
+              min={0}
+              max={99999999}
               value={formData.price}
-              onChange={(e) =>
-                setFormData({ ...formData, price: e.target.value })
-              }
+              onChange={(e) => {
+                setFormData({ ...formData, price: e.target.value });
+                if (errors.price) setErrors((prev) => ({ ...prev, price: "" }));
+              }}
               placeholder="1,900"
-              className="h-12 sm:h-14 w-full rounded-lg sm:rounded-xl border-2 border-primary-300 bg-white px-4 sm:px-5 text-md-r sm:text-lg-r outline-none placeholder:text-gray-400 focus:border-primary-400"
-              required
+              className={`h-12 sm:h-14 w-full rounded-lg sm:rounded-xl border-2 bg-white px-4 sm:px-5 text-md-r sm:text-lg-r outline-none placeholder:text-gray-400 focus:border-primary-400 ${
+                errors.price ? "border-red-400" : "border-primary-300"
+              }`}
             />
+            {errors.price && (
+              <p className="mt-1.5 text-sm text-red-500">{errors.price}</p>
+            )}
           </div>
 
           <div>
@@ -288,6 +326,9 @@ export default function ProductModal({ onClose, onSuccess, editMode = false, pro
                 </div>
               </label>
             </div>
+            {errors.image && (
+              <p className="mt-1.5 text-sm text-red-500">{errors.image}</p>
+            )}
           </div>
 
           <div>
