@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import "react-toastify/dist/ReactToastify.css";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { CartProvider } from "@/contexts/CartContext";
 import { ModalProvider } from "@/contexts/ModalContext";
 import { ToastContainer } from "react-toastify";
 
@@ -27,9 +28,11 @@ export default function RootLayout({
     <html lang="ko" className={pretendard.variable}>
       <body className={pretendard.className}>
         <AuthProvider>
-          <ModalProvider>
-            {children}
-          </ModalProvider>
+          <CartProvider>
+            <ModalProvider>
+              {children}
+            </ModalProvider>
+          </CartProvider>
         </AuthProvider>
         <ToastContainer
           position="top-right"

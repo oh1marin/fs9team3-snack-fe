@@ -4,12 +4,14 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
+import { useCart } from "@/contexts/CartContext";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 
 export default function Header({ hasToken = false }: { hasToken?: boolean }) {
   const pathname = usePathname();
   const { user, isLoading, logout } = useAuth();
+  const { cartCount } = useCart();
   const router = useRouter();
 
   const isLanding = pathname === "/";
@@ -81,13 +83,25 @@ export default function Header({ hasToken = false }: { hasToken?: boolean }) {
           </Link>
           <Link
             href="/items"
-            className="text-sm font-semibold text-primary-400 transition-colors hover:text-primary-300 min-[376px]:text-xl max-[375px]:absolute max-[375px]:left-1/2 max-[375px]:top-1/2 max-[375px]:-translate-x-1/2 max-[375px]:-translate-y-1/2"
+            className={`text-sm font-semibold transition-colors min-[376px]:text-xl max-[375px]:absolute max-[375px]:left-1/2 max-[375px]:top-1/2 max-[375px]:-translate-x-1/2 max-[375px]:-translate-y-1/2 ${pathname === "/items" || pathname.startsWith("/items/") ? "text-primary-400" : "text-black-400 hover:text-primary-400"}`}
           >
             상품 리스트
           </Link>
         </div>
 
         <div className="flex flex-shrink-0 items-center gap-4 sm:gap-6">
+          <Link
+            href="/cart"
+            className={`flex items-center gap-1.5 text-base font-medium transition-colors ${pathname === "/cart" ? "text-primary-400" : "text-gray-400 hover:text-black-400"}`}
+          >
+            Cart
+            <span
+              className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary-400 px-1.5 text-xs font-medium text-white"
+              aria-label={`장바구니 ${cartCount}개`}
+            >
+              {cartCount}
+            </span>
+          </Link>
           <Link
             href="/profile"
             className="text-base font-medium text-gray-400 transition-colors hover:text-black-400"
