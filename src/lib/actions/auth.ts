@@ -2,13 +2,18 @@
 
 import { cookies } from "next/headers";
 import { jwtDecode } from "jwt-decode";
-import { authService } from "../service/authService";
 
 interface JWTPayload {
   exp?: number;
   iat?: number;
   [key: string]: any;
 }
+
+/**
+ * 로그인/회원가입은 /api/auth/login, /api/auth/signup 으로 요청합니다.
+ * 백엔드가 res.cookie 로 Set-Cookie 를 내려주면 API 라우트가 그대로 전달하고,
+ * 라우트 가드는 쿠키 존재 여부(checkAuth)만으로 처리합니다.
+ */
 
 // 서버 사이드 전용 함수
 export async function getServerSideToken(type = "accessToken") {
@@ -17,19 +22,15 @@ export async function getServerSideToken(type = "accessToken") {
   return tokenCookie ? tokenCookie.value : null;
 }
 
+/** @deprecated 로그인/회원가입은 API 라우트를 통해 쿠키를 받습니다. refresh 등에서만 사용 가능. */
 export async function setServerSideTokens(accessToken: string, refreshToken: string) {
   const cookieStore = await cookies();
-
-  // 토큰 디코딩 및 만료 시간 계산
   const accessTokenData = jwtDecode<JWTPayload>(accessToken);
   const refreshTokenData = jwtDecode<JWTPayload>(refreshToken);
-
   const accessTokenExpiresIn =
     (accessTokenData.exp || 0) - Math.floor(Date.now() / 1000);
   const refreshTokenExpiresIn =
     (refreshTokenData.exp || 0) - Math.floor(Date.now() / 1000);
-
-  // 쿠키 설정
   cookieStore.set("accessToken", accessToken, {
     path: "/",
     maxAge: accessTokenExpiresIn,
@@ -37,7 +38,6 @@ export async function setServerSideTokens(accessToken: string, refreshToken: str
     secure: process.env.NODE_ENV === "production",
     httpOnly: true,
   });
-
   cookieStore.set("refreshToken", refreshToken, {
     path: "/",
     maxAge: refreshTokenExpiresIn,
@@ -78,18 +78,22 @@ export async function clearServerSideTokens() {
   return { success: true };
 }
 
+/** @deprecated 클라이언트는 /api/auth/login 을 호출해 쿠키를 받습니다. */
 export async function loginAction(email: string, password: string) {
-  const { user, accessToken, refreshToken, message } = await authService.login(
-    email,
-    password,
-  );
-
-  if (!accessToken || !refreshToken) {
-    return { success: false, error: "토큰 저장 실패" };
+  try {
+    const { user, accessToken, refreshToken, message } = await (
+      await import("../service/authService")
+    ).authService.login(email, password);
+    if (!accessToken || !refreshToken) {
+      return { success: false, message: "토큰 저장에 실패했습니다." };
+    }
+    await setServerSideTokens(accessToken, refreshToken);
+    return { success: true, userData: user, message, accessToken };
+  } catch (e) {
+    const message =
+      e instanceof Error ? e.message : "로그인에 실패했습니다. 다시 시도해 주세요.";
+    return { success: false, message };
   }
-
-  await setServerSideTokens(accessToken, refreshToken);
-  return { success: true, userData: user, message, accessToken };
 }
 
 export async function logoutAction() {
@@ -97,25 +101,34 @@ export async function logoutAction() {
   return { success: true };
 }
 
+/** @deprecated 클라이언트는 /api/auth/signup 을 호출해 쿠키를 받습니다. */
 export async function registerAction(
   nickname: string,
   email: string,
   password: string,
   passwordConfirmation: string,
 ) {
-  const { user, accessToken, refreshToken, message } = await authService.register(
-    nickname,
-    email,
-    password,
-    passwordConfirmation,
-  );
-  // 토큰 저장 로직 추가
-  if (!accessToken || !refreshToken) {
-    return { success: false, error: "토큰 저장 실패" };
+  try {
+    const { user, accessToken, refreshToken, message } = await (
+      await import("../service/authService")
+    ).authService.register(
+      nickname,
+      email,
+      password,
+      passwordConfirmation,
+    );
+    if (!accessToken || !refreshToken) {
+      return { success: false, message: "토큰 저장에 실패했습니다." };
+    }
+    await setServerSideTokens(accessToken, refreshToken);
+    return { success: true, userData: user, message, accessToken };
+  } catch (e) {
+    const message =
+      e instanceof Error
+        ? e.message
+        : "회원가입에 실패했습니다. 다시 시도해 주세요.";
+    return { success: false, message };
   }
-
-  await setServerSideTokens(accessToken, refreshToken);
-  return { success: true, userData: user, message, accessToken };
 }
 
 /**
@@ -123,23 +136,26 @@ export async function registerAction(
  * @returns {Promise<boolean>} 인증 성공 여부
  */
 export async function checkAuth() {
-  const cookieStore = await cookies();
-  const accessToken = cookieStore.get("accessToken")?.value;
-
-  // accessToken이 있으면 인증됨
-  return !!accessToken;
+  try {
+    const cookieStore = await cookies();
+    const accessToken = cookieStore.get("accessToken")?.value;
+    return !!accessToken;
+  } catch {
+    return false;
+  }
 }
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
 /**
  * 서버에서 쿠키로 /api/auth/me 호출해 user 반환 (protected 레이아웃용)
+ * 에러 시 null 반환 (서버에서 throw 방지)
  */
 export async function getServerUser() {
-  const cookieStore = await cookies();
-  const accessToken = cookieStore.get("accessToken")?.value;
-  if (!accessToken) return null;
   try {
+    const cookieStore = await cookies();
+    const accessToken = cookieStore.get("accessToken")?.value;
+    if (!accessToken) return null;
     const res = await fetch(`${API_URL}/api/auth/me`, {
       headers: { Cookie: `accessToken=${accessToken}` },
       cache: "no-store",
@@ -187,8 +203,8 @@ export async function checkAndRefreshAuth() {
 
   // 3. refreshToken으로 갱신 시도
   try {
-    const baseURL = process.env.NEXT_PUBLIC_API_URL;
-    const response = await fetch(`${baseURL}/auth/refresh`, {
+    const baseURL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+    const response = await fetch(`${baseURL}/api/auth/refresh`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

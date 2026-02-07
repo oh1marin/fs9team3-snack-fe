@@ -37,6 +37,30 @@ export default function ProductModal({ onClose, onSuccess, editMode = false, pro
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [showSubCategoryDropdown, setShowSubCategoryDropdown] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const validateForm = (): boolean => {
+    const newErrors: Record<string, string> = {};
+    const name = formData.productName.trim();
+    if (!name) {
+      newErrors.productName = "상품명을 입력해주세요.";
+    } else if (name.length > 12) {
+      newErrors.productName = "12자리를 넘었습니다.";
+    }
+    const priceNum = Number(formData.price);
+    if (formData.price === "" || formData.price === null || formData.price === undefined) {
+      newErrors.price = "가격을 입력해주세요.";
+    } else if (Number.isNaN(priceNum) || priceNum < 0) {
+      newErrors.price = "올바른 가격을 입력해주세요. (0 이상)";
+    } else if (priceNum > 1_000_000) {
+      newErrors.price = "가격은 100만원 이하여야 합니다.";
+    }
+    if (!imageFile && !imagePreview) {
+      newErrors.image = "상품 이미지를 등록해주세요.";
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const categories = [
     "스낵",
@@ -59,6 +83,7 @@ export default function ProductModal({ onClose, onSuccess, editMode = false, pro
     const file = e.target.files?.[0];
     if (file) {
       setImageFile(file);
+      if (errors.image) setErrors((prev) => ({ ...prev, image: "" }));
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result as string);
@@ -69,6 +94,7 @@ export default function ProductModal({ onClose, onSuccess, editMode = false, pro
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validateForm()) return;
     setIsSubmitting(true);
 
     try {
@@ -147,13 +173,20 @@ export default function ProductModal({ onClose, onSuccess, editMode = false, pro
             <input
               type="text"
               value={formData.productName}
-              onChange={(e) =>
-                setFormData({ ...formData, productName: e.target.value })
-              }
+              onChange={(e) => {
+                setFormData({ ...formData, productName: e.target.value });
+                if (errors.productName) setErrors((prev) => ({ ...prev, productName: "" }));
+              }}
               placeholder="스프라이트 제로"
-              className="h-12 sm:h-14 w-full rounded-lg sm:rounded-xl border-2 border-primary-300 bg-white px-4 sm:px-5 text-md-r sm:text-lg-r outline-none placeholder:text-gray-400 focus:border-primary-400"
-              required
+              maxLength={12}
+              className={`h-12 sm:h-14 w-full rounded-lg sm:rounded-xl border-2 bg-white px-4 sm:px-5 text-md-r sm:text-lg-r outline-none placeholder:text-gray-400 focus:border-primary-400 ${
+                errors.productName ? "border-red-400" : "border-primary-300"
+              }`}
             />
+            <p className="mt-1.5 text-sm text-gray-500">12자 이내로 입력해주세요.</p>
+            {errors.productName && (
+              <p className="mt-1 text-sm text-red-500">{errors.productName}</p>
+            )}
           </div>
 
           <div>
@@ -245,14 +278,27 @@ export default function ProductModal({ onClose, onSuccess, editMode = false, pro
             </label>
             <input
               type="number"
+              min={0}
               value={formData.price}
-              onChange={(e) =>
-                setFormData({ ...formData, price: e.target.value })
-              }
+              onChange={(e) => {
+                const raw = e.target.value;
+                const num = Number(raw);
+                const capped =
+                  raw !== "" && !Number.isNaN(num) && num > 1_000_000
+                    ? "1000000"
+                    : raw;
+                setFormData({ ...formData, price: capped });
+                if (errors.price) setErrors((prev) => ({ ...prev, price: "" }));
+              }}
               placeholder="1,900"
-              className="h-12 sm:h-14 w-full rounded-lg sm:rounded-xl border-2 border-primary-300 bg-white px-4 sm:px-5 text-md-r sm:text-lg-r outline-none placeholder:text-gray-400 focus:border-primary-400"
-              required
+              className={`h-12 sm:h-14 w-full rounded-lg sm:rounded-xl border-2 bg-white px-4 sm:px-5 text-md-r sm:text-lg-r outline-none placeholder:text-gray-400 focus:border-primary-400 ${
+                errors.price ? "border-red-400" : "border-primary-300"
+              }`}
             />
+            <p className="mt-1.5 text-sm text-gray-500">100만원 이하로 입력해주세요.</p>
+            {errors.price && (
+              <p className="mt-1 text-sm text-red-500">{errors.price}</p>
+            )}
           </div>
 
           <div>
@@ -288,6 +334,12 @@ export default function ProductModal({ onClose, onSuccess, editMode = false, pro
                 </div>
               </label>
             </div>
+            {errors.image && (
+              <p className="mt-1.5 text-sm text-red-500">{errors.image}</p>
+            )}
+            {!imagePreview && !imageFile && !errors.image && (
+              <p className="mt-1.5 text-sm text-gray-500">상품 이미지를 등록해주세요.</p>
+            )}
           </div>
 
           <div>
@@ -303,6 +355,11 @@ export default function ProductModal({ onClose, onSuccess, editMode = false, pro
               placeholder="naver.com 또는 https://naver.com"
               className="h-12 sm:h-14 w-full rounded-lg sm:rounded-xl border-2 border-primary-300 bg-white px-4 sm:px-5 text-md-r sm:text-lg-r outline-none placeholder:text-gray-400 focus:border-primary-400"
             />
+            {formData.productLink.trim() !== "" &&
+              !formData.productLink.includes("@") &&
+              !formData.productLink.includes(".") && (
+                <p className="mt-1.5 text-sm text-red-500">제품링크가 없습니다.</p>
+              )}
           </div>
 
           <div className="flex gap-2 sm:gap-3 pt-2">

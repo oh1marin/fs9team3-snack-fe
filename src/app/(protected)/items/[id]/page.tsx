@@ -6,11 +6,11 @@ import Link from "next/link";
 import Image from "next/image";
 import ProductModal from "@/components/ProductModal";
 import DeleteModal from "@/components/DeleteModal";
+import { useCart } from "@/contexts/CartContext";
 import { useModal } from "@/contexts/ModalContext";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { getClientAccessToken } from "@/lib/api/authToken";
-
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
 interface Product {
@@ -40,6 +40,7 @@ export default function ProductDetailPage() {
   const [error, setError] = useState<string | null>(null);
   
   const { openModal, closeModal } = useModal();
+  const { addToCart } = useCart();
 
   const fetchProduct = async () => {
     try {
@@ -119,6 +120,13 @@ export default function ProductDetailPage() {
   };
 
   const handleAddToCart = () => {
+    if (!product) return;
+    addToCart(product.id, 1, {
+      id: product.id,
+      title: product.title,
+      price: product.price,
+      image: product.image,
+    });
     toast.success("장바구니에 담겼습니다!");
   };
 
