@@ -38,15 +38,13 @@ export default function OrderSummary({
       }}
     >
       <div
-        className="flex w-full flex-col justify-center shrink-0 rounded-2xl p-4 text-black-400 sm:p-6"
+        className="flex w-full flex-col justify-center shrink-0 rounded-2xl bg-white p-4 text-black-400 max-[1100px]:bg-background-peach sm:p-6"
         style={{
           width: "100%",
           height: "clamp(230px, 15.1vw, 290px)",
           fontSize: "clamp(13px, 0.83vw, 14px)",
           borderRadius: "16px",
           border: "1px solid var(--Line-Line-100, #F2F2F2)",
-          background: "var(--gray-gray-50, #FFF)",
-          boxShadow: "4px 4px 20px 0 rgba(250, 247, 243, 0.25)",
           marginBottom: "32px",
         }}
       >
