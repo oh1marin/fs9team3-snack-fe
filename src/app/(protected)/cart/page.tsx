@@ -123,7 +123,7 @@ export default function CartPage() {
 
   return (
     <main className="mx-auto flex min-h-0 w-full max-w-[1920px] flex-col overflow-x-hidden bg-background-peach px-4 py-8 sm:px-6">
-      <h1 className="mb-8 ml-[clamp(2rem,8.33vw,10rem)] text-left text-2xl font-bold text-black-400 max-[1100px]:ml-0">장바구니</h1>
+      <h1 className="mb-8 text-left text-2xl font-bold text-black-400 max-[1100px]:ml-0 min-[1101px]:ml-[calc(clamp(2rem,8.33vw,10rem)-80px)]">장바구니</h1>
 
       {!cartLoaded ? (
         <div className="flex min-h-[200px] items-center justify-center">
@@ -151,7 +151,7 @@ export default function CartPage() {
                 <thead className="sticky top-0 z-10 bg-background-peach">
                   <tr className="bg-background-peach">
                     <th className="py-6 pl-4 pr-2 sm:py-11 sm:pl-10 sm:pr-6" style={{ width: "47.4%" }}>
-                      <div className="flex items-center" style={{ marginLeft: "calc(clamp(2rem, 8.33vw, 10rem) - 30px)", gap: "clamp(8px, 1.67vw, 32px)" }}>
+                      <div className="flex items-center" style={{ marginLeft: "calc(clamp(2rem, 8.33vw, 10rem) - 120px)", gap: "clamp(8px, 1.67vw, 32px)" }}>
                         <label className="cursor-pointer shrink-0">
                           <input
                             type="checkbox"
@@ -198,7 +198,7 @@ export default function CartPage() {
                     >
                       <td className="relative py-4 pl-4 pr-2 align-top sm:py-5 sm:pl-10 sm:pr-6" style={{ width: "47.4%", height: "clamp(128px, 8.75vw, 168px)", overflow: "hidden" }}>
                         <div className="flex items-start gap-2 pr-4 sm:gap-4 sm:pr-10" style={{ gap: "clamp(8px, 0.83vw, 16px)" }}>
-                          <div className="flex min-w-0 flex-1 items-start" style={{ marginLeft: "calc(clamp(2rem, 8.33vw, 10rem) - 30px)", gap: "clamp(8px, 0.83vw, 16px)" }}>
+                          <div className="flex min-w-0 flex-1 items-start" style={{ marginLeft: "calc(clamp(2rem, 8.33vw, 10rem) - 120px)", gap: "clamp(8px, 0.83vw, 16px)" }}>
                             <input
                               type="checkbox"
                               checked={selectedIds.has(item.id)}
