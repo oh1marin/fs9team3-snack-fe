@@ -5,10 +5,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import ProductModal from "@/components/ProductModal";
-import DeleteModal from "@/components/DeleteModal";
 import { useCart } from "@/contexts/CartContext";
 import { useModal } from "@/contexts/ModalContext";
-import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { getClientAccessToken } from "@/lib/api/authToken";
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
@@ -32,13 +30,13 @@ export default function ProductDetailPage() {
   const params = useParams();
   const searchParams = useSearchParams();
   const productId = params.id;
-  const router = useRouter();
   const listReturnUrl = searchParams.get("from") || "/items";
   
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+  const [quantity, setQuantity] = useState(1);
+
   const { openModal, closeModal } = useModal();
   const { addToCart } = useCart();
 
@@ -88,46 +86,19 @@ export default function ProductDetailPage() {
     }
   };
 
-  const handleDeleteProduct = () => {
-    if (product) {
-      openModal(
-        <DeleteModal
-          onClose={closeModal}
-          onConfirm={async () => {
-            try {
-              const token = getClientAccessToken();
-              const response = await fetch(`${API_URL}/api/items/${productId}`, {
-                method: "DELETE",
-                credentials: "include",
-                headers: token ? { Authorization: `Bearer ${token}` } : {},
-              });
-
-              if (!response.ok) {
-                throw new Error("상품 삭제에 실패했습니다");
-              }
-
-              toast.success("상품이 삭제되었습니다");
-              closeModal();
-              router.push(listReturnUrl);
-            } catch (error) {
-              toast.error("상품 삭제에 실패했습니다");
-            }
-          }}
-          itemName={product.title}
-        />
-      );
-    }
-  };
-
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     if (!product) return;
-    addToCart(product.id, 1, {
-      id: product.id,
-      title: product.title,
-      price: product.price,
-      image: product.image,
-    });
-    toast.success("장바구니에 담겼습니다!");
+    try {
+      await addToCart(product.id, quantity, {
+        id: product.id,
+        title: product.title,
+        price: product.price,
+        image: product.image,
+      });
+      toast.success("장바구니에 담겼습니다!");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "장바구니 담기에 실패했습니다.");
+    }
   };
 
   if (loading) {
@@ -273,30 +244,50 @@ export default function ProductDetailPage() {
           )}
 
           <div className="border-t border-line-gray pt-4 sm:pt-6">
-            <div className="flex gap-3">
-              {product.isOwner ? (
-                <>
+            <div className="flex flex-wrap items-center gap-3">
+              <div
+                className="flex shrink-0 items-center gap-1.5 sm:gap-3"
+                style={{
+                  width: "clamp(120px, 8.33vw, 160px)",
+                  minWidth: "120px",
+                  height: "clamp(46px, 3.5vw, 54px)",
+                  padding: "0 0.75rem",
+                  justifyContent: "flex-end",
+                  borderRadius: "16px",
+                  border: "1px solid var(--color-primary-300, #FCC49C)",
+                  background: "var(--color-gray-50, #FFF)",
+                }}
+              >
+                <span className="min-w-[3.25rem] text-right text-lg-m text-primary-400">
+                  {quantity} 개
+                </span>
+                <div className="flex flex-col items-center justify-center">
                   <button
-                    onClick={handleDeleteProduct}
-                    className="h-12 sm:h-14 flex-[1] rounded-lg sm:rounded-xl border-2 border-primary-400 bg-white text-md-sb sm:text-lg-sb text-primary-400 transition-colors hover:bg-primary-50"
+                    type="button"
+                    onClick={() => setQuantity((q) => q + 1)}
+                    className="flex items-center justify-center text-primary-400 transition-colors hover:opacity-80"
+                    style={{ minWidth: "clamp(1.25rem, 1.67vw, 2rem)", minHeight: "clamp(1.25rem, 1.67vw, 2rem)", width: "clamp(1.25rem, 1.67vw, 2rem)", height: "clamp(1.25rem, 1.67vw, 2rem)" }}
+                    aria-label="수량 증가"
                   >
-                    삭제하기
+                    <Image src="/upsemo.png" alt="수량 증가" width={13} height={13} className="object-contain" />
                   </button>
                   <button
-                    onClick={handleAddToCart}
-                    className="h-12 sm:h-14 flex-[2] rounded-lg sm:rounded-xl bg-primary-400 text-md-sb sm:text-lg-sb text-white transition-colors hover:bg-primary-300"
+                    type="button"
+                    onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                    className="flex items-center justify-center text-primary-400 transition-colors hover:opacity-80"
+                    style={{ minWidth: "clamp(1.25rem, 1.67vw, 2rem)", minHeight: "clamp(1.25rem, 1.67vw, 2rem)", width: "clamp(1.25rem, 1.67vw, 2rem)", height: "clamp(1.25rem, 1.67vw, 2rem)", marginTop: "-14px" }}
+                    aria-label="수량 감소"
                   >
-                    장바구니 담기
+                    <Image src="/downsemo.png" alt="수량 감소" width={13} height={13} className="object-contain" />
                   </button>
-                </>
-              ) : (
-                <button
-                  onClick={handleAddToCart}
-                  className="h-12 sm:h-14 w-full rounded-lg sm:rounded-xl bg-primary-400 text-md-sb sm:text-lg-sb text-white transition-colors hover:bg-primary-300"
-                >
-                  장바구니 담기
-                </button>
-              )}
+                </div>
+              </div>
+              <button
+                onClick={handleAddToCart}
+                className="h-12 sm:h-14 flex-1 min-w-[200px] rounded-lg sm:rounded-xl bg-primary-400 text-md-sb sm:text-lg-sb text-white transition-colors hover:bg-primary-300"
+              >
+                장바구니 담기
+              </button>
             </div>
           </div>
         </div>
