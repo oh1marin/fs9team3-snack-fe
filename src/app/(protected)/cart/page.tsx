@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -20,9 +20,14 @@ function formatPrice(n: number) {
 
 export default function CartPage() {
   const router = useRouter();
-  const { items, cartLoaded, updateQuantity, removeItem, removeAll, removeSelected } =
+  const { items, cartLoaded, refetchCart, updateQuantity, removeItem, removeAll, removeSelected } =
     useCart();
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+  // 상품 담고 "장바구니 바로가기"로 진입해도 목록 갱신되도록 페이지 마운트 시 재조회
+  useEffect(() => {
+    refetchCart();
+  }, [refetchCart]);
 
   const selectedItems = items.filter((it) => selectedIds.has(it.id));
   const productAmount = selectedItems.reduce(
