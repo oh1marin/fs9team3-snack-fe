@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { fetchOrders, cancelOrder, type Order } from "@/lib/api/orders";
 import { toast } from "react-toastify";
 
@@ -176,8 +177,24 @@ export default function OrdersPage() {
             <Link
               key={`${row.id}-2`}
               href={`/orders/${row.id}`}
-              className="flex h-20 items-center border-b border-line-gray text-left text-base hover:bg-gray-50"
+              className="flex h-20 items-center gap-3 border-b border-line-gray pl-3 text-left text-base hover:bg-gray-50"
             >
+              {row.image ? (
+                <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-gray-100">
+                  <Image
+                    src={row.image}
+                    alt={row.productLabel}
+                    fill
+                    className="object-cover"
+                    sizes="56px"
+                    unoptimized
+                  />
+                </div>
+              ) : (
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-xs text-gray-400">
+                  이미지 없음
+                </div>
+              )}
               <div>
                 <p className="font-medium text-black-400">
                   {row.otherCount > 0

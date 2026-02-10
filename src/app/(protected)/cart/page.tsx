@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { useCart, type CartItem } from "@/contexts/CartContext";
 import OrderSummary from "@/components/OrderSummary";
 import { toast } from "react-toastify";
-import { createOrder } from "@/lib/api/orders";
+import { createOrder, type CreateOrderItem } from "@/lib/api/orders";
 
 const PURCHASE_COMPLETE_KEY = "snack_purchase_complete";
 
@@ -91,14 +91,16 @@ export default function CartPage() {
       message: "",
     };
     try {
+      const orderItems: CreateOrderItem[] = [{
+        id: item.id,
+        itemId: item.itemId,
+        title: item.title || "상품",
+        quantity: item.quantity,
+        price: item.price,
+        image: item.image,
+      }];
       await createOrder({
-        items: [{
-          id: item.id,
-          title: item.title || "상품",
-          quantity: item.quantity,
-          price: item.price,
-          image: item.image,
-        }],
+        items: orderItems,
         totalQuantity,
         totalAmount,
       });
@@ -133,14 +135,16 @@ export default function CartPage() {
       message: "",
     };
     try {
+      const orderItems: CreateOrderItem[] = selectedItems.map((it) => ({
+        id: it.id,
+        itemId: it.itemId,
+        title: it.title || "상품",
+        quantity: it.quantity,
+        price: it.price,
+        image: it.image,
+      }));
       await createOrder({
-        items: selectedItems.map((it) => ({
-          id: it.id,
-          title: it.title || "상품",
-          quantity: it.quantity,
-          price: it.price,
-          image: it.image,
-        })),
+        items: orderItems,
         totalQuantity,
         totalAmount,
       });
@@ -252,10 +256,11 @@ export default function CartPage() {
                                   fill
                                   className="object-cover"
                                   sizes="120px"
+                                  unoptimized
                                 />
                               ) : (
                                 <div className="flex h-full w-full items-center justify-center text-xs text-gray-400">
-                                  No Image
+                                  이미지 없음
                                 </div>
                               )}
                             </div>
@@ -336,7 +341,7 @@ export default function CartPage() {
                             <span className="min-w-[3.25rem] text-right text-lg-m text-primary-400">
                               {item.quantity} 개
                             </span>
-                            <div className="flex flex-col items-center justify-center">
+                            <div className="flex flex-col items-center justify-center" style={{ gap: 2 }}>
                               <button
                                 type="button"
                                 onClick={() => handleQuantityChange(item, 1)}
@@ -350,7 +355,7 @@ export default function CartPage() {
                                 type="button"
                                 onClick={() => handleQuantityChange(item, -1)}
                                 className="flex items-center justify-center text-primary-400 transition-colors hover:opacity-80"
-                                style={{ minWidth: "clamp(1.25rem, 1.67vw, 2rem)", minHeight: "clamp(1.25rem, 1.67vw, 2rem)", width: "clamp(1.25rem, 1.67vw, 2rem)", height: "clamp(1.25rem, 1.67vw, 2rem)", marginTop: "-14px" }}
+                                style={{ minWidth: "clamp(1.25rem, 1.67vw, 2rem)", minHeight: "clamp(1.25rem, 1.67vw, 2rem)", width: "clamp(1.25rem, 1.67vw, 2rem)", height: "clamp(1.25rem, 1.67vw, 2rem)" }}
                                 aria-label="수량 감소"
                               >
                                 <Image src="/downsemo.png" alt="수량 감소" width={13} height={13} className="object-contain" />
@@ -486,10 +491,11 @@ export default function CartPage() {
                         fill
                         className="object-cover"
                         sizes="80px"
+                        unoptimized
                       />
                     ) : (
                       <div className="flex h-full w-full items-center justify-center text-xs text-gray-400">
-                        No Image
+                        이미지 없음
                       </div>
                     )}
                   </div>

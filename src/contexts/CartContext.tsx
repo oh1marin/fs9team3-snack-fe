@@ -17,6 +17,8 @@ import {
 
 export interface CartItemSnapshot {
   id: string;
+  /** 상품 ID (주문 시 사용). 없으면 id 사용 */
+  itemId?: string;
   title: string;
   price: number;
   image: string;
@@ -30,9 +32,10 @@ function getTotalCount(items: CartItem[]): number {
   return items.reduce((sum, it) => sum + it.quantity, 0);
 }
 
-function dtoToItem(d: { id: string; title: string; price: number; image: string; quantity: number }): CartItem {
+function dtoToItem(d: { id: string; itemId?: string; title: string; price: number; image: string; quantity: number }): CartItem {
   return {
     id: d.id,
+    itemId: d.itemId,
     title: d.title ?? "",
     price: d.price ?? 0,
     image: d.image ?? "",

@@ -255,7 +255,7 @@ export default function ProductDetailPage() {
                 <span className="min-w-[3.25rem] text-right text-lg-m text-primary-400">
                   {quantity} 개
                 </span>
-                <div className="flex flex-col items-center justify-center" style={{ gap: 10 }}>
+                <div className="flex flex-col items-center justify-center" style={{ gap: 5 }}>
                   <button
                     type="button"
                     onClick={() => setQuantity((q) => q + 1)}
