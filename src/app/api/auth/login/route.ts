@@ -47,7 +47,10 @@ export async function POST(request: NextRequest) {
     return res;
   } catch (e) {
     return NextResponse.json(
-      { message: e instanceof Error ? e.message : "로그인 요청에 실패했습니다." },
+      {
+        success: false,
+        message: e instanceof Error ? e.message : "로그인 요청에 실패했습니다.",
+      },
       { status: 500 }
     );
   }

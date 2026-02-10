@@ -9,11 +9,7 @@ interface JWTPayload {
   [key: string]: any;
 }
 
-/**
- * 로그인/회원가입은 /api/auth/login, /api/auth/signup 으로 요청합니다.
- * 백엔드가 res.cookie 로 Set-Cookie 를 내려주면 API 라우트가 그대로 전달하고,
- * 라우트 가드는 쿠키 존재 여부(checkAuth)만으로 처리합니다.
- */
+/** 로그인/회원가입은 API 라우트로 쿠키 받음. 가드는 checkAuth로 처리 */
 
 // 서버 사이드 전용 함수
 export async function getServerSideToken(type = "accessToken") {
@@ -22,7 +18,7 @@ export async function getServerSideToken(type = "accessToken") {
   return tokenCookie ? tokenCookie.value : null;
 }
 
-/** @deprecated 로그인/회원가입은 API 라우트를 통해 쿠키를 받습니다. refresh 등에서만 사용 가능. */
+/** @deprecated refresh 등에서만 사용 */
 export async function setServerSideTokens(accessToken: string, refreshToken: string) {
   const cookieStore = await cookies();
   const accessTokenData = jwtDecode<JWTPayload>(accessToken);
@@ -50,13 +46,9 @@ export async function setServerSideTokens(accessToken: string, refreshToken: str
 export async function updateAccessToken(accessToken: string) {
   const cookieStore = await cookies();
 
-  // 토큰 디코딩 및 만료 시간 계산
   const accessTokenData = jwtDecode<JWTPayload>(accessToken);
-
   const accessTokenExpiresIn =
     (accessTokenData.exp || 0) - Math.floor(Date.now() / 1000);
-
-  // 액세스 토큰만 갱신
   cookieStore.set("accessToken", accessToken, {
     path: "/",
     maxAge: accessTokenExpiresIn,
@@ -68,17 +60,12 @@ export async function updateAccessToken(accessToken: string) {
 
 export async function clearServerSideTokens() {
   const cookieStore = await cookies();
-
-  // 액세스 토큰 삭제
   cookieStore.delete("accessToken");
-
-  // 리프레시 토큰 삭제
   cookieStore.delete("refreshToken");
-
   return { success: true };
 }
 
-/** @deprecated 클라이언트는 /api/auth/login 을 호출해 쿠키를 받습니다. */
+/** @deprecated 클라이언트는 API 라우트 사용 */
 export async function loginAction(email: string, password: string) {
   try {
     const { user, accessToken, refreshToken, message } = await (
@@ -101,7 +88,7 @@ export async function logoutAction() {
   return { success: true };
 }
 
-/** @deprecated 클라이언트는 /api/auth/signup 을 호출해 쿠키를 받습니다. */
+/** @deprecated 클라이언트는 API 라우트 사용 */
 export async function registerAction(
   nickname: string,
   email: string,
@@ -131,10 +118,7 @@ export async function registerAction(
   }
 }
 
-/**
- * 인증 상태를 확인합니다 (토큰 검사만, 갱신은 하지 않음)
- * @returns {Promise<boolean>} 인증 성공 여부
- */
+/** 인증 여부 확인 (토큰만 검사) */
 export async function checkAuth() {
   try {
     const cookieStore = await cookies();
@@ -147,10 +131,7 @@ export async function checkAuth() {
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
-/**
- * 서버에서 쿠키로 /api/auth/me 호출해 user 반환 (protected 레이아웃용)
- * 에러 시 null 반환 (서버에서 throw 방지)
- */
+/** 서버에서 /api/auth/me로 user 조회, 에러 시 null */
 export async function getServerUser() {
   try {
     const cookieStore = await cookies();
@@ -168,40 +149,21 @@ export async function getServerUser() {
   }
 }
 
-/**
- * 인증 상태를 확인합니다 (accessToken 또는 refreshToken 중 하나라도 있으면 통과)
- * @returns {Promise<boolean>} 인증 성공 여부
- */
+/** accessToken 또는 refreshToken 있으면 통과 */
 export async function checkAuthWithRefresh() {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get("accessToken")?.value;
   const refreshToken = cookieStore.get("refreshToken")?.value;
-
-  // accessToken 또는 refreshToken 중 하나라도 있으면 인증됨
   return !!(accessToken || refreshToken);
 }
 
-/**
- * @deprecated 더 이상 사용하지 않습니다. checkAuth() 또는 checkAuthWithRefresh()를 사용하세요.
- * 인증 상태를 확인하고 필요시 토큰을 갱신합니다
- * @returns {Promise<boolean>} 인증 성공 여부
- */
+/** @deprecated checkAuth 또는 checkAuthWithRefresh 사용 */
 export async function checkAndRefreshAuth() {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get("accessToken")?.value;
   const refreshToken = cookieStore.get("refreshToken")?.value;
-
-  // 1. accessToken이 있으면 인증됨
-  if (accessToken) {
-    return true;
-  }
-
-  // 2. accessToken 없고 refreshToken도 없으면 인증 실패
-  if (!refreshToken) {
-    return false;
-  }
-
-  // 3. refreshToken으로 갱신 시도
+  if (accessToken) return true;
+  if (!refreshToken) return false;
   try {
     const baseURL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
     const response = await fetch(`${baseURL}/api/auth/refresh`, {

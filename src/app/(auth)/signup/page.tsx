@@ -82,7 +82,7 @@ export default function SignupPage() {
       toast.error(
         error instanceof Error
           ? error.message
-          : "회원가입 중 오류가 발생했습니다.",
+          : "회원가입 중 오류가 발생했습니다."
       );
     } finally {
       setIsLoading(false);

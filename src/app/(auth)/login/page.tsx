@@ -55,9 +55,7 @@ export default function LoginPage() {
       router.refresh();
     } catch (error) {
       toast.error(
-        error instanceof Error
-          ? error.message
-          : "로그인 중 오류가 발생했습니다.",
+        error instanceof Error ? error.message : "로그인 중 오류가 발생했습니다."
       );
     } finally {
       setIsLoading(false);

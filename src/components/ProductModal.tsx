@@ -21,9 +21,11 @@ interface ProductModalProps {
   onSuccess?: () => void;
   editMode?: boolean;
   product?: Product;
+  /** 기존 상품명 목록 (FE 중복 검사용) */
+  existingTitles?: string[];
 }
 
-export default function ProductModal({ onClose, onSuccess, editMode = false, product }: ProductModalProps) {
+export default function ProductModal({ onClose, onSuccess, editMode = false, product, existingTitles }: ProductModalProps) {
   const [formData, setFormData] = useState({
     productName: product?.title || "",
     category: product?.category_main || "음료",
@@ -46,6 +48,11 @@ export default function ProductModal({ onClose, onSuccess, editMode = false, pro
       newErrors.productName = "상품명을 입력해주세요.";
     } else if (name.length > 12) {
       newErrors.productName = "12자리를 넘었습니다.";
+    } else if (!editMode && existingTitles?.length) {
+      const isDuplicate = existingTitles.some((t) => t.trim() === name);
+      if (isDuplicate) {
+        newErrors.productName = "이미 등록된 상품명입니다.";
+      }
     }
     const priceNum = Number(formData.price);
     if (formData.price === "" || formData.price === null || formData.price === undefined) {
@@ -134,11 +141,21 @@ export default function ProductModal({ onClose, onSuccess, editMode = false, pro
           return;
         }
         const errorText = await response.text();
-        let detail = "";
+        let errorMessageRaw = "";
+        let errorMessageLower = "";
         try {
           const json = JSON.parse(errorText);
-          if (json?.error) detail = `\n${json.error}`;
+          errorMessageRaw = json?.error || json?.message || "";
+          errorMessageLower = errorMessageRaw.toLowerCase();
         } catch {}
+        const isDuplicateName =
+          response.status === 409 ||
+          /중복|duplicate|이미\s*등록|already\s*exist/i.test(errorMessageLower);
+        if (isDuplicateName && !editMode) {
+          setErrors((prev) => ({ ...prev, productName: "이미 등록된 상품명입니다." }));
+          return;
+        }
+        const detail = errorMessageRaw ? `\n${errorMessageRaw}` : "";
         throw new Error(`상품 ${editMode ? "수정" : "등록"}에 실패했습니다 (${response.status})${detail}`);
       }
       onSuccess?.();
