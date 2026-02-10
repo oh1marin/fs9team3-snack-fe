@@ -262,6 +262,7 @@ export default function CartPage() {
                                   fill
                                   className="object-contain"
                                   sizes="120px"
+                                  unoptimized
                                 />
                               ) : (
                                 <div className="flex h-full w-full items-center justify-center text-xs text-gray-400">
@@ -496,6 +497,7 @@ export default function CartPage() {
                         fill
                         className="object-contain"
                         sizes="80px"
+                        unoptimized
                       />
                     ) : (
                       <div className="flex h-full w-full items-center justify-center text-xs text-gray-400">

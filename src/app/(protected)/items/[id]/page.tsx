@@ -160,6 +160,7 @@ export default function ProductDetailPage() {
                   alt={product.title}
                   fill
                   className="object-contain"
+                  unoptimized
                 />
               </div>
             ) : (
