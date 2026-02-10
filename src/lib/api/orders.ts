@@ -2,6 +2,31 @@ import { fetchJSON, apiClient } from "./apiClient";
 
 export type OrderStatus = "승인 대기" | "구매 반려" | "승인 완료";
 
+const STATUS_MAP: Record<string, OrderStatus> = {
+  pending: "승인 대기",
+  approved: "승인 완료",
+  rejected: "구매 반려",
+  대기: "승인 대기",
+  완료: "승인 완료",
+  반려: "구매 반려",
+};
+
+function normalizeStatus(s: unknown): OrderStatus {
+  const key = String(s ?? "").toLowerCase().trim();
+  return STATUS_MAP[key] ?? (s as OrderStatus) ?? "승인 대기";
+}
+
+/** ISO 날짜/문자열 → "YYYY.MM.DD" 형태로 표시용 */
+export function formatRequestDate(value: string): string {
+  if (!value || !value.trim()) return "—";
+  const d = new Date(value.trim());
+  if (Number.isNaN(d.getTime())) return value;
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}.${m}.${day}`;
+}
+
 export interface Order {
   id: string;
   requestDate: string;
@@ -26,15 +51,22 @@ export interface OrdersListResponse {
 
 /** BE가 보내는 snake_case → FE용 camelCase (목록/상세 공통) */
 function toOrder(o: Record<string, unknown>): Order {
-  const image = String(o.first_item_image ?? o.image ?? o.image_url ?? "").trim();
+  const itemsArr = o.items ?? o.order_items;
+  const firstItem = Array.isArray(itemsArr) && itemsArr.length > 0 ? (itemsArr[0] as Record<string, unknown>) : null;
+  const image = String(
+    o.first_item_image ?? o.image ?? o.image_url
+    ?? firstItem?.image ?? firstItem?.image_url
+    ?? ""
+  ).trim();
+  const rawStatus = o.status ?? o.order_status;
   return {
     id: String(o.id ?? ""),
-    requestDate: String(o.request_date ?? o.requestDate ?? ""),
+    requestDate: String(o.request_date ?? o.requestDate ?? o.created_at ?? o.createdAt ?? ""),
     productLabel: String(o.product_label ?? o.productLabel ?? ""),
     otherCount: Number(o.other_count ?? o.otherCount ?? 0),
     totalQuantity: Number(o.total_quantity ?? o.totalQuantity ?? 0),
     orderAmount: Number(o.order_amount ?? o.orderAmount ?? 0),
-    status: (o.status as Order["status"]) ?? "승인 대기",
+    status: normalizeStatus(rawStatus),
     ...(image && { image }),
   };
 }
@@ -158,17 +190,20 @@ export async function fetchOrderDetail(orderId: string): Promise<OrderDetail | n
     requester: String(d.requester ?? ""),
     approvalDate: String(d.approval_date ?? d.approvalDate ?? ""),
     approver: String(d.approver ?? ""),
-    status: (d.status as OrderDetail["status"]) ?? "승인 대기",
+    status: normalizeStatus(d.status),
     resultMessage: String(d.result_message ?? d.resultMessage ?? ""),
     items: Array.isArray(d.items)
-      ? d.items.map((it: Record<string, unknown>) => ({
-          image: String(it.image ?? it.image_url ?? it.img ?? "").trim(),
+      ? d.items.map((it: Record<string, unknown>) => {
+          const sub = (it.item ?? it.product) as Record<string, unknown> | undefined;
+          return {
+          image: String(it.image ?? it.image_url ?? it.img ?? sub?.image ?? sub?.image_url ?? "").trim(),
           category: String(it.category ?? ""),
           name: String(it.name ?? it.title ?? ""),
           unitPrice: Number(it.unit_price ?? it.unitPrice ?? 0),
           quantity: Number(it.quantity ?? 0),
           totalPrice: Number(it.total_price ?? it.totalPrice ?? 0),
-        }))
+        };
+        })
       : [],
     totalCount: Number(d.total_count ?? d.totalCount ?? 0),
     totalAmount: Number(d.total_amount ?? d.totalAmount ?? 0),

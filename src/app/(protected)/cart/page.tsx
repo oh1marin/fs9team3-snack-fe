@@ -13,8 +13,21 @@ const PURCHASE_COMPLETE_KEY = "snack_purchase_complete";
 
 const DELIVERY_FEE = 3000;
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+
 function formatPrice(n: number) {
   return n.toLocaleString("ko-KR") + "원";
+}
+
+/** 상품 리스트와 동일: 상대 경로면 API 기준 URL로 변환 */
+function getImageSrc(image: string): string {
+  if (!image || !image.trim()) return "";
+  if (image.startsWith("http://") || image.startsWith("https://") || image.startsWith("//")) {
+    return image.trim();
+  }
+  const base = API_URL.replace(/\/$/, "");
+  const path = image.startsWith("/") ? image : `/${image}`;
+  return `${base}${path}`;
 }
 
 export default function CartPage() {
@@ -251,12 +264,11 @@ export default function CartPage() {
                             >
                               {item.image ? (
                                 <Image
-                                  src={item.image}
+                                  src={getImageSrc(item.image)}
                                   alt={item.title}
                                   fill
-                                  className="object-cover"
+                                  className="object-contain"
                                   sizes="120px"
-                                  unoptimized
                                 />
                               ) : (
                                 <div className="flex h-full w-full items-center justify-center text-xs text-gray-400">
@@ -486,12 +498,11 @@ export default function CartPage() {
                   <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-gray-100">
                     {item.image ? (
                       <Image
-                        src={item.image}
+                        src={getImageSrc(item.image)}
                         alt={item.title}
                         fill
-                        className="object-cover"
+                        className="object-contain"
                         sizes="80px"
-                        unoptimized
                       />
                     ) : (
                       <div className="flex h-full w-full items-center justify-center text-xs text-gray-400">
