@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { fetchOrders, cancelOrder, formatRequestDate, type Order } from "@/lib/api/orders";
 import { toast } from "react-toastify";
 
@@ -194,13 +193,14 @@ export default function OrdersPage() {
             >
               <div className="h-14 w-14 shrink-0 min-[1082px]:hidden">
                 {row.image ? (
-                  <div className="relative h-14 w-14 overflow-hidden rounded-lg bg-gray-100">
-                    <Image
+                  <div className="h-14 w-14 overflow-hidden rounded-lg bg-gray-100">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
                       src={getImageSrc(row.image)}
                       alt={row.productLabel}
-                      fill
-                      className="object-contain"
-                      sizes="56px"
+                      className="h-full w-full object-contain"
+                      referrerPolicy="no-referrer"
+                      loading="lazy"
                     />
                   </div>
                 ) : (
