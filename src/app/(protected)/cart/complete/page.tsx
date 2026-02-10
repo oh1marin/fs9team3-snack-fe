@@ -18,7 +18,7 @@ function formatPrice(n: number) {
   return n.toLocaleString("ko-KR") + "원";
 }
 
-/** 상품명 기준 기본 요청 메시지 (예: "코카콜라 제로가 인기가 많아요.\n많이 주문하면 좋을 것 같아요!") */
+/** 기본 요청 메시지 생성 */
 function getDefaultMessage(productName: string): string {
   if (!productName?.trim()) return "많이 주문하면 좋을 것 같아요!";
   const name = productName.trim();

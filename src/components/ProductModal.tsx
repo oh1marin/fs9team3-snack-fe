@@ -21,7 +21,7 @@ interface ProductModalProps {
   onSuccess?: () => void;
   editMode?: boolean;
   product?: Product;
-  /** 등록 시 중복 검사용 기존 상품명 목록 (있으면 제출 전에 FE에서 바로 검사) */
+  /** 기존 상품명 목록 (FE 중복 검사용) */
   existingTitles?: string[];
 }
 
@@ -148,7 +148,6 @@ export default function ProductModal({ onClose, onSuccess, editMode = false, pro
           errorMessageRaw = json?.error || json?.message || "";
           errorMessageLower = errorMessageRaw.toLowerCase();
         } catch {}
-        // 상품명 중복 에러: 409 Conflict 또는 메시지에 중복/duplicate 포함
         const isDuplicateName =
           response.status === 409 ||
           /중복|duplicate|이미\s*등록|already\s*exist/i.test(errorMessageLower);

@@ -40,13 +40,6 @@ function dtoToItem(d: { id: string; title: string; price: number; image: string;
   };
 }
 
-/** 테스트용 더미 장바구니 아이템 (API 응답 앞에 붙임) */
-const DUMMY_CART_ITEMS: CartItem[] = [
-  { id: "dummy-cart-1", title: "코카콜라 제로", price: 2000, image: "", quantity: 2 },
-  { id: "dummy-cart-2", title: "포카리스웨트", price: 1500, image: "", quantity: 1 },
-  { id: "dummy-cart-3", title: "칠성사이다", price: 1800, image: "", quantity: 1 },
-];
-
 interface CartContextValue {
   cartCount: number;
   items: CartItem[];
@@ -69,12 +62,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     fetchCart()
       .then((res) => {
         if (!cancelled) {
-          const apiItems = (res.items ?? []).map(dtoToItem);
-          setItems([...DUMMY_CART_ITEMS, ...apiItems]);
+          setItems((res.items ?? []).map(dtoToItem));
         }
       })
       .catch(() => {
-        if (!cancelled) setItems([...DUMMY_CART_ITEMS]);
+        if (!cancelled) setItems([]);
       })
       .finally(() => {
         if (!cancelled) setCartLoaded(true);
@@ -82,10 +74,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, []);
-
-  const mergeWithDummy = useCallback((apiItems: CartItem[]) => {
-    setItems([...DUMMY_CART_ITEMS, ...apiItems]);
   }, []);
 
   const addToCart = useCallback(
@@ -97,16 +85,16 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         price: snapshot?.price,
         image: snapshot?.image,
       });
-      mergeWithDummy((res.items ?? []).map(dtoToItem));
+      setItems((res.items ?? []).map(dtoToItem));
     },
-    [mergeWithDummy]
+    []
   );
 
   const updateQuantity = useCallback(async (itemId: string, quantity: number) => {
     if (quantity < 1) {
       try {
         const res = await removeCartItemApi(itemId);
-        mergeWithDummy((res.items ?? []).map(dtoToItem));
+        setItems((res.items ?? []).map(dtoToItem));
       } catch {
         setItems((prev) => prev.filter((it) => it.id !== itemId));
         throw new Error("삭제에 실패했습니다.");
@@ -115,57 +103,38 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
     try {
       const res = await updateCartItemQuantityApi(itemId, quantity);
-      mergeWithDummy((res.items ?? []).map(dtoToItem));
+      setItems((res.items ?? []).map(dtoToItem));
     } catch {
-      if (itemId.startsWith("dummy-")) {
-        setItems((prev) =>
-          prev.map((it) => (it.id === itemId ? { ...it, quantity } : it))
-        );
-        return;
-      }
       throw new Error("수량 변경에 실패했습니다.");
     }
-  }, [mergeWithDummy]);
+  }, []);
 
   const removeItem = useCallback(async (itemId: string) => {
-    if (itemId.startsWith("dummy-")) {
-      setItems((prev) => prev.filter((it) => it.id !== itemId));
-      return;
-    }
     try {
       const res = await removeCartItemApi(itemId);
-      mergeWithDummy((res.items ?? []).map(dtoToItem));
+      setItems((res.items ?? []).map(dtoToItem));
     } catch {
       setItems((prev) => prev.filter((it) => it.id !== itemId));
       throw new Error("삭제에 실패했습니다.");
     }
-  }, [mergeWithDummy]);
+  }, []);
 
   const removeAll = useCallback(async () => {
     try {
       await clearCartApi();
-      setItems([...DUMMY_CART_ITEMS]);
+      setItems([]);
     } catch {
-      setItems([...DUMMY_CART_ITEMS]);
       throw new Error("장바구니 비우기에 실패했습니다.");
     }
   }, []);
 
   const removeSelected = useCallback(async (itemIds: string[]) => {
     const set = new Set(itemIds);
-    const apiIds = [...set].filter((id) => !id.startsWith("dummy-"));
-    if (apiIds.length === 0) {
-      setItems((prev) => prev.filter((it) => !set.has(it.id)));
-      return;
-    }
+    if (set.size === 0) return;
     try {
-      await Promise.all(apiIds.map((id) => removeCartItemApi(id)));
+      await Promise.all([...set].map((id) => removeCartItemApi(id)));
       const res = await fetchCart();
-      const apiItems = (res.items ?? []).map(dtoToItem);
-      setItems([
-        ...DUMMY_CART_ITEMS.filter((d) => !set.has(d.id)),
-        ...apiItems,
-      ]);
+      setItems((res.items ?? []).map(dtoToItem));
     } catch {
       setItems((prev) => prev.filter((it) => !set.has(it.id)));
       throw new Error("선택 삭제에 실패했습니다.");

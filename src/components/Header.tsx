@@ -70,8 +70,8 @@ export default function Header({ hasToken = false }: { hasToken?: boolean }) {
   return (
     <header className="border-b border-line-gray bg-background-peach">
       <div className="relative mx-auto flex h-[88px] max-w-[1920px] items-center justify-between px-4 sm:px-6">
-        <div className="flex min-w-0 flex-shrink-0 items-center gap-16">
-          <Link href="/" className="flex items-center">
+        <div className="flex min-w-0 flex-shrink-0 items-center gap-10">
+          <Link href="/" className="flex items-center shrink-0">
             <Image
               src="/smallSnacklogo.png"
               alt="Snack"
@@ -81,18 +81,32 @@ export default function Header({ hasToken = false }: { hasToken?: boolean }) {
               className="h-6 w-auto sm:h-8"
             />
           </Link>
-          <Link
-            href="/items"
-            className={`text-sm font-semibold transition-colors min-[376px]:text-xl max-[375px]:absolute max-[375px]:left-1/2 max-[375px]:top-1/2 max-[375px]:-translate-x-1/2 max-[375px]:-translate-y-1/2 ${pathname === "/items" || pathname.startsWith("/items/") ? "text-primary-400" : "text-black-400 hover:text-primary-400"}`}
-          >
-            상품 리스트
-          </Link>
+          <nav className="flex items-center gap-10 text-left">
+            <Link
+              href="/items"
+              className={`text-sm font-semibold transition-colors min-[376px]:text-base ${pathname === "/items" || pathname.startsWith("/items/") ? "text-primary-400" : "text-gray-400 hover:text-primary-400"}`}
+            >
+              상품 리스트
+            </Link>
+            <Link
+              href="/orders"
+              className={`text-sm font-semibold transition-colors min-[376px]:text-base ${pathname === "/orders" ? "text-primary-400" : "text-gray-400 hover:text-primary-400"}`}
+            >
+              구매 요청 내역
+            </Link>
+            <Link
+              href="/items/register"
+              className={`text-sm font-semibold transition-colors min-[376px]:text-base ${pathname === "/items/register" ? "text-primary-400" : "text-gray-400 hover:text-primary-400"}`}
+            >
+              상품 등록 내역
+            </Link>
+          </nav>
         </div>
 
-        <div className="flex flex-shrink-0 items-center gap-4 sm:gap-6">
+        <div className="flex flex-shrink-0 items-center gap-10">
           <Link
             href="/cart"
-            className={`flex items-center gap-1.5 text-base font-medium transition-colors ${pathname === "/cart" ? "text-primary-400" : "text-gray-400 hover:text-black-400"}`}
+            className={`flex items-center gap-1.5 text-base font-medium transition-colors ${pathname === "/cart" ? "text-primary-400" : "text-gray-400 hover:text-primary-400"}`}
           >
             Cart
             <span
@@ -104,7 +118,7 @@ export default function Header({ hasToken = false }: { hasToken?: boolean }) {
           </Link>
           <Link
             href="/profile"
-            className="text-base font-medium text-gray-400 transition-colors hover:text-black-400"
+            className="text-base font-medium text-gray-400 transition-colors hover:text-primary-400"
           >
             Profile
           </Link>
@@ -118,7 +132,7 @@ export default function Header({ hasToken = false }: { hasToken?: boolean }) {
                 toast.error("로그아웃 중 오류가 발생했습니다.");
               }
             }}
-            className="text-base font-medium text-gray-400 transition-colors hover:text-black-400"
+            className="text-base font-medium text-gray-400 transition-colors hover:text-primary-400"
           >
             Logout
           </button>
