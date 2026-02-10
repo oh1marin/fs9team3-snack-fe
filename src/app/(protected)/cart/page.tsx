@@ -79,8 +79,44 @@ export default function CartPage() {
     }
   };
 
-  const handleInstantRequest = (item: CartItem) => {
-    toast.info("즉시 요청 기능은 준비 중입니다.");
+  const handleInstantRequest = async (item: CartItem) => {
+    const totalQuantity = item.quantity;
+    const productAmount = item.price * item.quantity;
+    const totalAmount = productAmount + DELIVERY_FEE;
+    const payload = {
+      firstProductTitle: item.title || "상품",
+      firstProductImage: item.image || "",
+      totalQuantity,
+      totalAmount,
+      message: "",
+    };
+    try {
+      await createOrder({
+        items: [{
+          id: item.id,
+          title: item.title || "상품",
+          quantity: item.quantity,
+          price: item.price,
+          image: item.image,
+        }],
+        totalQuantity,
+        totalAmount,
+      });
+      sessionStorage.setItem(PURCHASE_COMPLETE_KEY, JSON.stringify(payload));
+      try {
+        await removeItem(item.id);
+      } catch {
+        // 주문은 완료됐으므로 진행
+      }
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        next.delete(item.id);
+        return next;
+      });
+      router.push("/cart/complete");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "구매 요청에 실패했습니다.");
+    }
   };
 
   const handlePurchaseRequest = async () => {
