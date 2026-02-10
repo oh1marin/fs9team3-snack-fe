@@ -53,8 +53,9 @@ export default function OrdersPage() {
   const handleCancelRequest = async (id: string) => {
     try {
       await cancelOrder(id);
-      setOrders((prev) => prev.filter((o) => o.id !== id));
       toast.success("요청이 취소되었습니다.");
+      // 서버 반영 후 목록을 다시 맞추기(페이지/정렬/총페이지 동기화)
+      loadOrders();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "요청 취소에 실패했습니다.");
     }
@@ -213,7 +214,7 @@ export default function OrdersPage() {
               href={`/orders/${row.id}`}
               className="flex h-20 items-center justify-center border-b border-line-gray text-center text-base text-black-400 hover:bg-gray-50"
             >
-              {formatAmount(row.orderAmount)}
+              {formatAmount(row.orderAmount)}원
             </Link>,
             <Link
               key={`${row.id}-4`}

@@ -65,7 +65,8 @@ function toOrder(o: Record<string, unknown>): Order {
     productLabel: String(o.product_label ?? o.productLabel ?? ""),
     otherCount: Number(o.other_count ?? o.otherCount ?? 0),
     totalQuantity: Number(o.total_quantity ?? o.totalQuantity ?? 0),
-    orderAmount: Number(o.order_amount ?? o.orderAmount ?? 0),
+    // BE 스펙: create 시 total_amount로 보냄 → 목록에서도 total_amount로 내려오는 케이스 대응
+    orderAmount: Number(o.order_amount ?? o.total_amount ?? o.orderAmount ?? o.totalAmount ?? 0),
     status: normalizeStatus(rawStatus),
     ...(image && { image }),
   };
