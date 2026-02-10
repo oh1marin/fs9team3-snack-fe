@@ -21,7 +21,7 @@ export async function fetchCart(): Promise<CartResponse> {
   return { items: raw.items ?? [] };
 }
 
-/** 장바구니에 상품 추가 */
+/** 장바구니에 상품 추가 (BE는 item_id 문자열, snake_case 요구) */
 export async function addCartItem(body: {
   itemId: string;
   quantity: number;
@@ -29,9 +29,16 @@ export async function addCartItem(body: {
   price?: number;
   image?: string;
 }): Promise<CartResponse> {
+  const payload = {
+    item_id: String(body.itemId),
+    quantity: Number(body.quantity) || 1,
+    ...(body.title != null && { title: body.title }),
+    ...(body.price != null && { price: body.price }),
+    ...(body.image != null && { image: body.image }),
+  };
   const res = await apiClient("/api/cart/items", {
     method: "POST",
-    body: JSON.stringify(body),
+    body: JSON.stringify(payload),
   });
   if (!res.ok) {
     const result = await res.json().catch(() => ({}));
@@ -42,12 +49,12 @@ export async function addCartItem(body: {
   return { items: raw.items ?? [] };
 }
 
-/** 장바구니 수량 변경 */
+/** 장바구니 수량 변경 (BE가 quantity만 받으면 그대로, snake_case 요구 시 quantity 유지) */
 export async function updateCartItemQuantity(
   itemId: string,
   quantity: number
 ): Promise<CartResponse> {
-  const res = await apiClient(`/api/cart/items/${itemId}`, {
+  const res = await apiClient(`/api/cart/items/${String(itemId)}`, {
     method: "PATCH",
     body: JSON.stringify({ quantity }),
   });
