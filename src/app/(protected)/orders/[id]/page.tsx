@@ -4,22 +4,10 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { fetchOrderDetail, formatRequestDate, type OrderDetail } from "@/lib/api/orders";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+import { getImageSrc } from "@/lib/utils/image";
 
 function formatPrice(n: number) {
   return n.toLocaleString("ko-KR") + "원";
-}
-
-/** 상품 리스트/장바구니와 동일: 상대 경로면 API 기준 URL로 변환 */
-function getImageSrc(image: string): string {
-  if (!image || !image.trim()) return "";
-  if (image.startsWith("http://") || image.startsWith("https://") || image.startsWith("//")) {
-    return image.trim();
-  }
-  const base = API_URL.replace(/\/$/, "");
-  const path = image.startsWith("/") ? image : `/${image}`;
-  return `${base}${path}`;
 }
 
 export default function OrderDetailPage() {

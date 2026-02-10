@@ -9,6 +9,8 @@ import { useCart } from "@/contexts/CartContext";
 import { useModal } from "@/contexts/ModalContext";
 import { toast } from "react-toastify";
 import { getClientAccessToken } from "@/lib/api/authToken";
+import { getImageSrc } from "@/lib/utils/image";
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
 interface Product {
@@ -143,8 +145,8 @@ export default function ProductDetailPage() {
           <div className="aspect-square w-full max-w-[600px] rounded-xl sm:rounded-2xl bg-white p-6 sm:p-12">
             {product.image ? (
               <div className="relative h-full w-full">
-                <Image 
-                  src={product.image} 
+                <Image
+                  src={getImageSrc(product.image)}
                   alt={product.title}
                   fill
                   className="object-contain"

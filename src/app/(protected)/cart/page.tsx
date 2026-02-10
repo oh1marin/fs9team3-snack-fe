@@ -8,26 +8,14 @@ import { useCart, type CartItem } from "@/contexts/CartContext";
 import OrderSummary from "@/components/OrderSummary";
 import { toast } from "react-toastify";
 import { createOrder, type CreateOrderItem } from "@/lib/api/orders";
+import { getImageSrc } from "@/lib/utils/image";
 
 const PURCHASE_COMPLETE_KEY = "snack_purchase_complete";
 
 const DELIVERY_FEE = 3000;
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
-
 function formatPrice(n: number) {
   return n.toLocaleString("ko-KR") + "원";
-}
-
-/** 상품 리스트와 동일: 상대 경로면 API 기준 URL로 변환 */
-function getImageSrc(image: string): string {
-  if (!image || !image.trim()) return "";
-  if (image.startsWith("http://") || image.startsWith("https://") || image.startsWith("//")) {
-    return image.trim();
-  }
-  const base = API_URL.replace(/\/$/, "");
-  const path = image.startsWith("/") ? image : `/${image}`;
-  return `${base}${path}`;
 }
 
 export default function CartPage() {
