@@ -1,10 +1,11 @@
 "use client";
 
-import { useParams, useSearchParams } from "next/navigation";
+import { useParams, useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import ProductModal from "@/components/ProductModal";
+import AddToCartModal from "@/components/AddToCartModal";
 import { useCart } from "@/contexts/CartContext";
 import { useModal } from "@/contexts/ModalContext";
 import { toast } from "react-toastify";
@@ -31,9 +32,10 @@ interface Product {
 export default function ProductDetailPage() {
   const params = useParams();
   const searchParams = useSearchParams();
+  const router = useRouter();
   const productId = params.id;
   const listReturnUrl = searchParams.get("from") || "/items";
-  
+
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -97,7 +99,15 @@ export default function ProductDetailPage() {
         price: product.price,
         image: product.image,
       });
-      toast.success("장바구니에 담겼습니다!");
+      openModal(
+        <AddToCartModal
+          onClose={closeModal}
+          onGoToCart={() => {
+            closeModal();
+            router.push("/cart");
+          }}
+        />
+      );
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "장바구니 담기에 실패했습니다.");
     }
