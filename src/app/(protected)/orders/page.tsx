@@ -3,13 +3,26 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { fetchOrders, cancelOrder, type Order } from "@/lib/api/orders";
+import { fetchOrders, cancelOrder, formatRequestDate, type Order } from "@/lib/api/orders";
 import { toast } from "react-toastify";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
 type SortOption = "최신순" | "낮은 금액순" | "높은 금액순";
 
 function formatAmount(n: number) {
   return n.toLocaleString("ko-KR");
+}
+
+/** 상품 리스트/장바구니와 동일: 상대 경로면 API 기준 URL로 변환 */
+function getImageSrc(image: string): string {
+  if (!image || !image.trim()) return "";
+  if (image.startsWith("http://") || image.startsWith("https://") || image.startsWith("//")) {
+    return image.trim();
+  }
+  const base = API_URL.replace(/\/$/, "");
+  const path = image.startsWith("/") ? image : `/${image}`;
+  return `${base}${path}`;
 }
 
 /** BE 정렬 파라미터는 snake_case로 전달 */
@@ -172,29 +185,30 @@ export default function OrdersPage() {
               href={`/orders/${row.id}`}
               className="flex h-20 items-center border-b border-line-gray pl-5 text-center text-base text-black-400 hover:bg-gray-50"
             >
-              {row.requestDate}
+              {formatRequestDate(row.requestDate)}
             </Link>,
             <Link
               key={`${row.id}-2`}
               href={`/orders/${row.id}`}
               className="flex h-20 items-center gap-3 border-b border-line-gray pl-3 text-left text-base hover:bg-gray-50"
             >
-              {row.image ? (
-                <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-gray-100">
-                  <Image
-                    src={row.image}
-                    alt={row.productLabel}
-                    fill
-                    className="object-cover"
-                    sizes="56px"
-                    unoptimized
-                  />
-                </div>
-              ) : (
-                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-xs text-gray-400">
-                  이미지 없음
-                </div>
-              )}
+              <div className="h-14 w-14 shrink-0 min-[1082px]:hidden">
+                {row.image ? (
+                  <div className="relative h-14 w-14 overflow-hidden rounded-lg bg-gray-100">
+                    <Image
+                      src={getImageSrc(row.image)}
+                      alt={row.productLabel}
+                      fill
+                      className="object-contain"
+                      sizes="56px"
+                    />
+                  </div>
+                ) : (
+                  <div className="flex h-14 w-14 items-center justify-center rounded-lg bg-gray-100 text-xs text-gray-400">
+                    이미지 없음
+                  </div>
+                )}
+              </div>
               <div>
                 <p className="font-medium text-black-400">
                   {row.otherCount > 0
@@ -245,17 +259,18 @@ export default function OrdersPage() {
         )}
       </div>
 
-      {!loading && orders.length > 0 && (
+      {!loading && orders.length > 0 && totalPages >= 1 && (
       <div className="mt-10 flex items-center justify-center gap-1.5">
         <button
           type="button"
           onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-          className="flex h-11 w-11 items-center justify-center rounded text-base font-normal text-black-400 hover:bg-gray-100 disabled:opacity-50"
+          disabled={currentPage <= 1}
+          className="flex h-11 w-11 items-center justify-center rounded text-base font-normal text-black-400 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
           aria-label="이전 페이지"
         >
           &lt;
         </button>
-        {[1, 2, 3, 4, 5].map((n) => (
+        {Array.from({ length: totalPages }, (_, i) => i + 1).map((n) => (
           <button
             key={n}
             type="button"
@@ -269,18 +284,11 @@ export default function OrdersPage() {
             {n}
           </button>
         ))}
-        <span className="px-1.5 text-base font-normal text-gray-500">...</span>
-        <button
-          type="button"
-          onClick={() => setCurrentPage(totalPages)}
-          className="flex h-11 min-w-[2.75rem] items-center justify-center rounded px-2.5 text-base font-normal text-black-400 hover:bg-gray-100"
-        >
-          {totalPages}
-        </button>
         <button
           type="button"
           onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-          className="flex h-11 w-11 items-center justify-center rounded text-base font-normal text-black-400 hover:bg-gray-100 disabled:opacity-50"
+          disabled={currentPage >= totalPages}
+          className="flex h-11 w-11 items-center justify-center rounded text-base font-normal text-black-400 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
           aria-label="다음 페이지"
         >
           &gt;

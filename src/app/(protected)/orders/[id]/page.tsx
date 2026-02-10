@@ -1,13 +1,26 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
+import Image from "next/image";
 import { useParams } from "next/navigation";
-import { fetchOrderDetail, type OrderDetail } from "@/lib/api/orders";
+import { fetchOrderDetail, formatRequestDate, type OrderDetail } from "@/lib/api/orders";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
 function formatPrice(n: number) {
   return n.toLocaleString("ko-KR") + "원";
+}
+
+/** 상품 리스트/장바구니와 동일: 상대 경로면 API 기준 URL로 변환 */
+function getImageSrc(image: string): string {
+  if (!image || !image.trim()) return "";
+  if (image.startsWith("http://") || image.startsWith("https://") || image.startsWith("//")) {
+    return image.trim();
+  }
+  const base = API_URL.replace(/\/$/, "");
+  const path = image.startsWith("/") ? image : `/${image}`;
+  return `${base}${path}`;
 }
 
 export default function OrderDetailPage() {
@@ -86,12 +99,11 @@ export default function OrderDetailPage() {
                   <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-gray-100">
                     {item.image ? (
                       <Image
-                        src={item.image}
+                        src={getImageSrc(item.image)}
                         alt={item.name}
                         fill
-                        className="object-cover"
+                        className="object-contain"
                         sizes="64px"
-                        unoptimized
                       />
                     ) : (
                       <div className="flex h-full w-full items-center justify-center text-xs text-gray-400">
@@ -170,7 +182,7 @@ export default function OrderDetailPage() {
             <h3 className="border-b border-line-gray pb-3 text-base font-semibold text-black-400">
               요청 정보
             </h3>
-            <p className="mt-4 text-base text-black-400">{data.requestDate}</p>
+            <p className="mt-4 text-base text-black-400">{formatRequestDate(data.requestDate)}</p>
             <div className="mt-4">
               <label className="block text-sm font-medium text-gray-600">
                 요청인
@@ -199,7 +211,7 @@ export default function OrderDetailPage() {
             <h3 className="border-b border-line-gray pb-3 text-base font-semibold text-black-400">
               승인 정보
             </h3>
-            <p className="mt-4 text-base text-black-400">{data.approvalDate}</p>
+            <p className="mt-4 text-base text-black-400">{formatRequestDate(data.approvalDate)}</p>
             <div className="mt-4">
               <label className="block text-sm font-medium text-gray-600">
                 담당자

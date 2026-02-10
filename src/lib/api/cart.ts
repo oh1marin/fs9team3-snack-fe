@@ -14,16 +14,23 @@ export interface CartResponse {
   items: CartItemDto[];
 }
 
-/** BE 응답 한 줄을 id/title/price/image/quantity(camelCase)로 통일 */
+/** BE 응답 한 줄을 id/title/price/image/quantity(camelCase)로 통일. item 객체로 넘어와도 처리 */
 function toCartItemDto(d: Record<string, unknown>): CartItemDto {
+  const itemObj = (d.item ?? d.product) as Record<string, unknown> | null | undefined;
   const id = String(d.id ?? "");
-  const itemId = String(d.item_id ?? d.id ?? "");
-  const image = String(d.image ?? d.image_url ?? d.img ?? d.picture ?? "").trim();
+  const itemId = String(d.item_id ?? d.id ?? itemObj?.id ?? "").trim();
+  const image = String(
+    d.image ?? d.image_url ?? d.img ?? d.picture
+    ?? itemObj?.image ?? itemObj?.image_url
+    ?? ""
+  ).trim();
+  const title = String(d.title ?? itemObj?.title ?? "").trim();
+  const price = Number(d.price ?? d.unit_price ?? d.total_price ?? itemObj?.price ?? 0);
   return {
     id: id || itemId,
     itemId: itemId || id,
-    title: String(d.title ?? ""),
-    price: Number(d.price ?? d.unit_price ?? d.total_price ?? 0),
+    title: title || "상품",
+    price,
     image,
     quantity: Number(d.quantity ?? 1),
   };
