@@ -10,6 +10,8 @@ export interface Order {
   totalQuantity: number;
   orderAmount: number;
   status: OrderStatus;
+  /** 목록에서 썸네일로 쓸 대표 이미지 (BE가 first_item_image 등으로 보내면 표시) */
+  image?: string;
 }
 
 export interface OrdersListResponse {
@@ -24,6 +26,7 @@ export interface OrdersListResponse {
 
 /** BE가 보내는 snake_case → FE용 camelCase (목록/상세 공통) */
 function toOrder(o: Record<string, unknown>): Order {
+  const image = String(o.first_item_image ?? o.image ?? o.image_url ?? "").trim();
   return {
     id: String(o.id ?? ""),
     requestDate: String(o.request_date ?? o.requestDate ?? ""),
@@ -32,6 +35,7 @@ function toOrder(o: Record<string, unknown>): Order {
     totalQuantity: Number(o.total_quantity ?? o.totalQuantity ?? 0),
     orderAmount: Number(o.order_amount ?? o.orderAmount ?? 0),
     status: (o.status as Order["status"]) ?? "승인 대기",
+    ...(image && { image }),
   };
 }
 
@@ -64,16 +68,26 @@ export async function fetchOrders(params?: {
   };
 }
 
+/** 구매 요청 시 FE가 넘기는 상품 한 줄 (itemId 있으면 주문 시 item_id로 전송) */
+export interface CreateOrderItem {
+  id: string;
+  itemId?: string;
+  title: string;
+  quantity: number;
+  price: number;
+  image?: string;
+}
+
 /** 구매 요청 생성 (BE는 snake_case 요구 → item_id, total_quantity, total_amount 등) */
 export async function createOrder(body: {
-  items: Array<{ id: string; title: string; quantity: number; price: number; image?: string }>;
+  items: CreateOrderItem[];
   totalQuantity: number;
   totalAmount: number;
   message?: string;
 }): Promise<Order> {
   const payload = {
     items: body.items.map((it) => ({
-      item_id: String(it.id),
+      item_id: String(it.itemId ?? it.id),
       title: it.title,
       quantity: Number(it.quantity),
       price: Number(it.price),
@@ -148,7 +162,7 @@ export async function fetchOrderDetail(orderId: string): Promise<OrderDetail | n
     resultMessage: String(d.result_message ?? d.resultMessage ?? ""),
     items: Array.isArray(d.items)
       ? d.items.map((it: Record<string, unknown>) => ({
-          image: String(it.image ?? ""),
+          image: String(it.image ?? it.image_url ?? it.img ?? "").trim(),
           category: String(it.category ?? ""),
           name: String(it.name ?? it.title ?? ""),
           unitPrice: Number(it.unit_price ?? it.unitPrice ?? 0),

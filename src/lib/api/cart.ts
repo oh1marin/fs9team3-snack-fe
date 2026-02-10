@@ -2,6 +2,8 @@ import { fetchJSON, apiClient } from "./apiClient";
 
 export interface CartItemDto {
   id: string;
+  /** 상품 ID (주문 시 item_id로 전송). BE가 item_id 주면 여기 들어감 */
+  itemId?: string;
   title: string;
   price: number;
   image: string;
@@ -14,11 +16,15 @@ export interface CartResponse {
 
 /** BE 응답 한 줄을 id/title/price/image/quantity(camelCase)로 통일 */
 function toCartItemDto(d: Record<string, unknown>): CartItemDto {
+  const id = String(d.id ?? "");
+  const itemId = String(d.item_id ?? d.id ?? "");
+  const image = String(d.image ?? d.image_url ?? d.img ?? d.picture ?? "").trim();
   return {
-    id: String(d.id ?? d.item_id ?? ""),
+    id: id || itemId,
+    itemId: itemId || id,
     title: String(d.title ?? ""),
     price: Number(d.price ?? d.unit_price ?? d.total_price ?? 0),
-    image: String(d.image ?? ""),
+    image,
     quantity: Number(d.quantity ?? 1),
   };
 }
