@@ -40,11 +40,30 @@
 
 ---
 
-## 3. BE에서 검증할 것
+## 3. GET /api/cart (장바구니 목록 – 여기 안 맞으면 장바구니 페이지에 안 보임)
+
+FE는 **items** 배열을 기대합니다. 키는 **camelCase든 snake_case든** FE에서 정규화합니다.
+
+- **응답 예시 (둘 다 가능)**
+  ```json
+  { "items": [ { "id": "cart-row-uuid", "item_id": "상품-uuid", "title": "상품명", "price": 2000, "image": "url", "quantity": 2 } ] }
+  ```
+  또는
+  ```json
+  { "items": [ { "item_id": "상품-uuid", "title": "상품명", "price": 2000, "image": "url", "quantity": 2 } ] }
+  ```
+- 각 요소에 **id 또는 item_id**, **title**, **price**(또는 unit_price), **image**, **quantity** 있으면 됨.
+- FE는 `id ?? item_id` 로 행 식별, 나머지 키도 snake_case면 매핑해서 장바구니 페이지에 표시함.
+
+---
+
+## 4. BE에서 검증할 것
 
 1. **POST /api/cart/items**
    - body에 `item_id` (snake_case) 있는지
    - `typeof item_id === "string"` 인지
    - `Content-Type: application/json` 인지
-2. **PATCH/DELETE**  
+2. **GET /api/cart**
+   - 응답에 `items` 배열이 있는지, 각 항목에 `id` 또는 `item_id`, `title`, `price`, `image`, `quantity` 있는지
+3. **PATCH/DELETE**  
    - URL의 `:itemId`를 문자열로 파싱해 사용 (숫자로 변환하지 말 것)

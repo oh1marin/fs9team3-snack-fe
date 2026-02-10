@@ -12,13 +12,32 @@ export interface CartResponse {
   items: CartItemDto[];
 }
 
-/** 장바구니 목록 조회 */
-export async function fetchCart(): Promise<CartResponse> {
-  const raw = await fetchJSON<CartResponse | CartItemDto[]>("/api/cart");
+/** BE 응답 한 줄을 id/title/price/image/quantity(camelCase)로 통일 */
+function toCartItemDto(d: Record<string, unknown>): CartItemDto {
+  return {
+    id: String(d.id ?? d.item_id ?? ""),
+    title: String(d.title ?? ""),
+    price: Number(d.price ?? d.unit_price ?? d.total_price ?? 0),
+    image: String(d.image ?? ""),
+    quantity: Number(d.quantity ?? 1),
+  };
+}
+
+function normalizeCartResponse(raw: unknown): CartResponse {
   if (Array.isArray(raw)) {
-    return { items: raw };
+    return { items: raw.map((x) => toCartItemDto((x as Record<string, unknown>) ?? {})) };
   }
-  return { items: raw.items ?? [] };
+  const obj = raw as Record<string, unknown> | null;
+  if (!obj) return { items: [] };
+  const list = obj.items ?? obj.data ?? obj.cart;
+  const arr = Array.isArray(list) ? list : [];
+  return { items: arr.map((x) => toCartItemDto((x as Record<string, unknown>) ?? {})) };
+}
+
+/** 장바구니 목록 조회 (BE snake_case 수용) */
+export async function fetchCart(): Promise<CartResponse> {
+  const raw = await fetchJSON<unknown>("/api/cart");
+  return normalizeCartResponse(raw);
 }
 
 /** 장바구니에 상품 추가 (BE는 item_id 문자열, snake_case 요구) */
@@ -45,8 +64,7 @@ export async function addCartItem(body: {
     throw new Error(result.message || "장바구니 담기에 실패했습니다.");
   }
   const raw = await res.json();
-  if (Array.isArray(raw)) return { items: raw };
-  return { items: raw.items ?? [] };
+  return normalizeCartResponse(raw);
 }
 
 /** 장바구니 수량 변경 (BE가 quantity만 받으면 그대로, snake_case 요구 시 quantity 유지) */
@@ -63,8 +81,7 @@ export async function updateCartItemQuantity(
     throw new Error(result.message || "수량 변경에 실패했습니다.");
   }
   const raw = await res.json();
-  if (Array.isArray(raw)) return { items: raw };
-  return { items: raw.items ?? [] };
+  return normalizeCartResponse(raw);
 }
 
 /** 장바구니 상품 삭제 */
@@ -78,8 +95,7 @@ export async function removeCartItem(itemId: string): Promise<CartResponse> {
   }
   if (res.status === 204) return { items: [] };
   const raw = await res.json();
-  if (Array.isArray(raw)) return { items: raw };
-  return { items: raw.items ?? [] };
+  return normalizeCartResponse(raw);
 }
 
 /** 장바구니 비우기 */
