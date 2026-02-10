@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { useParams } from "next/navigation";
 import { fetchOrderDetail, formatRequestDate, type OrderDetail } from "@/lib/api/orders";
 
@@ -98,12 +97,13 @@ export default function OrderDetailPage() {
                 <div className="flex min-w-0 flex-1 items-center gap-4">
                   <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-gray-100">
                     {item.image ? (
-                      <Image
+                      /* eslint-disable-next-line @next/next/no-img-element */
+                      <img
                         src={getImageSrc(item.image)}
                         alt={item.name}
-                        fill
-                        className="object-contain"
-                        sizes="64px"
+                        className="h-full w-full object-contain"
+                        referrerPolicy="no-referrer"
+                        loading="lazy"
                       />
                     ) : (
                       <div className="flex h-full w-full items-center justify-center text-xs text-gray-400">
