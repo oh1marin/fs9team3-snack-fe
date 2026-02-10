@@ -47,6 +47,7 @@ interface CartContextValue {
   cartCount: number;
   items: CartItem[];
   cartLoaded: boolean;
+  refetchCart: () => Promise<void>;
   addToCart: (itemId: string, quantity?: number, snapshot?: CartItemSnapshot) => void | Promise<void>;
   updateQuantity: (itemId: string, quantity: number) => void | Promise<void>;
   removeItem: (itemId: string) => void | Promise<void>;
@@ -59,6 +60,11 @@ const CartContext = createContext<CartContextValue | null>(null);
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [cartLoaded, setCartLoaded] = useState(false);
+
+  const refetchCart = useCallback(async () => {
+    const res = await fetchCart();
+    setItems((res.items ?? []).map(dtoToItem));
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -152,6 +158,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         cartCount,
         items,
         cartLoaded,
+        refetchCart,
         addToCart,
         updateQuantity,
         removeItem,

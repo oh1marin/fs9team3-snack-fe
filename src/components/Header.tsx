@@ -66,7 +66,9 @@ export default function Header({ hasToken = false }: { hasToken?: boolean }) {
     );
   }
 
-  // 로그인 시 헤더
+  const isAdmin = user?.is_admin === "Y" || (user as { isAdmin?: string })?.isAdmin === "Y";
+
+  // 로그인 시 헤더 (관리자면 링크 더 표시)
   return (
     <header className="border-b border-line-gray bg-background-peach">
       <div className="relative mx-auto flex h-[88px] max-w-[1920px] items-center justify-between px-4 sm:px-6">
@@ -81,7 +83,7 @@ export default function Header({ hasToken = false }: { hasToken?: boolean }) {
               className="h-6 w-auto sm:h-8"
             />
           </Link>
-          <nav className="flex items-center gap-10 text-left">
+          <nav className="flex flex-wrap items-center gap-6 text-left sm:gap-10">
             <Link
               href="/items"
               className={`text-sm font-semibold transition-colors min-[376px]:text-base ${pathname === "/items" || pathname.startsWith("/items/") ? "text-primary-400" : "text-gray-400 hover:text-primary-400"}`}
@@ -94,12 +96,28 @@ export default function Header({ hasToken = false }: { hasToken?: boolean }) {
             >
               구매 요청 내역
             </Link>
-            <Link
-              href="/items/register"
-              className={`text-sm font-semibold transition-colors min-[376px]:text-base ${pathname === "/items/register" ? "text-primary-400" : "text-gray-400 hover:text-primary-400"}`}
-            >
-              상품 등록 내역
-            </Link>
+            {isAdmin && (
+              <>
+                <Link
+                  href="/admin/orders"
+                  className={`text-sm font-semibold transition-colors min-[376px]:text-base ${pathname === "/admin/orders" ? "text-primary-400" : "text-gray-400 hover:text-primary-400"}`}
+                >
+                  구매 요청 관리
+                </Link>
+                <Link
+                  href="/admin/purchase-history"
+                  className={`text-sm font-semibold transition-colors min-[376px]:text-base ${pathname === "/admin/purchase-history" ? "text-primary-400" : "text-gray-400 hover:text-primary-400"}`}
+                >
+                  구매 내역 확인
+                </Link>
+                <Link
+                  href="/items/register"
+                  className={`text-sm font-semibold transition-colors min-[376px]:text-base ${pathname === "/items/register" ? "text-primary-400" : "text-gray-400 hover:text-primary-400"}`}
+                >
+                  상품 등록 내역
+                </Link>
+              </>
+            )}
           </nav>
         </div>
 
