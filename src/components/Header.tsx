@@ -66,7 +66,12 @@ export default function Header({ hasToken = false }: { hasToken?: boolean }) {
     );
   }
 
-  const isAdmin = user?.is_admin === "Y" || (user as { isAdmin?: string })?.isAdmin === "Y";
+  const rawAdmin = user?.is_admin ?? (user as { isAdmin?: string | boolean })?.isAdmin;
+  const isAdmin =
+    rawAdmin === "Y" ||
+    rawAdmin === "y" ||
+    rawAdmin === true ||
+    String(rawAdmin ?? "").toLowerCase() === "true";
 
   // 로그인 시 헤더 (관리자면 링크 더 표시)
   return (

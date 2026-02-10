@@ -258,6 +258,7 @@ export default function ItemsPage() {
                       alt={item.title}
                       fill
                       className="object-contain"
+                      unoptimized
                     />
                   ) : (
                     <div className="flex h-full items-center justify-center text-md-m text-gray-400">
