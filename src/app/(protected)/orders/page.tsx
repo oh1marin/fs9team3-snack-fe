@@ -4,24 +4,12 @@ import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { fetchOrders, cancelOrder, formatRequestDate, type Order } from "@/lib/api/orders";
 import { toast } from "react-toastify";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+import { getImageSrc } from "@/lib/utils/image";
 
 type SortOption = "최신순" | "낮은 금액순" | "높은 금액순";
 
 function formatAmount(n: number) {
   return n.toLocaleString("ko-KR");
-}
-
-/** 상품 리스트/장바구니와 동일: 상대 경로면 API 기준 URL로 변환 */
-function getImageSrc(image: string): string {
-  if (!image || !image.trim()) return "";
-  if (image.startsWith("http://") || image.startsWith("https://") || image.startsWith("//")) {
-    return image.trim();
-  }
-  const base = API_URL.replace(/\/$/, "");
-  const path = image.startsWith("/") ? image : `/${image}`;
-  return `${base}${path}`;
 }
 
 /** BE 정렬 파라미터는 snake_case로 전달 */
