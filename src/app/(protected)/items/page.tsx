@@ -151,6 +151,7 @@ export default function ItemsPage() {
       <ProductModal 
         onClose={closeModal} 
         onSuccess={() => fetchItems(true)} 
+        existingTitles={items.map((i) => i.title)}
       />
     );
   };
