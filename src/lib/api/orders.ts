@@ -64,20 +64,32 @@ export async function fetchOrders(params?: {
   };
 }
 
-/** 구매 요청 생성 (장바구니에서 요청) */
+/** 구매 요청 생성 (BE는 snake_case 요구 → item_id, total_quantity, total_amount 등) */
 export async function createOrder(body: {
   items: Array<{ id: string; title: string; quantity: number; price: number; image?: string }>;
   totalQuantity: number;
   totalAmount: number;
   message?: string;
 }): Promise<Order> {
+  const payload = {
+    items: body.items.map((it) => ({
+      item_id: String(it.id),
+      title: it.title,
+      quantity: Number(it.quantity),
+      price: Number(it.price),
+      ...(it.image != null && { image: it.image }),
+    })),
+    total_quantity: Number(body.totalQuantity),
+    total_amount: Number(body.totalAmount),
+    ...(body.message != null && body.message !== "" && { request_message: body.message }),
+  };
   const response = await apiClient("/api/orders", {
     method: "POST",
-    body: JSON.stringify(body),
+    body: JSON.stringify(payload),
   });
   if (!response.ok) {
     const result = await response.json().catch(() => ({}));
-    throw new Error(result.message || "구매 요청에 실패했습니다.");
+    throw new Error(result.message || result.error || "구매 요청에 실패했습니다.");
   }
   const res = await response.json();
   const o = res?.data ?? res;
