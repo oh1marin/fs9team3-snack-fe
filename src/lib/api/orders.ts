@@ -37,6 +37,8 @@ export interface Order {
   status: OrderStatus;
   /** 목록에서 썸네일로 쓸 대표 이미지 (BE가 first_item_image 등으로 보내면 표시) */
   image?: string;
+  /** 목록 첫 품목의 카테고리 (BE가 items[0].category 등으로 보내면 표시) */
+  firstItemCategory?: string;
 }
 
 export interface OrdersListResponse {
@@ -59,16 +61,19 @@ function toOrder(o: Record<string, unknown>): Order {
     ?? ""
   ).trim();
   const rawStatus = o.status ?? o.order_status;
+  const firstItemCategory = firstItem
+    ? String(firstItem.category ?? firstItem.category_sub ?? "").trim()
+    : "";
   return {
     id: String(o.id ?? ""),
     requestDate: String(o.request_date ?? o.requestDate ?? o.created_at ?? o.createdAt ?? ""),
     productLabel: String(o.product_label ?? o.productLabel ?? ""),
     otherCount: Number(o.other_count ?? o.otherCount ?? 0),
     totalQuantity: Number(o.total_quantity ?? o.totalQuantity ?? 0),
-    // BE 스펙: create 시 total_amount로 보냄 → 목록에서도 total_amount로 내려오는 케이스 대응
     orderAmount: Number(o.order_amount ?? o.total_amount ?? o.orderAmount ?? o.totalAmount ?? 0),
     status: normalizeStatus(rawStatus),
     ...(image && { image }),
+    ...(firstItemCategory && { firstItemCategory }),
   };
 }
 
@@ -206,7 +211,7 @@ export async function fetchOrderDetail(orderId: string): Promise<OrderDetail | n
         };
         })
       : [],
-    totalCount: Number(d.total_count ?? d.totalCount ?? 0),
+    totalCount: Number(d.total_count ?? d.totalCount ?? 0) || (Array.isArray(d.items) ? d.items.length : 0),
     totalAmount: Number(d.total_amount ?? d.totalAmount ?? 0),
   };
 }
