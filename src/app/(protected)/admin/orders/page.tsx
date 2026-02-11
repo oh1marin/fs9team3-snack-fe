@@ -269,14 +269,14 @@ export default function AdminOrdersPage() {
                       e.stopPropagation();
                       handleApprove(row.id);
                     }}
-                    className="flex shrink-0 items-center justify-center rounded-lg font-medium text-black-400 transition-colors hover:opacity-90"
+                    className="flex shrink-0 items-center justify-center font-medium text-white transition-colors hover:opacity-90"
                     style={{
                       width: 94,
                       height: 44,
                       padding: "8px 16px",
                       gap: 10,
-                      background: "var(--Background-Background-400, #FBF8F4)",
-                      border: "1px solid var(--Line-Line-200, #E6E6E6)",
+                      borderRadius: 8,
+                      background: "var(--Primary-orange-400, #F97B22)",
                     }}
                   >
                     승인
