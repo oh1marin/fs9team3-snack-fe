@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useCart } from "@/contexts/CartContext";
 
 const PURCHASE_COMPLETE_KEY = "snack_purchase_complete";
 
@@ -31,6 +32,7 @@ function getDefaultMessage(productName: string): string {
 
 export default function CartCompletePage() {
   const [data, setData] = useState<PurchaseCompleteData | null>(null);
+  const { items: cartItems, refetchCart } = useCart();
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -45,6 +47,11 @@ export default function CartCompletePage() {
       setData(null);
     }
   }, []);
+
+  // 구매요청 완료 페이지에서 장바구니 남은 개수 확인 → "장바구니로 돌아가기" 노출 여부
+  useEffect(() => {
+    refetchCart();
+  }, [refetchCart]);
 
   if (data === null) {
     return (
@@ -171,12 +178,14 @@ export default function CartCompletePage() {
         </section>
 
         <div className="flex flex-nowrap items-center justify-center gap-4 sm:gap-6">
-          <Link
-            href="/cart"
-            className="flex h-16 w-[310px] shrink-0 items-center justify-center rounded-xl bg-[#FDF0DF] text-lg font-semibold text-black-400 transition-colors hover:bg-primary-200/50"
-          >
-            장바구니로 돌아가기
-          </Link>
+          {cartItems.length > 0 && (
+            <Link
+              href="/cart"
+              className="flex h-16 w-[310px] shrink-0 items-center justify-center rounded-xl bg-[#FDF0DF] text-lg font-semibold text-black-400 transition-colors hover:bg-primary-200/50"
+            >
+              장바구니로 돌아가기
+            </Link>
+          )}
           <Link
             href="/orders"
             className="flex h-16 w-[310px] shrink-0 items-center justify-center rounded-xl bg-primary-400 text-lg font-semibold text-white transition-colors hover:bg-primary-300"
