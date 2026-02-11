@@ -12,6 +12,11 @@ function formatAmount(n: number) {
   return n.toLocaleString("ko-KR");
 }
 
+/** "코카콜라 제로 외 1건" → "코카콜라 제로" */
+function firstProductName(productLabel: string): string {
+  return productLabel.replace(/\s*외\s*\d+\s*건\s*$/i, "").trim() || productLabel;
+}
+
 const SORT_MAP: Record<SortOption, string> = {
   최신순: "request_date:desc",
   "낮은 금액순": "order_amount:asc",
@@ -206,22 +211,26 @@ export default function AdminOrdersPage() {
                 )}
               </div>
               <div>
+                {row.firstItemCategory ? (
+                  <p className="text-sm text-gray-500">{row.firstItemCategory}</p>
+                ) : null}
                 <p className="font-medium text-black-400">
-                  {row.otherCount > 0
-                    ? `${row.productLabel} 외 ${row.otherCount}건`
-                    : row.productLabel}
+                  상품이름: {firstProductName(row.productLabel)} 및 {row.totalQuantity}개
                 </p>
-                <p className="mt-1 text-gray-500">
-                  총 수량: {row.totalQuantity}개
+                <p className="mt-1 text-sm text-gray-500">
+                  상품 갯수: {row.totalQuantity}개
                 </p>
               </div>
             </Link>,
             <Link
               key={`${row.id}-3`}
               href={`/orders/${row.id}`}
-              className="flex h-20 items-center justify-center border-b border-line-gray text-center text-base text-black-400 hover:bg-gray-50"
+              className="flex h-20 flex-col items-center justify-center gap-0.5 border-b border-line-gray text-center text-base text-black-400 hover:bg-gray-50"
             >
-              {formatAmount(row.orderAmount)}원
+              <span className="text-sm text-gray-500">
+                {row.totalQuantity > 0 ? formatAmount(Math.round(row.orderAmount / row.totalQuantity)) : 0}원 (1개당)
+              </span>
+              <span className="font-medium">{formatAmount(row.orderAmount)}원</span>
             </Link>,
             <Link
               key={`${row.id}-4`}
@@ -269,14 +278,14 @@ export default function AdminOrdersPage() {
                       e.stopPropagation();
                       handleApprove(row.id);
                     }}
-                    className="flex shrink-0 items-center justify-center rounded-lg font-medium text-black-400 transition-colors hover:opacity-90"
+                    className="flex shrink-0 items-center justify-center font-medium text-white transition-colors hover:opacity-90"
                     style={{
                       width: 94,
                       height: 44,
                       padding: "8px 16px",
                       gap: 10,
-                      background: "var(--Background-Background-400, #FBF8F4)",
-                      border: "1px solid var(--Line-Line-200, #E6E6E6)",
+                      borderRadius: 8,
+                      background: "var(--Primary-orange-400, #F97B22)",
                     }}
                   >
                     승인

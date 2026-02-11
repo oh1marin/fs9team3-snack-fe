@@ -12,6 +12,11 @@ function formatAmount(n: number) {
   return n.toLocaleString("ko-KR");
 }
 
+/** "코카콜라 제로 외 1건" → "코카콜라 제로" (상품이름만) */
+function firstProductName(productLabel: string): string {
+  return productLabel.replace(/\s*외\s*\d+\s*건\s*$/i, "").trim() || productLabel;
+}
+
 /** BE 정렬 파라미터는 snake_case로 전달 */
 const SORT_MAP: Record<SortOption, string> = {
   최신순: "request_date:desc",
@@ -200,9 +205,7 @@ export default function OrdersPage() {
               </div>
               <div>
                 <p className="font-medium text-black-400">
-                  {row.otherCount > 0
-                    ? `${row.productLabel} 외 ${row.otherCount}건`
-                    : row.productLabel}
+                  상품이름: {firstProductName(row.productLabel)} 및 {row.totalQuantity}개
                 </p>
                 <p className="mt-1 text-gray-500">
                   총 수량: {row.totalQuantity}개

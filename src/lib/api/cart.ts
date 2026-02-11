@@ -14,7 +14,7 @@ export interface CartResponse {
   items: CartItemDto[];
 }
 
-/** BE 응답 한 줄을 id/title/price/image/quantity(camelCase)로 통일. item 객체로 넘어와도 처리 */
+/** BE 응답 한 줄을 id/title/price/image/quantity(camelCase)로 통일. price는 반드시 단가(unit). total_price만 오면 단가 = total_price/quantity */
 function toCartItemDto(d: Record<string, unknown>): CartItemDto {
   const itemObj = (d.item ?? d.product) as Record<string, unknown> | null | undefined;
   const id = String(d.id ?? "");
@@ -25,14 +25,22 @@ function toCartItemDto(d: Record<string, unknown>): CartItemDto {
     ?? ""
   ).trim();
   const title = String(d.title ?? itemObj?.title ?? "").trim();
-  const price = Number(d.price ?? d.unit_price ?? d.total_price ?? itemObj?.price ?? 0);
+  const quantity = Number(d.quantity ?? 1) || 1;
+  const totalPrice = Number(d.total_price ?? itemObj?.total_price ?? 0);
+  const unitFromApi = Number(d.price ?? d.unit_price ?? itemObj?.price ?? itemObj?.unit_price ?? 0);
+  const price =
+    unitFromApi > 0
+      ? unitFromApi
+      : totalPrice > 0 && quantity > 0
+        ? Math.round(totalPrice / quantity)
+        : 0;
   return {
     id: id || itemId,
     itemId: itemId || id,
     title: title || "상품",
     price,
     image,
-    quantity: Number(d.quantity ?? 1),
+    quantity,
   };
 }
 
