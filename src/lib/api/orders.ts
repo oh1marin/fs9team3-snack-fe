@@ -18,6 +18,12 @@ function normalizeStatus(s: unknown): OrderStatus {
   return STATUS_MAP[key] ?? (s as OrderStatus) ?? "승인 대기";
 }
 
+/** summary_title 표시용: " 및 N개" → " 외 N건" */
+export function formatSummaryTitle(label: string): string {
+  if (!label || !label.trim()) return label;
+  return label.replace(/ 및 (\d+)개$/, " 외 $1건");
+}
+
 /** ISO 날짜/문자열 → "YYYY.MM.DD" 형태로 표시용 */
 export function formatRequestDate(value: string): string {
   if (!value || !value.trim()) return "—";
@@ -53,10 +59,35 @@ export interface OrdersListResponse {
   };
 }
 
+/** items 배열에서 총 수량 합산 */
+function sumQuantity(items: unknown[]): number {
+  return items.reduce<number>((sum, it) => {
+    const r = it as Record<string, unknown>;
+    return sum + (Number(r?.quantity ?? 0) || 0);
+  }, 0);
+}
+
+/**
+ * items 배열에서 summary_title 규칙으로 대표 상품명 생성
+ * - 0개: ""
+ * - 1종류: 상품명만 (예: "코카콜라 제로")
+ * - 2종류 이상: "첫상품명 및 N개" (N = 품목 종류 수 - 1, 예: "코카콜라 제로 및 1개")
+ */
+function buildSummaryFromItems(items: unknown[]): string {
+  if (!Array.isArray(items) || items.length === 0) return "";
+  const first = items[0] as Record<string, unknown>;
+  const sub = (first?.item ?? first?.product) as Record<string, unknown> | undefined;
+  const title = String(first?.title ?? first?.name ?? sub?.title ?? sub?.name ?? "").trim();
+  if (!title) return "";
+  if (items.length === 1) return title;
+  return `${title} 및 ${items.length - 1}개`;
+}
+
 /** BE가 보내는 snake_case → FE용 camelCase (목록/상세 공통) */
 function toOrder(o: Record<string, unknown>): Order {
   const itemsArr = o.items ?? o.order_items;
-  const firstItem = Array.isArray(itemsArr) && itemsArr.length > 0 ? (itemsArr[0] as Record<string, unknown>) : null;
+  const itemsList = Array.isArray(itemsArr) ? itemsArr : [];
+  const firstItem = itemsList.length > 0 ? (itemsList[0] as Record<string, unknown>) : null;
   const image = String(
     o.first_item_image ?? o.image ?? o.image_url
     ?? firstItem?.image ?? firstItem?.image_url
@@ -66,12 +97,18 @@ function toOrder(o: Record<string, unknown>): Order {
   const firstItemCategory = firstItem
     ? String(firstItem.category ?? firstItem.category_sub ?? "").trim()
     : "";
+  const totalQuantityFromItems = sumQuantity(itemsList);
+  const totalQuantity = Number(o.total_quantity ?? o.totalQuantity ?? 0) || totalQuantityFromItems;
+  const productLabelRaw = String(
+    o.summary_title ?? o.summaryTitle ?? o.product_label ?? o.productLabel ?? o.product_summary ?? ""
+  ).trim();
+  const productLabel = productLabelRaw || buildSummaryFromItems(itemsList);
   return {
     id: String(o.id ?? ""),
     requestDate: String(o.request_date ?? o.requestDate ?? o.created_at ?? o.createdAt ?? ""),
-    productLabel: String(o.summary_title ?? o.product_label ?? o.productLabel ?? ""),
+    productLabel,
     otherCount: Number(o.other_count ?? o.otherCount ?? 0),
-    totalQuantity: Number(o.total_quantity ?? o.totalQuantity ?? 0),
+    totalQuantity,
     orderAmount: Number(o.order_amount ?? o.total_amount ?? o.orderAmount ?? o.totalAmount ?? 0),
     status: normalizeStatus(rawStatus),
     ...(image && { image }),
@@ -90,13 +127,13 @@ export async function fetchOrders(params?: {
   if (params?.limit != null) search.set("limit", String(params.limit));
   if (params?.sort) search.set("sort", params.sort);
   const q = search.toString();
-  const raw = await fetchJSON<{ data?: unknown[]; pagination?: Record<string, unknown> } | unknown[]>(
+  const raw = await fetchJSON<{ data?: unknown[]; orders?: unknown[]; pagination?: Record<string, unknown> } | unknown[]>(
     `/api/orders${q ? `?${q}` : ""}`
   );
-  const arr = Array.isArray(raw) ? raw : raw?.data ?? [];
-  const pag = Array.isArray(raw) ? undefined : raw?.pagination;
+  const arrSafe = getOrdersArray(raw);
+  const pag = Array.isArray(raw) ? undefined : raw && typeof raw === "object" ? (raw as Record<string, unknown>).pagination as Record<string, unknown> | undefined : undefined;
   return {
-    data: arr.map((item) => toOrder((item as Record<string, unknown>) ?? {})),
+    data: arrSafe.map((item) => toOrder((item as Record<string, unknown>) ?? {})),
     pagination: pag
       ? {
           page: Number(pag.page ?? 1),
@@ -106,6 +143,20 @@ export async function fetchOrders(params?: {
         }
       : undefined,
   };
+}
+
+/** 응답에서 주문 배열 추출 (data / orders / result / list 또는 중첩 data.orders 등) */
+function getOrdersArray(raw: unknown): unknown[] {
+  if (Array.isArray(raw)) return raw;
+  if (!raw || typeof raw !== "object") return [];
+  const o = raw as Record<string, unknown>;
+  const data = o.data ?? o.orders ?? o.result ?? o.list;
+  if (Array.isArray(data)) return data;
+  if (data && typeof data === "object" && !Array.isArray(data)) {
+    const inner = (data as Record<string, unknown>).orders ?? (data as Record<string, unknown>).data;
+    if (Array.isArray(inner)) return inner;
+  }
+  return [];
 }
 
 /** 관리자: 구매 요청 목록 (GET /api/admin/orders, 응답 형식 동일) */
@@ -119,13 +170,13 @@ export async function fetchAdminOrders(params?: {
   if (params?.limit != null) search.set("limit", String(params.limit));
   if (params?.sort) search.set("sort", params.sort);
   const q = search.toString();
-  const raw = await fetchJSON<{ data?: unknown[]; pagination?: Record<string, unknown> } | unknown[]>(
+  const raw = await fetchJSON<{ data?: unknown[]; orders?: unknown[]; pagination?: Record<string, unknown> } | unknown[]>(
     `/api/admin/orders${q ? `?${q}` : ""}`
   );
-  const arr = Array.isArray(raw) ? raw : raw?.data ?? [];
-  const pag = Array.isArray(raw) ? undefined : raw?.pagination;
+  const arrSafe = getOrdersArray(raw);
+  const pag = Array.isArray(raw) ? undefined : raw && typeof raw === "object" ? (raw as Record<string, unknown>).pagination as Record<string, unknown> | undefined : undefined;
   return {
-    data: arr.map((item) => toOrder((item as Record<string, unknown>) ?? {})),
+    data: arrSafe.map((item) => toOrder((item as Record<string, unknown>) ?? {})),
     pagination: pag
       ? {
           page: Number(pag.page ?? 1),
