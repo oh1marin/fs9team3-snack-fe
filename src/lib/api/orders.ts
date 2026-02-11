@@ -69,7 +69,7 @@ function toOrder(o: Record<string, unknown>): Order {
   return {
     id: String(o.id ?? ""),
     requestDate: String(o.request_date ?? o.requestDate ?? o.created_at ?? o.createdAt ?? ""),
-    productLabel: String(o.product_label ?? o.productLabel ?? ""),
+    productLabel: String(o.summary_title ?? o.product_label ?? o.productLabel ?? ""),
     otherCount: Number(o.other_count ?? o.otherCount ?? 0),
     totalQuantity: Number(o.total_quantity ?? o.totalQuantity ?? 0),
     orderAmount: Number(o.order_amount ?? o.total_amount ?? o.orderAmount ?? o.totalAmount ?? 0),
@@ -106,6 +106,53 @@ export async function fetchOrders(params?: {
         }
       : undefined,
   };
+}
+
+/** 관리자: 구매 요청 목록 (GET /api/admin/orders, 응답 형식 동일) */
+export async function fetchAdminOrders(params?: {
+  page?: number;
+  limit?: number;
+  sort?: string;
+}): Promise<OrdersListResponse> {
+  const search = new URLSearchParams();
+  if (params?.page != null) search.set("page", String(params.page));
+  if (params?.limit != null) search.set("limit", String(params.limit));
+  if (params?.sort) search.set("sort", params.sort);
+  const q = search.toString();
+  const raw = await fetchJSON<{ data?: unknown[]; pagination?: Record<string, unknown> } | unknown[]>(
+    `/api/admin/orders${q ? `?${q}` : ""}`
+  );
+  const arr = Array.isArray(raw) ? raw : raw?.data ?? [];
+  const pag = Array.isArray(raw) ? undefined : raw?.pagination;
+  return {
+    data: arr.map((item) => toOrder((item as Record<string, unknown>) ?? {})),
+    pagination: pag
+      ? {
+          page: Number(pag.page ?? 1),
+          limit: Number(pag.limit ?? 10),
+          totalCount: Number(pag.total_count ?? pag.totalCount ?? 0),
+          totalPages: Number(pag.total_pages ?? pag.totalPages ?? 1),
+        }
+      : undefined,
+  };
+}
+
+/** 관리자: 주문 승인/반려 (PATCH /api/admin/orders/:id, status: approved | cancelled) */
+export async function updateAdminOrderStatus(
+  orderId: string,
+  status: "approved" | "cancelled"
+): Promise<Order> {
+  const response = await apiClient(`/api/admin/orders/${orderId}`, {
+    method: "PATCH",
+    body: JSON.stringify({ status }),
+  });
+  if (!response.ok) {
+    const result = await response.json().catch(() => ({}));
+    throw new Error(result.message || result.error || (status === "cancelled" ? "반려에 실패했습니다." : "승인에 실패했습니다."));
+  }
+  const res = await response.json();
+  const o = res?.data ?? res;
+  return toOrder(o ?? {});
 }
 
 /** 구매 요청 시 FE가 넘기는 상품 한 줄 (itemId 있으면 주문 시 item_id로 전송) */
@@ -197,6 +244,8 @@ export interface OrderDetail {
   items: OrderDetailItem[];
   totalCount: number;
   totalAmount: number;
+  /** BE summary_title (예: "코카콜라 제로 및 1개") */
+  summaryTitle?: string;
 }
 
 /** 구매 요청 상세 조회 (BE: snake_case → FE: camelCase) */
@@ -220,9 +269,9 @@ export async function fetchOrderDetail(orderId: string): Promise<OrderDetail | n
           const sub = (it.item ?? it.product) as Record<string, unknown> | undefined;
           return {
           image: String(it.image ?? it.image_url ?? it.img ?? sub?.image ?? sub?.image_url ?? "").trim(),
-          category: String(it.category ?? ""),
-          name: String(it.name ?? it.title ?? ""),
-          unitPrice: Number(it.unit_price ?? it.unitPrice ?? 0),
+          category: String(it.category ?? it.category_sub ?? sub?.category_sub ?? sub?.category ?? ""),
+          name: String(it.name ?? it.title ?? sub?.title ?? sub?.name ?? ""),
+          unitPrice: Number(it.unit_price ?? it.unitPrice ?? sub?.price ?? 0),
           quantity: Number(it.quantity ?? 0),
           totalPrice: Number(it.total_price ?? it.totalPrice ?? 0),
         };
@@ -230,5 +279,6 @@ export async function fetchOrderDetail(orderId: string): Promise<OrderDetail | n
       : [],
     totalCount: Number(d.total_count ?? d.totalCount ?? 0) || (Array.isArray(d.items) ? d.items.length : 0),
     totalAmount: Number(d.total_amount ?? d.totalAmount ?? 0),
+    summaryTitle: d.summary_title != null ? String(d.summary_title) : undefined,
   };
 }
