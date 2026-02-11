@@ -11,6 +11,8 @@ interface User {
   id: string;
   email: string;
   nickname?: string;
+  /** 관리자 여부: 'Y' | 'N'. 일반 유저 N, 관리자 Y */
+  is_admin?: string;
   [key: string]: any;
 }
 

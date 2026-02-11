@@ -7,10 +7,7 @@ interface AuthInitializerProps {
   initialUser: Record<string, unknown> | null;
 }
 
-/**
- * protected 라우트에서 서버가 조회한 user를 context에 넣어줍니다.
- * 프로필 등에서 user가 바로 쓰이도록 합니다..
- */
+/** 서버 user를 context에 세팅 */
 export default function AuthInitializer({ initialUser }: AuthInitializerProps) {
   const { setInitialUser } = useAuth();
   const didSetRef = useRef(false);

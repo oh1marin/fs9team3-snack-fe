@@ -1,14 +1,17 @@
 "use client";
 
-import { useParams, useSearchParams } from "next/navigation";
+import { useParams, useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import ProductModal from "@/components/ProductModal";
+import AddToCartModal from "@/components/AddToCartModal";
 import { useCart } from "@/contexts/CartContext";
 import { useModal } from "@/contexts/ModalContext";
 import { toast } from "react-toastify";
 import { getClientAccessToken } from "@/lib/api/authToken";
+import { getImageSrc } from "@/lib/utils/image";
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
 interface Product {
@@ -29,9 +32,10 @@ interface Product {
 export default function ProductDetailPage() {
   const params = useParams();
   const searchParams = useSearchParams();
+  const router = useRouter();
   const productId = params.id;
   const listReturnUrl = searchParams.get("from") || "/items";
-  
+
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -95,7 +99,15 @@ export default function ProductDetailPage() {
         price: product.price,
         image: product.image,
       });
-      toast.success("장바구니에 담겼습니다!");
+      openModal(
+        <AddToCartModal
+          onClose={closeModal}
+          onGoToCart={() => {
+            closeModal();
+            router.push("/cart");
+          }}
+        />
+      );
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "장바구니 담기에 실패했습니다.");
     }
@@ -143,11 +155,12 @@ export default function ProductDetailPage() {
           <div className="aspect-square w-full max-w-[600px] rounded-xl sm:rounded-2xl bg-white p-6 sm:p-12">
             {product.image ? (
               <div className="relative h-full w-full">
-                <Image 
-                  src={product.image} 
+                <Image
+                  src={getImageSrc(product.image)}
                   alt={product.title}
                   fill
                   className="object-contain"
+                  unoptimized
                 />
               </div>
             ) : (
@@ -246,39 +259,31 @@ export default function ProductDetailPage() {
           <div className="border-t border-line-gray pt-4 sm:pt-6">
             <div className="flex flex-wrap items-center gap-3">
               <div
-                className="flex shrink-0 items-center gap-1.5 sm:gap-3"
+                className="flex shrink-0 items-center justify-end gap-2 px-4 rounded-2xl border-2 border-primary-300 bg-white"
                 style={{
-                  width: "clamp(120px, 8.33vw, 160px)",
-                  minWidth: "120px",
-                  height: "clamp(46px, 3.5vw, 54px)",
-                  padding: "0 0.75rem",
-                  justifyContent: "flex-end",
-                  borderRadius: "16px",
-                  border: "1px solid var(--color-primary-300, #FCC49C)",
-                  background: "var(--color-gray-50, #FFF)",
+                  width: 200,
+                  height: 64,
                 }}
               >
                 <span className="min-w-[3.25rem] text-right text-lg-m text-primary-400">
                   {quantity} 개
                 </span>
-                <div className="flex flex-col items-center justify-center">
+                <div className="flex flex-col items-center justify-center" style={{ gap: 5 }}>
                   <button
                     type="button"
                     onClick={() => setQuantity((q) => q + 1)}
-                    className="flex items-center justify-center text-primary-400 transition-colors hover:opacity-80"
-                    style={{ minWidth: "clamp(1.25rem, 1.67vw, 2rem)", minHeight: "clamp(1.25rem, 1.67vw, 2rem)", width: "clamp(1.25rem, 1.67vw, 2rem)", height: "clamp(1.25rem, 1.67vw, 2rem)" }}
+                    className="flex items-center justify-center w-8 h-8 text-primary-400 transition-colors hover:opacity-80"
                     aria-label="수량 증가"
                   >
-                    <Image src="/upsemo.png" alt="수량 증가" width={13} height={13} className="object-contain" />
+                    <Image src="/upsemo.png" alt="수량 증가" width={20} height={20} className="object-contain" />
                   </button>
                   <button
                     type="button"
                     onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                    className="flex items-center justify-center text-primary-400 transition-colors hover:opacity-80"
-                    style={{ minWidth: "clamp(1.25rem, 1.67vw, 2rem)", minHeight: "clamp(1.25rem, 1.67vw, 2rem)", width: "clamp(1.25rem, 1.67vw, 2rem)", height: "clamp(1.25rem, 1.67vw, 2rem)", marginTop: "-14px" }}
+                    className="flex items-center justify-center w-8 h-8 text-primary-400 transition-colors hover:opacity-80"
                     aria-label="수량 감소"
                   >
-                    <Image src="/downsemo.png" alt="수량 감소" width={13} height={13} className="object-contain" />
+                    <Image src="/downsemo.png" alt="수량 감소" width={20} height={20} className="object-contain" />
                   </button>
                 </div>
               </div>
