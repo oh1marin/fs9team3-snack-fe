@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import { useCart } from "@/contexts/CartContext";
 import { fetchOrders, cancelOrder, formatRequestDate, formatSummaryTitle, type Order } from "@/lib/api/orders";
 import { toast } from "react-toastify";
 import { getImageSrc } from "@/lib/utils/image";
@@ -21,6 +22,7 @@ const SORT_MAP: Record<SortOption, string> = {
 };
 
 export default function OrdersPage() {
+  const { refetchCart } = useCart();
   const [sortOption, setSortOption] = useState<SortOption>("최신순");
   const [showSortDropdown, setShowSortDropdown] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -54,8 +56,8 @@ export default function OrdersPage() {
   const handleCancelRequest = async (id: string) => {
     try {
       await cancelOrder(id);
-      toast.success("요청이 취소되었습니다.");
-      // 서버 반영 후 목록을 다시 맞추기(페이지/정렬/총페이지 동기화)
+      toast.success("요청이 취소되었습니다. 해당 상품이 장바구니에 다시 담겼습니다.");
+      await refetchCart();
       loadOrders();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "요청 취소에 실패했습니다.");

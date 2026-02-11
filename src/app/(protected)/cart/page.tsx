@@ -161,6 +161,7 @@ export default function CartPage() {
       }
       sessionStorage.setItem(PURCHASE_COMPLETE_KEY, JSON.stringify(payload));
       setSelectedIds(new Set());
+      await refetchCart();
       toast.success("주문이 생성되었습니다.");
       router.push("/cart/complete");
     } catch (err) {
