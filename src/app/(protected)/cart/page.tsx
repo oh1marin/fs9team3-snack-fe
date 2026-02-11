@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { useCart, type CartItem } from "@/contexts/CartContext";
 import OrderSummary from "@/components/OrderSummary";
 import { toast } from "react-toastify";
-import { createOrder, type CreateOrderItem } from "@/lib/api/orders";
+import { createOrder, createOrderFromCart, type CreateOrderItem } from "@/lib/api/orders";
 import { getImageSrc } from "@/lib/utils/image";
 
 const PURCHASE_COMPLETE_KEY = "snack_purchase_complete";
@@ -141,26 +141,27 @@ export default function CartPage() {
       message: "",
     };
     try {
-      const orderItems: CreateOrderItem[] = selectedItems.map((it) => ({
-        id: it.id,
-        itemId: it.itemId,
-        title: it.title || "상품",
-        quantity: it.quantity,
-        price: it.price,
-        image: it.image,
-      }));
-      await createOrder({
-        items: orderItems,
-        totalQuantity,
-        totalAmount,
-      });
-      sessionStorage.setItem(PURCHASE_COMPLETE_KEY, JSON.stringify(payload));
-      try {
-        await removeSelected([...selectedIds]);
-      } catch {
-        // 주문은 완료됐으므로 진행
+      const isFullCart = selectedItems.length === items.length && items.length > 0;
+      if (isFullCart) {
+        await createOrderFromCart();
+      } else {
+        const orderItems: CreateOrderItem[] = selectedItems.map((it) => ({
+          id: it.id,
+          itemId: it.itemId,
+          title: it.title || "상품",
+          quantity: it.quantity,
+          price: it.price,
+          image: it.image,
+        }));
+        await createOrder({
+          items: orderItems,
+          totalQuantity,
+          totalAmount,
+        });
       }
+      sessionStorage.setItem(PURCHASE_COMPLETE_KEY, JSON.stringify(payload));
       setSelectedIds(new Set());
+      toast.success("주문이 생성되었습니다.");
       router.push("/cart/complete");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "구매 요청에 실패했습니다.");

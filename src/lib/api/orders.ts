@@ -2,10 +2,12 @@ import { fetchJSON, apiClient } from "./apiClient";
 
 export type OrderStatus = "승인 대기" | "구매 반려" | "승인 완료";
 
+// BE Prisma: status = pending | approved | cancelled (cancelled = 반려)
 const STATUS_MAP: Record<string, OrderStatus> = {
   pending: "승인 대기",
   approved: "승인 완료",
   rejected: "구매 반려",
+  cancelled: "구매 반려",
   대기: "승인 대기",
   완료: "승인 완료",
   반려: "구매 반려",
@@ -116,7 +118,22 @@ export interface CreateOrderItem {
   image?: string;
 }
 
-/** 구매 요청 생성 (BE는 snake_case 요구 → item_id, total_quantity, total_amount 등) */
+/** 장바구니 전체로 주문 (body 없음 → BE가 해당 유저 장바구니 전부로 주문 생성 후 카트에서 삭제) */
+export async function createOrderFromCart(): Promise<Order> {
+  const response = await apiClient("/api/orders", {
+    method: "POST",
+    body: JSON.stringify({}),
+  });
+  if (!response.ok) {
+    const result = await response.json().catch(() => ({}));
+    throw new Error(result.message || result.error || "구매 요청에 실패했습니다.");
+  }
+  const res = await response.json();
+  const o = res?.data ?? res;
+  return toOrder(o ?? {});
+}
+
+/** 구매 요청 생성 — 선택 품목만 보낼 때 (BE는 snake_case 요구) */
 export async function createOrder(body: {
   items: CreateOrderItem[];
   totalQuantity: number;
