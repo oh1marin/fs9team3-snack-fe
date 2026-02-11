@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { fetchOrders, cancelOrder, formatRequestDate, type Order } from "@/lib/api/orders";
+import { fetchOrders, cancelOrder, formatRequestDate, formatSummaryTitle, type Order } from "@/lib/api/orders";
 import { toast } from "react-toastify";
 import { getImageSrc } from "@/lib/utils/image";
 
@@ -201,7 +201,7 @@ export default function OrdersPage() {
               </div>
               <div>
                 <p className="font-medium text-black-400">
-                  {row.productLabel ? `상품이름: ${row.productLabel}` : "—"}
+                  {row.productLabel ? `상품이름: ${formatSummaryTitle(row.productLabel)}` : "—"}
                 </p>
                 <p className="mt-1 text-gray-500">
                   총 수량: {row.totalQuantity}개

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { fetchAdminOrders, updateAdminOrderStatus, formatRequestDate, type Order } from "@/lib/api/orders";
+import { fetchAdminOrders, updateAdminOrderStatus, formatRequestDate, formatSummaryTitle, type Order } from "@/lib/api/orders";
 import { toast } from "react-toastify";
 import { getImageSrc } from "@/lib/utils/image";
 
@@ -38,9 +38,10 @@ export default function AdminOrdersPage() {
       const apiOrders = res.data ?? [];
       setOrders(apiOrders);
       setTotalPages(res.pagination?.totalPages ?? 1);
-    } catch {
+    } catch (err) {
       setOrders([]);
       setTotalPages(1);
+      toast.error(err instanceof Error ? err.message : "목록을 불러오지 못했습니다.");
     } finally {
       setLoading(false);
     }
@@ -211,7 +212,7 @@ export default function AdminOrdersPage() {
                   <p className="text-sm text-gray-500">{row.firstItemCategory}</p>
                 ) : null}
                 <p className="font-medium text-black-400">
-                  {row.productLabel ? `상품이름: ${row.productLabel}` : "—"}
+                  {row.productLabel ? `상품이름: ${formatSummaryTitle(row.productLabel)}` : "—"}
                 </p>
                 <p className="mt-1 text-sm text-gray-500">
                   총 수량: {row.totalQuantity}개
