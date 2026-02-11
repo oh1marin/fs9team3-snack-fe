@@ -110,10 +110,19 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       }
       return;
     }
+    // 낙관적 업데이트: UI에 즉시 반영
+    let prevItems: CartItem[] = [];
+    setItems((current) => {
+      prevItems = current;
+      return current.map((it) =>
+        it.id === itemId ? { ...it, quantity } : it
+      );
+    });
     try {
       const res = await updateCartItemQuantityApi(itemId, quantity);
       setItems((res.items ?? []).map(dtoToItem));
     } catch {
+      setItems(prevItems);
       throw new Error("수량 변경에 실패했습니다.");
     }
   }, []);
