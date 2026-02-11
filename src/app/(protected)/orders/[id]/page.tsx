@@ -62,11 +62,9 @@ export default function OrderDetailPage() {
           <h2 className="mb-2 text-lg font-semibold text-black-400">
             요청 품목
           </h2>
-          {data.items.length > 0 && (
+          {(data.summaryTitle || data.items.length > 0) && (
             <p className="mb-4 text-base text-gray-600">
-              상품이름: {data.items[0].name} 및{" "}
-              {data.items.reduce((s, i) => s + i.quantity, 0)}개 / 총 수량:{" "}
-              {data.items.reduce((s, i) => s + i.quantity, 0)}개
+              상품이름: {data.summaryTitle || (data.items[0]?.name ? `${data.items[0].name} 및 ${data.totalCount}개` : "—")} / 총 수량: {data.totalCount}개
             </p>
           )}
           <div

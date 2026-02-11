@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { fetchOrders, formatRequestDate, type Order } from "@/lib/api/orders";
+import { fetchAdminOrders, updateAdminOrderStatus, formatRequestDate, type Order } from "@/lib/api/orders";
 import { toast } from "react-toastify";
 import { getImageSrc } from "@/lib/utils/image";
 
@@ -12,10 +12,6 @@ function formatAmount(n: number) {
   return n.toLocaleString("ko-KR");
 }
 
-/** "코카콜라 제로 외 1건" → "코카콜라 제로" */
-function firstProductName(productLabel: string): string {
-  return productLabel.replace(/\s*외\s*\d+\s*건\s*$/i, "").trim() || productLabel;
-}
 
 const SORT_MAP: Record<SortOption, string> = {
   최신순: "request_date:desc",
@@ -34,7 +30,7 @@ export default function AdminOrdersPage() {
   const loadOrders = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetchOrders({
+      const res = await fetchAdminOrders({
         page: currentPage,
         limit: 10,
         sort: SORT_MAP[sortOption],
@@ -56,8 +52,8 @@ export default function AdminOrdersPage() {
 
   const handleReject = async (id: string) => {
     try {
-      // TODO: BE API 연동 (예: rejectOrder(id))
-      toast.success("구매 요청을 반려했습니다.");
+      await updateAdminOrderStatus(id, "cancelled");
+      toast.success("반려되었습니다. 해당 상품이 요청자 장바구니에 다시 담겼습니다.");
       loadOrders();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "반려 처리에 실패했습니다.");
@@ -66,7 +62,7 @@ export default function AdminOrdersPage() {
 
   const handleApprove = async (id: string) => {
     try {
-      // TODO: BE API 연동 (예: approveOrder(id))
+      await updateAdminOrderStatus(id, "approved");
       toast.success("구매 요청을 승인했습니다.");
       loadOrders();
     } catch (err) {
@@ -215,10 +211,10 @@ export default function AdminOrdersPage() {
                   <p className="text-sm text-gray-500">{row.firstItemCategory}</p>
                 ) : null}
                 <p className="font-medium text-black-400">
-                  상품이름: {firstProductName(row.productLabel)} 및 {row.totalQuantity}개
+                  {row.productLabel ? `상품이름: ${row.productLabel}` : "—"}
                 </p>
                 <p className="mt-1 text-sm text-gray-500">
-                  상품 갯수: {row.totalQuantity}개
+                  총 수량: {row.totalQuantity}개
                 </p>
               </div>
             </Link>,
