@@ -15,7 +15,6 @@ export async function POST(request: NextRequest) {
     });
 
     const data = await backendRes.json().catch(() => ({}));
-
     const res = NextResponse.json(data, { status: backendRes.status });
 
     const setCookieHeaders = backendRes.headers.getSetCookie?.() ?? [];

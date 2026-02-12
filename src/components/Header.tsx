@@ -101,6 +101,12 @@ export default function Header({ hasToken = false }: { hasToken?: boolean }) {
             >
               구매 요청 내역
             </Link>
+            <Link
+              href="/admin/items"
+              className={`text-sm font-semibold transition-colors min-[376px]:text-base ${pathname === "/admin/items" ? "text-primary-400" : "text-gray-400 hover:text-primary-400"}`}
+            >
+              상품 등록 내역
+            </Link>
             {isAdmin && (
               <>
                 <Link
@@ -114,12 +120,6 @@ export default function Header({ hasToken = false }: { hasToken?: boolean }) {
                   className={`text-sm font-semibold transition-colors min-[376px]:text-base ${pathname === "/admin/purchase-history" ? "text-primary-400" : "text-gray-400 hover:text-primary-400"}`}
                 >
                   구매 내역 확인
-                </Link>
-                <Link
-                  href="/items/register"
-                  className={`text-sm font-semibold transition-colors min-[376px]:text-base ${pathname === "/items/register" ? "text-primary-400" : "text-gray-400 hover:text-primary-400"}`}
-                >
-                  상품 등록 내역
                 </Link>
               </>
             )}

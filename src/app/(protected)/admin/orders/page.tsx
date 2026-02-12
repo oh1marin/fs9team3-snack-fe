@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { fetchOrders, formatRequestDate, type Order } from "@/lib/api/orders";
+import { fetchAdminOrders, updateAdminOrderStatus, formatRequestDate, formatSummaryTitle, type Order } from "@/lib/api/orders";
 import { toast } from "react-toastify";
 import { getImageSrc } from "@/lib/utils/image";
 
@@ -11,6 +11,7 @@ type SortOption = "최신순" | "낮은 금액순" | "높은 금액순";
 function formatAmount(n: number) {
   return n.toLocaleString("ko-KR");
 }
+
 
 const SORT_MAP: Record<SortOption, string> = {
   최신순: "request_date:desc",
@@ -29,7 +30,7 @@ export default function AdminOrdersPage() {
   const loadOrders = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetchOrders({
+      const res = await fetchAdminOrders({
         page: currentPage,
         limit: 10,
         sort: SORT_MAP[sortOption],
@@ -37,9 +38,10 @@ export default function AdminOrdersPage() {
       const apiOrders = res.data ?? [];
       setOrders(apiOrders);
       setTotalPages(res.pagination?.totalPages ?? 1);
-    } catch {
+    } catch (err) {
       setOrders([]);
       setTotalPages(1);
+      toast.error(err instanceof Error ? err.message : "목록을 불러오지 못했습니다.");
     } finally {
       setLoading(false);
     }
@@ -51,8 +53,8 @@ export default function AdminOrdersPage() {
 
   const handleReject = async (id: string) => {
     try {
-      // TODO: BE API 연동 (예: rejectOrder(id))
-      toast.success("구매 요청을 반려했습니다.");
+      await updateAdminOrderStatus(id, "cancelled");
+      toast.success("반려되었습니다. 해당 상품이 요청자 장바구니에 다시 담겼습니다.");
       loadOrders();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "반려 처리에 실패했습니다.");
@@ -61,7 +63,7 @@ export default function AdminOrdersPage() {
 
   const handleApprove = async (id: string) => {
     try {
-      // TODO: BE API 연동 (예: approveOrder(id))
+      await updateAdminOrderStatus(id, "approved");
       toast.success("구매 요청을 승인했습니다.");
       loadOrders();
     } catch (err) {
@@ -206,12 +208,13 @@ export default function AdminOrdersPage() {
                 )}
               </div>
               <div>
+                {row.firstItemCategory ? (
+                  <p className="text-sm text-gray-500">{row.firstItemCategory}</p>
+                ) : null}
                 <p className="font-medium text-black-400">
-                  {row.otherCount > 0
-                    ? `${row.productLabel} 외 ${row.otherCount}건`
-                    : row.productLabel}
+                  {row.productLabel ? `상품이름: ${formatSummaryTitle(row.productLabel)}` : "—"}
                 </p>
-                <p className="mt-1 text-gray-500">
+                <p className="mt-1 text-sm text-gray-500">
                   총 수량: {row.totalQuantity}개
                 </p>
               </div>
@@ -219,9 +222,12 @@ export default function AdminOrdersPage() {
             <Link
               key={`${row.id}-3`}
               href={`/orders/${row.id}`}
-              className="flex h-20 items-center justify-center border-b border-line-gray text-center text-base text-black-400 hover:bg-gray-50"
+              className="flex h-20 flex-col items-center justify-center gap-0.5 border-b border-line-gray text-center text-base text-black-400 hover:bg-gray-50"
             >
-              {formatAmount(row.orderAmount)}원
+              <span className="text-sm text-gray-500">
+                {row.totalQuantity > 0 ? formatAmount(Math.round(row.orderAmount / row.totalQuantity)) : 0}원 (1개당)
+              </span>
+              <span className="font-medium">{formatAmount(row.orderAmount)}원</span>
             </Link>,
             <Link
               key={`${row.id}-4`}

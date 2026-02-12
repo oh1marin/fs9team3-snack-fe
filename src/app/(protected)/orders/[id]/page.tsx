@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { fetchOrderDetail, formatRequestDate, type OrderDetail } from "@/lib/api/orders";
+import { fetchOrderDetail, formatRequestDate, formatSummaryTitle, type OrderDetail } from "@/lib/api/orders";
 import { getImageSrc } from "@/lib/utils/image";
 
 function formatPrice(n: number) {
@@ -59,9 +59,14 @@ export default function OrderDetailPage() {
           <h1 className="mb-2 text-2xl font-bold text-black-400">
             구매 요청 내역
           </h1>
-          <h2 className="mb-4 text-lg font-semibold text-black-400">
+          <h2 className="mb-2 text-lg font-semibold text-black-400">
             요청 품목
           </h2>
+          {(data.summaryTitle || data.items.length > 0) && (
+            <p className="mb-4 text-base text-gray-600">
+              상품이름: {data.summaryTitle ? formatSummaryTitle(data.summaryTitle) : (data.items[0]?.name ? `${data.items[0].name} 및 ${data.totalCount}개` : "—")} / 총 수량: {data.totalCount}개
+            </p>
+          )}
           <div
             className="mb-6 flex flex-col overflow-y-auto"
             style={{
@@ -130,7 +135,7 @@ export default function OrderDetailPage() {
                   lineHeight: "32px",
                 }}
               >
-                총 {data.totalCount}건{" "}
+                총 {data.totalCount || data.items?.length || 0}개{" "}
               </span>
               <span
                 style={{
