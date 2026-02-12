@@ -48,7 +48,10 @@ export default function AddToCartModal({ onClose, onGoToCart }: AddToCartModalPr
         <div className="flex gap-3 justify-center w-full mt-auto flex-wrap sm:flex-nowrap">
           <button
             type="button"
-            onClick={() => router.push("/items")}
+            onClick={() => {
+              onClose();
+              router.push("/items");
+            }}
             className="text-lg-sb transition-colors hover:opacity-90"
             style={{
               width: "100%",

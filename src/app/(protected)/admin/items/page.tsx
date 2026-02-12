@@ -3,6 +3,7 @@
 import { Fragment, useState, useEffect, useCallback } from "react";
 import { fetchRegisteredItems, type RegisteredItem } from "@/lib/api/items";
 import { getImageSrc } from "@/lib/utils/image";
+import { useAuth } from "@/contexts/AuthContext";
 
 type SortOption = "최신순" | "낮은가격순" | "높은가격순";
 
@@ -16,18 +17,36 @@ function formatPrice(n: number) {
   return n.toLocaleString("ko-KR");
 }
 
-function displayLink(link: string | null): string {
-  if (!link || !link.trim()) return "—";
-  const url = link.startsWith("http") ? link : `https://${link.replace(/^\/\//, "")}`;
+const DEFAULT_LINK = "https://www.codeit.com";
+
+function displayLink(link: string | null, useDefault = false): string {
+  const resolved = useDefault && (!link || !link.trim()) ? DEFAULT_LINK : (link || "").trim();
+  if (!resolved) return "—";
+  const url = resolved.startsWith("http") ? resolved : `https://${resolved.replace(/^\/\//, "")}`;
   try {
     const host = new URL(url).hostname;
     return host.length > 20 ? `${host.slice(0, 17)}...` : host;
   } catch {
-    return link.length > 24 ? `${link.slice(0, 21)}...` : link;
+    return resolved.length > 24 ? `${resolved.slice(0, 21)}...` : resolved;
   }
 }
 
+function resolveLink(link: string | null): string {
+  if (link && link.trim()) {
+    return link.startsWith("http") ? link : `https://${link.replace(/^\/\//, "")}`;
+  }
+  return DEFAULT_LINK;
+}
+
 export default function AdminItemsPage() {
+  const { user } = useAuth();
+  const rawAdmin = user?.is_admin ?? (user as { isAdmin?: string | boolean })?.isAdmin;
+  const isAdmin =
+    rawAdmin === "Y" ||
+    rawAdmin === "y" ||
+    rawAdmin === true ||
+    String(rawAdmin ?? "").toLowerCase() === "true";
+
   const [sortOption, setSortOption] = useState<SortOption>("최신순");
   const [showSortDropdown, setShowSortDropdown] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -42,6 +61,7 @@ export default function AdminItemsPage() {
         page: currentPage,
         limit: 10,
         sort: SORT_MAP[sortOption],
+        mine: !isAdmin,
       });
       setItems(res.data ?? []);
       setTotalPages(res.pagination?.totalPages ?? 1);
@@ -51,7 +71,7 @@ export default function AdminItemsPage() {
     } finally {
       setLoading(false);
     }
-  }, [currentPage, sortOption]);
+  }, [currentPage, sortOption, isAdmin]);
 
   useEffect(() => {
     loadItems();
@@ -195,23 +215,19 @@ export default function AdminItemsPage() {
                   {formatPrice(row.price)}
                 </div>
                 <div className="flex h-20 items-center justify-center border-b border-line-gray pr-5 text-center text-base">
-                  {row.link ? (
-                    <a
-                      href={row.link.startsWith("http") ? row.link : `https://${row.link.replace(/^\/\//, "")}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 text-primary-400 hover:underline"
-                    >
-                      <span className="truncate max-w-[140px]">{displayLink(row.link)}</span>
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-                        <polyline points="15 3 21 3 21 9" />
-                        <line x1="10" y1="14" x2="21" y2="3" />
-                      </svg>
-                    </a>
-                  ) : (
-                    <span className="text-gray-400">—</span>
-                  )}
+                  <a
+                    href={resolveLink(row.link)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-primary-400 hover:underline"
+                  >
+                    <span className="truncate max-w-[140px]">{displayLink(row.link, true)}</span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                      <polyline points="15 3 21 3 21 9" />
+                      <line x1="10" y1="14" x2="21" y2="3" />
+                    </svg>
+                  </a>
                 </div>
               </Fragment>
             ))}

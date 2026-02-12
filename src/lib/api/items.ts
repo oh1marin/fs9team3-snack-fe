@@ -46,16 +46,19 @@ function toRegisteredItem(raw: Record<string, unknown>): RegisteredItem {
   };
 }
 
-/** 상품 등록 내역 목록 (GET /api/items) - 관리자용 */
+/** 상품 등록 내역 목록 (GET /api/items) - mine: true면 현재 사용자 등록 상품만, 관리자는 전체 */
 export async function fetchRegisteredItems(params?: {
   page?: number;
   limit?: number;
   sort?: string;
+  /** true면 본인 등록 상품만 (일반 사용자), 없거나 false면 전체 (관리자) */
+  mine?: boolean;
 }): Promise<ItemsListResponse> {
   const search = new URLSearchParams();
   if (params?.page != null) search.set("page", String(params.page));
   if (params?.limit != null) search.set("limit", String(params.limit));
   if (params?.sort) search.set("sort", params.sort);
+  if (params?.mine === true) search.set("mine", "1");
   const q = search.toString();
   const raw = await fetchJSON<{ data?: unknown[]; pagination?: Record<string, unknown> } | unknown[]>(
     `/api/items${q ? `?${q}` : ""}`
