@@ -178,14 +178,18 @@ export default function CartCompletePage() {
         </section>
 
         <div className="flex flex-nowrap items-center justify-center gap-4 sm:gap-6">
-          {cartItems.length > 0 && (
-            <Link
-              href="/cart"
-              className="flex h-16 w-[310px] shrink-0 items-center justify-center rounded-xl bg-[#FDF0DF] text-lg font-semibold text-black-400 transition-colors hover:bg-primary-200/50"
-            >
-              장바구니로 돌아가기
-            </Link>
-          )}
+          <Link
+            href="/cart"
+            className="flex shrink-0 items-center justify-center text-lg font-semibold text-primary-400 transition-colors hover:opacity-90"
+            style={{
+              width: 310,
+              height: 64,
+              borderRadius: 16,
+              background: "var(--Background-Background-500, #FDF0DF)",
+            }}
+          >
+            장바구니로 돌아가기
+          </Link>
           <Link
             href="/orders"
             className="flex h-16 w-[310px] shrink-0 items-center justify-center rounded-xl bg-primary-400 text-lg font-semibold text-white transition-colors hover:bg-primary-300"

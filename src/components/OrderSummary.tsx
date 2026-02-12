@@ -31,7 +31,7 @@ export default function OrderSummary({
 }: OrderSummaryProps) {
   return (
     <aside
-      className="flex shrink-0 flex-col overflow-visible"
+      className="relative z-10 flex shrink-0 flex-col overflow-visible"
       style={{
         width: "min(386px, max(280px, 20.1vw))",
         height: "min(466px, max(386px, 24.27vw))",
