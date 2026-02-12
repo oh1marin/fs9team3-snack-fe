@@ -1,11 +1,15 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+
 interface AddToCartModalProps {
   onClose: () => void;
   onGoToCart: () => void;
 }
 
 export default function AddToCartModal({ onClose, onGoToCart }: AddToCartModalProps) {
+  const router = useRouter();
+
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
       onClose();
@@ -44,7 +48,7 @@ export default function AddToCartModal({ onClose, onGoToCart }: AddToCartModalPr
         <div className="flex gap-3 justify-center w-full mt-auto flex-wrap sm:flex-nowrap">
           <button
             type="button"
-            onClick={onClose}
+            onClick={() => router.push("/items")}
             className="text-lg-sb transition-colors hover:opacity-90"
             style={{
               width: "100%",
