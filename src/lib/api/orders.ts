@@ -168,16 +168,19 @@ function getOrdersArray(raw: unknown): unknown[] {
   return [];
 }
 
-/** 관리자: 구매 요청 목록 (GET /api/admin/orders, 응답 형식 동일) */
+/** 관리자: 구매 요청 목록 (GET /api/admin/orders). status 있으면 해당 상태만 조회 (예: pending) */
 export async function fetchAdminOrders(params?: {
   page?: number;
   limit?: number;
   sort?: string;
+  /** 미지정 시 BE 기본값. 구매 요청 관리에서는 pending만 보려면 'pending' 전달 */
+  status?: string;
 }): Promise<OrdersListResponse> {
   const search = new URLSearchParams();
   if (params?.page != null) search.set("page", String(params.page));
   if (params?.limit != null) search.set("limit", String(params.limit));
   if (params?.sort) search.set("sort", params.sort);
+  if (params?.status) search.set("status", params.status);
   const q = search.toString();
   const raw = await fetchJSON<{ data?: unknown[]; orders?: unknown[]; pagination?: Record<string, unknown> } | unknown[]>(
     `/api/admin/orders${q ? `?${q}` : ""}`
