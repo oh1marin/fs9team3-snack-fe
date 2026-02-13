@@ -162,12 +162,30 @@ export default function AdminPurchaseHistoryDetailPage() {
               <label className="block text-sm font-medium text-gray-600">
                 요청인
               </label>
-              <input
-                type="text"
-                readOnly
-                value={data.requester || "김스낵"}
-                className="mt-1.5 w-full rounded-lg border border-line-gray bg-background-peach px-4 py-3 text-base text-black-400"
-              />
+              <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                <input
+                  type="text"
+                  readOnly
+                  value={data.requester || "김스낵"}
+                  className="flex-1 min-w-0 rounded-lg border border-line-gray bg-background-peach px-4 py-3 text-base text-black-400"
+                />
+                {data.isInstantPurchase && (
+                  <span
+                    className="shrink-0 rounded-lg border px-3 py-1.5 text-center font-semibold"
+                    style={{
+                      color: "var(--Primary-orange-400, #F97B22)",
+                      fontFamily: "Pretendard, sans-serif",
+                      fontSize: "16px",
+                      fontWeight: 600,
+                      lineHeight: "26px",
+                      borderColor: "var(--Primary-orange-200, #FDE1CD)",
+                      background: "var(--Primary-orange-100, #FEF3EB)",
+                    }}
+                  >
+                    즉시 구매
+                  </span>
+                )}
+              </div>
             </div>
             <div className="mt-4">
               <label className="block text-sm font-medium text-gray-600">

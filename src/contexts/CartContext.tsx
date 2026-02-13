@@ -34,7 +34,14 @@ function getTotalCount(items: CartItem[]): number {
   return items.reduce((sum, it) => sum + it.quantity, 0);
 }
 
-function dtoToItem(d: { id: string; itemId?: string; title: string; price: number; image: string; quantity: number }): CartItem {
+function dtoToItem(d: {
+  id: string;
+  itemId?: string;
+  title: string;
+  price: number;
+  image: string;
+  quantity: number;
+}): CartItem {
   return {
     id: d.id,
     itemId: d.itemId,
@@ -50,7 +57,11 @@ interface CartContextValue {
   items: CartItem[];
   cartLoaded: boolean;
   refetchCart: () => Promise<void>;
-  addToCart: (itemId: string, quantity?: number, snapshot?: CartItemSnapshot) => void | Promise<void>;
+  addToCart: (
+    itemId: string,
+    quantity?: number,
+    snapshot?: CartItemSnapshot,
+  ) => void | Promise<void>;
   updateQuantity: (itemId: string, quantity: number) => void | Promise<void>;
   removeItem: (itemId: string) => void | Promise<void>;
   removeAll: () => void | Promise<void>;
@@ -133,58 +144,61 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         throw new Error("장바구니 담기에 실패했습니다.");
       }
     },
-    [refetchCart]
+    [refetchCart],
   );
 
-  const updateQuantity = useCallback(async (itemId: string, quantity: number) => {
-    if (quantity < 1) {
+  const updateQuantity = useCallback(
+    async (itemId: string, quantity: number) => {
+      if (quantity < 1) {
+        try {
+          const res = await removeCartItemApi(itemId);
+          const nextItems = (res.items ?? []).map(dtoToItem);
+          const cnt = getTotalCount(nextItems);
+          setItems(nextItems);
+          setCartCount(cnt);
+          setCartCountStore(cnt);
+        } catch {
+          const next = itemsRef.current.filter((it) => it.id !== itemId);
+          const cnt = getTotalCount(next);
+          setItems(next);
+          setCartCount(cnt);
+          setCartCountStore(cnt);
+          throw new Error("삭제에 실패했습니다.");
+        }
+        return;
+      }
+      let prevItems: CartItem[] = [];
+      setItems((current) => {
+        prevItems = current;
+        return current.map((it) =>
+          it.id === itemId ? { ...it, quantity } : it,
+        );
+      });
+      const nextCnt = (() => {
+        const prev = prevItems.find((it) => it.id === itemId);
+        return cartCountRef.current - (prev?.quantity ?? 0) + quantity;
+      })();
+      setCartCount(nextCnt);
+      setCartCountStore(nextCnt);
       try {
-        const res = await removeCartItemApi(itemId);
-        const nextItems = (res.items ?? []).map(dtoToItem);
-        const cnt = getTotalCount(nextItems);
-        setItems(nextItems);
-        setCartCount(cnt);
-        setCartCountStore(cnt);
+        const res = await updateCartItemQuantityApi(itemId, quantity);
+        if (res.items && res.items.length > 0) {
+          const nextItems = res.items.map(dtoToItem);
+          const cnt = getTotalCount(nextItems);
+          setItems(nextItems);
+          setCartCount(cnt);
+          setCartCountStore(cnt);
+        }
       } catch {
-        const next = itemsRef.current.filter((it) => it.id !== itemId);
-        const cnt = getTotalCount(next);
-        setItems(next);
+        const cnt = getTotalCount(prevItems);
+        setItems(prevItems);
         setCartCount(cnt);
         setCartCountStore(cnt);
-        throw new Error("삭제에 실패했습니다.");
+        throw new Error("수량 변경에 실패했습니다.");
       }
-      return;
-    }
-    let prevItems: CartItem[] = [];
-    setItems((current) => {
-      prevItems = current;
-      return current.map((it) =>
-        it.id === itemId ? { ...it, quantity } : it
-      );
-    });
-    const nextCnt = (() => {
-      const prev = prevItems.find((it) => it.id === itemId);
-      return cartCountRef.current - (prev?.quantity ?? 0) + quantity;
-    })();
-    setCartCount(nextCnt);
-    setCartCountStore(nextCnt);
-    try {
-      const res = await updateCartItemQuantityApi(itemId, quantity);
-      if (res.items && res.items.length > 0) {
-        const nextItems = res.items.map(dtoToItem);
-        const cnt = getTotalCount(nextItems);
-        setItems(nextItems);
-        setCartCount(cnt);
-        setCartCountStore(cnt);
-      }
-    } catch {
-      const cnt = getTotalCount(prevItems);
-      setItems(prevItems);
-      setCartCount(cnt);
-      setCartCountStore(cnt);
-      throw new Error("수량 변경에 실패했습니다.");
-    }
-  }, []);
+    },
+    [],
+  );
 
   const removeItem = useCallback(async (itemId: string) => {
     try {

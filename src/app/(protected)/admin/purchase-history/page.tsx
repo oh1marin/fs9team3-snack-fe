@@ -161,8 +161,24 @@ export default function AdminPurchaseHistoryPage() {
                 <Link key={`${row.id}-3`} href={detailHref} className="flex h-20 items-center justify-center border-b border-line-gray text-base text-black-400 hover:bg-gray-50">
                   {formatAmount(row.orderAmount)}원
                 </Link>,
-                <Link key={`${row.id}-4`} href={detailHref} className="flex h-20 items-center justify-center border-b border-line-gray text-base text-black-400 hover:bg-gray-50">
-                  {row.requester ?? "김스낵"}
+                <Link key={`${row.id}-4`} href={detailHref} className="flex h-20 flex-wrap items-center justify-center gap-2 border-b border-line-gray px-2 text-base text-black-400 hover:bg-gray-50">
+                  <span>{row.requester ?? "김스낵"}</span>
+                  {row.isInstantPurchase && (
+                    <span
+                      className="shrink-0 rounded-lg border px-2 py-0.5 text-center text-sm font-semibold"
+                      style={{
+                        color: "var(--Primary-orange-400, #F97B22)",
+                        fontFamily: "Pretendard, sans-serif",
+                        fontSize: "14px",
+                        fontWeight: 600,
+                        lineHeight: "22px",
+                        borderColor: "var(--Primary-orange-200, #FDE1CD)",
+                        background: "var(--Primary-orange-100, #FEF3EB)",
+                      }}
+                    >
+                      즉시 구매
+                    </span>
+                  )}
                 </Link>,
                 <Link key={`${row.id}-5`} href={detailHref} className="flex h-20 items-center justify-center border-b border-line-gray text-base text-black-400 hover:bg-gray-50">
                   {row.approver ?? "김코드"}
