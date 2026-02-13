@@ -1,10 +1,8 @@
 import Image from "next/image";
-import Header from "@/components/Header";
 
 export default function LandingPage() {
   return (
     <>
-      <Header hasToken={false} />
       <div
         className="relative mx-auto w-full max-w-[1920px] bg-[#FDF0DF]"
         style={{ height: "calc(100vh - 88px)", minHeight: "992px" }}

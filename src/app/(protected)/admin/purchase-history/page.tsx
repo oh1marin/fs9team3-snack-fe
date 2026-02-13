@@ -162,10 +162,10 @@ export default function AdminPurchaseHistoryPage() {
                   {formatAmount(row.orderAmount)}원
                 </Link>,
                 <Link key={`${row.id}-4`} href={detailHref} className="flex h-20 items-center justify-center border-b border-line-gray text-base text-black-400 hover:bg-gray-50">
-                  {row.requester ?? "—"}
+                  {row.requester ?? "김스낵"}
                 </Link>,
                 <Link key={`${row.id}-5`} href={detailHref} className="flex h-20 items-center justify-center border-b border-line-gray text-base text-black-400 hover:bg-gray-50">
-                  {row.approver ?? "—"}
+                  {row.approver ?? "김코드"}
                 </Link>,
                 <Link key={`${row.id}-6`} href={detailHref} className="flex h-20 items-center justify-center border-b border-line-gray text-base text-black-400 hover:bg-gray-50">
                   {formatRequestDate(approvedDate)}

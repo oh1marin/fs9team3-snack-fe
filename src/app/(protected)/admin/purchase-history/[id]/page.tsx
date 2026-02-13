@@ -165,7 +165,7 @@ export default function AdminPurchaseHistoryDetailPage() {
               <input
                 type="text"
                 readOnly
-                value={data.requester}
+                value={data.requester || "김스낵"}
                 className="mt-1.5 w-full rounded-lg border border-line-gray bg-background-peach px-4 py-3 text-base text-black-400"
               />
             </div>
@@ -194,7 +194,7 @@ export default function AdminPurchaseHistoryDetailPage() {
               <input
                 type="text"
                 readOnly
-                value={data.approver}
+                value={data.approver || "김코드"}
                 className="mt-1.5 w-full rounded-lg border border-line-gray bg-background-peach px-4 py-3 text-base text-black-400"
               />
             </div>
