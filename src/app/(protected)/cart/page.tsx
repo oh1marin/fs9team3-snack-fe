@@ -28,7 +28,7 @@ export default function CartPage() {
     rawAdmin === "y" ||
     rawAdmin === true ||
     String(rawAdmin ?? "").toLowerCase() === "true";
-  const purchaseButtonLabel = isAdmin ? "구매하기" : "구매 요청";
+  const purchaseButtonLabel = isAdmin ? "즉시 구매" : "구매 요청";
   const instantButtonLabel = isAdmin ? "즉시 구매" : "즉시 요청";
   const { items, cartLoaded, refetchCart, updateQuantity, removeItem, removeAll, removeSelected } =
     useCart();
@@ -121,6 +121,7 @@ export default function CartPage() {
         items: orderItems,
         totalQuantity,
         totalAmount,
+        ...(isAdmin && { instant_purchase: true }),
       });
       sessionStorage.setItem(PURCHASE_COMPLETE_KEY, JSON.stringify(payload));
       try {
@@ -139,7 +140,7 @@ export default function CartPage() {
     }
   };
 
-  const handlePurchaseRequest = async () => {
+  const handlePurchaseRequest = async (instantPurchase = false) => {
     if (selectedItems.length === 0) {
       toast.warn("상품을 선택해 주세요.");
       return;
@@ -152,12 +153,12 @@ export default function CartPage() {
       totalAmount,
       message: "",
       isAdmin,
-      purchaseMode: "cart" as const,
+      purchaseMode: instantPurchase ? ("instant" as const) : ("cart" as const),
     };
     try {
       const isFullCart = selectedItems.length === items.length && items.length > 0;
       if (isFullCart) {
-        await createOrderFromCart();
+        await createOrderFromCart(instantPurchase ? { instant_purchase: true } : undefined);
       } else {
         const orderItems: CreateOrderItem[] = selectedItems.map((it) => ({
           id: it.id,
@@ -171,6 +172,7 @@ export default function CartPage() {
           items: orderItems,
           totalQuantity,
           totalAmount,
+          ...(instantPurchase && { instant_purchase: true }),
         });
       }
       sessionStorage.setItem(PURCHASE_COMPLETE_KEY, JSON.stringify(payload));
@@ -457,7 +459,7 @@ export default function CartPage() {
             productAmount={productAmount}
             deliveryFee={deliveryFee}
             totalAmount={totalAmount}
-            onPurchaseRequest={handlePurchaseRequest}
+            onPurchaseRequest={() => handlePurchaseRequest(isAdmin)}
             purchaseButtonLabel={purchaseButtonLabel}
             continueShoppingHref="/items"
           />
@@ -632,7 +634,7 @@ export default function CartPage() {
             </Link>
             <button
               type="button"
-              onClick={handlePurchaseRequest}
+              onClick={() => handlePurchaseRequest(isAdmin)}
               className="h-12 w-[340px] shrink-0 rounded-xl bg-primary-400 font-semibold text-white transition-colors hover:bg-primary-300"
             >
               {purchaseButtonLabel}
