@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import "react-toastify/dist/ReactToastify.css";
+import LayoutWithHeader from "@/components/LayoutWithHeader";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { CartProvider } from "@/contexts/CartContext";
+import { HeaderRefreshProvider } from "@/contexts/HeaderRefreshContext";
 import { ModalProvider } from "@/contexts/ModalContext";
 import { ToastContainer } from "react-toastify";
 
@@ -28,11 +30,15 @@ export default function RootLayout({
     <html lang="ko" className={pretendard.variable}>
       <body className={pretendard.className}>
         <AuthProvider>
-          <CartProvider>
-            <ModalProvider>
-              {children}
-            </ModalProvider>
-          </CartProvider>
+          <HeaderRefreshProvider>
+            <CartProvider>
+              <ModalProvider>
+                <LayoutWithHeader>
+                  {children}
+                </LayoutWithHeader>
+              </ModalProvider>
+            </CartProvider>
+          </HeaderRefreshProvider>
         </AuthProvider>
         <ToastContainer
           position="top-right"
