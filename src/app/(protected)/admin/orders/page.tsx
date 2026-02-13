@@ -34,6 +34,7 @@ export default function AdminOrdersPage() {
         page: currentPage,
         limit: 10,
         sort: SORT_MAP[sortOption],
+        status: "pending",
       });
       const apiOrders = res.data ?? [];
       setOrders(apiOrders);
