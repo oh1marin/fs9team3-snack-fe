@@ -38,11 +38,14 @@ export function formatRequestDate(value: string): string {
 export interface Order {
   id: string;
   requestDate: string;
+  approvedAt?: string;
   productLabel: string;
   otherCount: number;
   totalQuantity: number;
   orderAmount: number;
   status: OrderStatus;
+  requester?: string;
+  approver?: string;
   /** 목록에서 썸네일로 쓸 대표 이미지 (BE가 first_item_image 등으로 보내면 표시) */
   image?: string;
   /** 목록 첫 품목의 카테고리 (BE가 items[0].category 등으로 보내면 표시) */
@@ -106,11 +109,14 @@ function toOrder(o: Record<string, unknown>): Order {
   return {
     id: String(o.id ?? ""),
     requestDate: String(o.request_date ?? o.requestDate ?? o.created_at ?? o.createdAt ?? ""),
+    approvedAt: String(o.approved_at ?? o.approval_date ?? o.approvedAt ?? o.approvalDate ?? "").trim() || undefined,
     productLabel,
     otherCount: Number(o.other_count ?? o.otherCount ?? 0),
     totalQuantity,
     orderAmount: Number(o.order_amount ?? o.total_amount ?? o.orderAmount ?? o.totalAmount ?? 0),
     status: normalizeStatus(rawStatus),
+    requester: String(o.requester ?? o.request_user_name ?? o.requested_by ?? "").trim() || undefined,
+    approver: String(o.approver ?? o.approver_name ?? o.approved_by ?? "").trim() || undefined,
     ...(image && { image }),
     ...(firstItemCategory && { firstItemCategory }),
   };

@@ -67,6 +67,7 @@ export default function CartCompletePage() {
   const descriptionText = isAdminPurchase
     ? "성공적으로 구매가 완료되었습니다."
     : "관리자에게 성공적으로 구매 요청이 완료되었습니다.";
+  const historyLink = isAdminPurchase ? "/admin/purchase-history" : "/orders";
 
   return (
     <main className="mx-auto flex min-h-0 w-full max-w-[1920px] flex-col items-center overflow-x-hidden bg-background-peach px-4 pb-8 pt-[80px] sm:px-6">
@@ -193,7 +194,7 @@ export default function CartCompletePage() {
             장바구니로 돌아가기
           </Link>
           <Link
-            href="/orders"
+            href={historyLink}
             className="flex h-16 w-[310px] shrink-0 items-center justify-center rounded-xl bg-primary-400 text-lg font-semibold text-white transition-colors hover:bg-primary-300"
           >
             구매 내역 확인하기

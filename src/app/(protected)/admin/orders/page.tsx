@@ -167,7 +167,7 @@ export default function AdminOrdersPage() {
             className="flex h-20 items-center justify-center border-b border-t border-gray-200 bg-white text-center text-base font-semibold text-black-400"
             style={{ borderColor: "var(--color-gray-200, #E0E0E0)", background: "var(--color-gray-50, #FFF)" }}
           >
-            상태
+            요청인
           </div>
           <div
             className="flex h-20 items-center justify-center rounded-r-[100px] border-b border-r border-t border-gray-200 bg-white pr-5 text-center text-base font-semibold text-black-400"
@@ -234,7 +234,7 @@ export default function AdminOrdersPage() {
               href={`/orders/${row.id}`}
               className="flex h-20 items-center justify-center border-b border-line-gray text-center text-base text-black-400 hover:bg-gray-50"
             >
-              {row.status}
+              김스낵
             </Link>,
             <div
               key={`${row.id}-5`}
