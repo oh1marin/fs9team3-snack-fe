@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { fetchAdminOrders, formatRequestDate, formatSummaryTitle, type Order } from "@/lib/api/orders";
 import { toast } from "react-toastify";
@@ -31,9 +32,10 @@ export default function AdminPurchaseHistoryPage() {
         page: 1,
         limit: 200,
         sort: SORT_MAP[sortOption],
+        status: "approved",
       });
-      const approvedOnly = (res.data ?? []).filter((row) => row.status === "승인 완료");
-      setOrders(approvedOnly);
+      const list = res.data ?? [];
+      setOrders(list);
     } catch (err) {
       setOrders([]);
       toast.error(err instanceof Error ? err.message : "구매 내역을 불러오지 못했습니다.");
@@ -118,6 +120,15 @@ export default function AdminPurchaseHistoryPage() {
         {loading ? (
           <div className="flex min-h-[200px] items-center justify-center rounded-lg border border-line-gray bg-white">
             <p className="text-gray-500">불러오는 중...</p>
+          </div>
+        ) : orders.length === 0 ? (
+          <div className="flex min-h-[300px] flex-col items-center justify-center py-16">
+            <Image
+              src="/sadDog.png"
+              alt=""
+              width={388}
+              height={304}
+            />
           </div>
         ) : (
           <div

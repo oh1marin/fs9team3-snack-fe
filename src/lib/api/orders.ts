@@ -121,7 +121,7 @@ function toOrder(o: Record<string, unknown>): Order {
     approver: String(o.approver ?? o.approver_name ?? o.approved_by ?? "").trim() || undefined,
     ...(image && { image }),
     ...(firstItemCategory && { firstItemCategory }),
-    ...((o.is_instant_purchase === true || o.is_instant_purchase === "Y" || o.purchase_type === "instant") ? { isInstantPurchase: true } : {}),
+    ...(o.is_instant_purchase === true || o.is_instant_purchase === "Y" || o.is_instant_purchase === "true" || o.isInstantPurchase === true || o.isInstantPurchase === "Y" || o.purchase_type === "instant" ? { isInstantPurchase: true } : {}),
   };
 }
 
@@ -349,6 +349,6 @@ export async function fetchOrderDetail(orderId: string): Promise<OrderDetail | n
     totalCount: Number(d.total_count ?? d.totalCount ?? 0) || (Array.isArray(d.items) ? d.items.length : 0),
     totalAmount: Number(d.total_amount ?? d.totalAmount ?? 0),
     summaryTitle: d.summary_title != null ? String(d.summary_title) : undefined,
-    isInstantPurchase: d.is_instant_purchase === true || d.is_instant_purchase === "Y" || d.purchase_type === "instant",
+    isInstantPurchase: d.is_instant_purchase === true || d.is_instant_purchase === "Y" || d.is_instant_purchase === "true" || d.isInstantPurchase === true || d.isInstantPurchase === "Y" || d.purchase_type === "instant",
   };
 }
