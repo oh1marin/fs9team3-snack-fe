@@ -166,7 +166,7 @@ export default function AdminPurchaseHistoryDetailPage() {
                 <input
                   type="text"
                   readOnly
-                  value={data.requester || "김스낵"}
+                  value="김스낵"
                   className="flex-1 min-w-0 rounded-lg border border-line-gray bg-background-peach px-4 py-3 text-base text-black-400"
                 />
                 {data.isInstantPurchase && (

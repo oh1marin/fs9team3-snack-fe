@@ -5,7 +5,14 @@ import { setClientAccessToken } from "@/lib/api/authToken";
 import { authService } from "@/lib/service/authService";
 import { userService } from "@/lib/service/userService";
 
-import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+  ReactNode,
+} from "react";
 
 interface User {
   id: string;
@@ -27,7 +34,7 @@ interface AuthContextType {
     nickname: string,
     email: string,
     password: string,
-    passwordConfirmation: string
+    passwordConfirmation: string,
   ) => Promise<string | undefined>;
 }
 
@@ -78,7 +85,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     nickname: string,
     email: string,
     password: string,
-    passwordConfirmation: string
+    passwordConfirmation: string,
   ) => {
     const res = await fetch("/api/auth/signup", {
       method: "POST",
@@ -93,7 +100,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
     const result = await res.json();
     if (!res.ok) {
-      throw new Error(result.message ?? result.error ?? "회원가입에 실패했습니다.");
+      throw new Error(
+        result.message ?? result.error ?? "회원가입에 실패했습니다.",
+      );
     }
     if (result.accessToken) setClientAccessToken(result.accessToken);
     setUser(result.user ?? result.userData ?? null);
@@ -110,7 +119,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
     const result = await res.json();
     if (!res.ok) {
-      throw new Error(result.message ?? result.error ?? "로그인에 실패했습니다.");
+      throw new Error(
+        result.message ?? result.error ?? "로그인에 실패했습니다.",
+      );
     }
     if (result.accessToken) setClientAccessToken(result.accessToken);
     setUser(result.user ?? result.userData ?? null);
@@ -137,7 +148,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [getUser]);
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, refreshUser, setInitialUser, login, logout, register }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        isLoading,
+        refreshUser,
+        setInitialUser,
+        login,
+        logout,
+        register,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
