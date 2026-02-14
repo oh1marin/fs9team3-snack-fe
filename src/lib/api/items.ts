@@ -9,6 +9,8 @@ export interface RegisteredItem {
   categorySub: string;
   createAt: string;
   link: string | null;
+  /** 등록자 user id (본인 목록 필터용, BE에서 user_id / created_by 등으로 내려주면 사용) */
+  createdByUserId?: string | null;
 }
 
 export interface ItemsListResponse {
@@ -34,6 +36,7 @@ function formatCreateAt(value: string): string {
 
 function toRegisteredItem(raw: Record<string, unknown>): RegisteredItem {
   const createAt = String(raw.create_at ?? raw.createAt ?? "").trim();
+  const createdBy = raw.user_id ?? raw.userId ?? raw.created_by ?? raw.register_user_id;
   return {
     id: String(raw.id ?? ""),
     title: String(raw.title ?? "").trim(),
@@ -43,6 +46,7 @@ function toRegisteredItem(raw: Record<string, unknown>): RegisteredItem {
     categorySub: String(raw.category_sub ?? raw.categorySub ?? "").trim(),
     createAt: createAt ? formatCreateAt(createAt) : "—",
     link: raw.link != null && raw.link !== "" ? String(raw.link).trim() : null,
+    createdByUserId: createdBy != null ? String(createdBy) : undefined,
   };
 }
 

@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCart, type CartItem } from "@/contexts/CartContext";
+import { useAuth } from "@/contexts/AuthContext";
 import OrderSummary from "@/components/OrderSummary";
 import { toast } from "react-toastify";
 import { createOrder, createOrderFromCart, type CreateOrderItem } from "@/lib/api/orders";
@@ -20,6 +21,15 @@ function formatPrice(n: number) {
 
 export default function CartPage() {
   const router = useRouter();
+  const { user } = useAuth();
+  const rawAdmin = user?.is_admin ?? (user as { isAdmin?: string | boolean })?.isAdmin;
+  const isAdmin =
+    rawAdmin === "Y" ||
+    rawAdmin === "y" ||
+    rawAdmin === true ||
+    String(rawAdmin ?? "").toLowerCase() === "true";
+  const purchaseButtonLabel = isAdmin ? "즉시 구매" : "구매 요청";
+  const instantButtonLabel = isAdmin ? "즉시 구매" : "즉시 요청";
   const { items, cartLoaded, refetchCart, updateQuantity, removeItem, removeAll, removeSelected } =
     useCart();
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -95,6 +105,8 @@ export default function CartPage() {
       totalQuantity,
       totalAmount,
       message: "",
+      isAdmin,
+      purchaseMode: "instant" as const,
     };
     try {
       const orderItems: CreateOrderItem[] = [{
@@ -109,6 +121,7 @@ export default function CartPage() {
         items: orderItems,
         totalQuantity,
         totalAmount,
+        ...(isAdmin && { instant_purchase: true }),
       });
       sessionStorage.setItem(PURCHASE_COMPLETE_KEY, JSON.stringify(payload));
       try {
@@ -127,7 +140,7 @@ export default function CartPage() {
     }
   };
 
-  const handlePurchaseRequest = async () => {
+  const handlePurchaseRequest = async (instantPurchase = false) => {
     if (selectedItems.length === 0) {
       toast.warn("상품을 선택해 주세요.");
       return;
@@ -139,11 +152,13 @@ export default function CartPage() {
       totalQuantity,
       totalAmount,
       message: "",
+      isAdmin,
+      purchaseMode: instantPurchase ? ("instant" as const) : ("cart" as const),
     };
     try {
       const isFullCart = selectedItems.length === items.length && items.length > 0;
       if (isFullCart) {
-        await createOrderFromCart();
+        await createOrderFromCart(instantPurchase ? { instant_purchase: true } : undefined);
       } else {
         const orderItems: CreateOrderItem[] = selectedItems.map((it) => ({
           id: it.id,
@@ -157,6 +172,7 @@ export default function CartPage() {
           items: orderItems,
           totalQuantity,
           totalAmount,
+          ...(instantPurchase && { instant_purchase: true }),
         });
       }
       sessionStorage.setItem(PURCHASE_COMPLETE_KEY, JSON.stringify(payload));
@@ -443,7 +459,8 @@ export default function CartPage() {
             productAmount={productAmount}
             deliveryFee={deliveryFee}
             totalAmount={totalAmount}
-            onPurchaseRequest={handlePurchaseRequest}
+            onPurchaseRequest={() => handlePurchaseRequest(isAdmin)}
+            purchaseButtonLabel={purchaseButtonLabel}
             continueShoppingHref="/items"
           />
         </div>
@@ -543,7 +560,7 @@ export default function CartPage() {
                         onClick={() => handleInstantRequest(item)}
                         className="w-[120px] shrink-0 rounded-full bg-primary-400 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-primary-300 sm:w-[160px] sm:px-4 sm:py-2 sm:text-sm min-[400px]:w-[200px]"
                       >
-                        즉시 요청
+                          {instantButtonLabel}
                       </button>
                     </div>
                   </div>
@@ -617,10 +634,10 @@ export default function CartPage() {
             </Link>
             <button
               type="button"
-              onClick={handlePurchaseRequest}
+              onClick={() => handlePurchaseRequest(isAdmin)}
               className="h-12 w-[340px] shrink-0 rounded-xl bg-primary-400 font-semibold text-white transition-colors hover:bg-primary-300"
             >
-              구매 요청
+              {purchaseButtonLabel}
             </button>
           </div>
         </div>

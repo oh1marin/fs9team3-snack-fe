@@ -63,7 +63,14 @@ export default function AdminItemsPage() {
         sort: SORT_MAP[sortOption],
         mine: !isAdmin,
       });
-      setItems(res.data ?? []);
+      let list = res.data ?? [];
+      if (!isAdmin && user?.id) {
+        const hasCreatorInfo = list.some((i) => i.createdByUserId != null);
+        if (hasCreatorInfo) {
+          list = list.filter((i) => i.createdByUserId === user.id);
+        }
+      }
+      setItems(list);
       setTotalPages(res.pagination?.totalPages ?? 1);
     } catch {
       setItems([]);
@@ -71,7 +78,7 @@ export default function AdminItemsPage() {
     } finally {
       setLoading(false);
     }
-  }, [currentPage, sortOption, isAdmin]);
+  }, [currentPage, sortOption, isAdmin, user?.id]);
 
   useEffect(() => {
     loadItems();

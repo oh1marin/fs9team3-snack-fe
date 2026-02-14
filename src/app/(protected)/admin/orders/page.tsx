@@ -1,10 +1,13 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { fetchAdminOrders, updateAdminOrderStatus, formatRequestDate, formatSummaryTitle, type Order } from "@/lib/api/orders";
 import { toast } from "react-toastify";
 import { getImageSrc } from "@/lib/utils/image";
+
+type ConfirmType = "approve" | "reject";
 
 type SortOption = "최신순" | "낮은 금액순" | "높은 금액순";
 
@@ -26,6 +29,7 @@ export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalPages, setTotalPages] = useState(1);
+  const [confirmModal, setConfirmModal] = useState<{ type: ConfirmType; orderId: string } | null>(null);
 
   const loadOrders = useCallback(async () => {
     setLoading(true);
@@ -34,6 +38,7 @@ export default function AdminOrdersPage() {
         page: currentPage,
         limit: 10,
         sort: SORT_MAP[sortOption],
+        status: "pending",
       });
       const apiOrders = res.data ?? [];
       setOrders(apiOrders);
@@ -54,6 +59,7 @@ export default function AdminOrdersPage() {
   const handleReject = async (id: string) => {
     try {
       await updateAdminOrderStatus(id, "cancelled");
+      setConfirmModal(null);
       toast.success("반려되었습니다. 해당 상품이 요청자 장바구니에 다시 담겼습니다.");
       loadOrders();
     } catch (err) {
@@ -64,11 +70,20 @@ export default function AdminOrdersPage() {
   const handleApprove = async (id: string) => {
     try {
       await updateAdminOrderStatus(id, "approved");
+      setConfirmModal(null);
       toast.success("구매 요청을 승인했습니다.");
       loadOrders();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "승인 처리에 실패했습니다.");
     }
+  };
+
+  const openConfirm = (type: ConfirmType, orderId: string) => setConfirmModal({ type, orderId });
+  const closeConfirm = () => setConfirmModal(null);
+  const onConfirmYes = async () => {
+    if (!confirmModal) return;
+    if (confirmModal.type === "approve") await handleApprove(confirmModal.orderId);
+    else await handleReject(confirmModal.orderId);
   };
 
   return (
@@ -137,6 +152,15 @@ export default function AdminOrdersPage() {
           <div className="flex min-h-[200px] items-center justify-center rounded-lg border border-line-gray bg-white">
             <p className="text-gray-500">불러오는 중...</p>
           </div>
+        ) : orders.length === 0 ? (
+          <div className="flex min-h-[300px] flex-col items-center justify-center py-16">
+            <Image
+              src="/sadDog.png"
+              alt=""
+              width={388}
+              height={304}
+            />
+          </div>
         ) : (
         <div
           className="min-w-[820px] overflow-x-auto"
@@ -167,7 +191,7 @@ export default function AdminOrdersPage() {
             className="flex h-20 items-center justify-center border-b border-t border-gray-200 bg-white text-center text-base font-semibold text-black-400"
             style={{ borderColor: "var(--color-gray-200, #E0E0E0)", background: "var(--color-gray-50, #FFF)" }}
           >
-            상태
+            요청인
           </div>
           <div
             className="flex h-20 items-center justify-center rounded-r-[100px] border-b border-r border-t border-gray-200 bg-white pr-5 text-center text-base font-semibold text-black-400"
@@ -234,7 +258,7 @@ export default function AdminOrdersPage() {
               href={`/orders/${row.id}`}
               className="flex h-20 items-center justify-center border-b border-line-gray text-center text-base text-black-400 hover:bg-gray-50"
             >
-              {row.status}
+              김스낵
             </Link>,
             <div
               key={`${row.id}-5`}
@@ -256,7 +280,7 @@ export default function AdminOrdersPage() {
                     type="button"
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleReject(row.id);
+                      openConfirm("reject", row.id);
                     }}
                     className="flex shrink-0 items-center justify-center rounded-lg font-medium text-black-400 transition-colors hover:opacity-90"
                     style={{
@@ -273,7 +297,7 @@ export default function AdminOrdersPage() {
                     type="button"
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleApprove(row.id);
+                      openConfirm("approve", row.id);
                     }}
                     className="flex shrink-0 items-center justify-center font-medium text-white transition-colors hover:opacity-90"
                     style={{
@@ -332,6 +356,41 @@ export default function AdminOrdersPage() {
           &gt;
         </button>
       </div>
+      )}
+
+      {confirmModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          onClick={closeConfirm}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="confirm-title"
+        >
+          <div
+            className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-lg"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p id="confirm-title" className="text-center text-lg font-semibold text-black-400">
+              {confirmModal.type === "approve" ? "정말 승인하시겠습니까?" : "정말 반려하겠습니까?"}
+            </p>
+            <div className="mt-6 flex justify-center gap-3">
+              <button
+                type="button"
+                onClick={closeConfirm}
+                className="rounded-lg border border-line-gray bg-gray-100 px-6 py-2.5 font-medium text-black-400 hover:bg-gray-200"
+              >
+                취소
+              </button>
+              <button
+                type="button"
+                onClick={onConfirmYes}
+                className="rounded-lg bg-primary-400 px-6 py-2.5 font-medium text-white hover:bg-primary-300"
+              >
+                {confirmModal.type === "approve" ? "승인" : "반려"}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </main>
   );

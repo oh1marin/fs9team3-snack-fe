@@ -17,6 +17,8 @@ export interface OrderSummaryProps {
   totalAmount: number;
   /** 구매 요청 버튼 클릭 */
   onPurchaseRequest: () => void;
+  /** 역할별 메인 버튼 문구 */
+  purchaseButtonLabel?: string;
   /** 계속 쇼핑하기 링크 (기본: /items) */
   continueShoppingHref?: string;
 }
@@ -27,6 +29,7 @@ export default function OrderSummary({
   deliveryFee,
   totalAmount,
   onPurchaseRequest,
+  purchaseButtonLabel = "구매 요청",
   continueShoppingHref = "/items",
 }: OrderSummaryProps) {
   return (
@@ -174,7 +177,7 @@ export default function OrderSummary({
             className="h-[64px] w-full rounded-xl bg-primary-400 text-white"
             style={{ fontSize: "clamp(14px, 0.94vw, 18px)", fontWeight: 600 }}
           >
-            구매 요청
+            {purchaseButtonLabel}
           </button>
         </div>
         <div

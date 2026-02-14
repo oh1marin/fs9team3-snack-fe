@@ -38,15 +38,20 @@ export function formatRequestDate(value: string): string {
 export interface Order {
   id: string;
   requestDate: string;
+  approvedAt?: string;
   productLabel: string;
   otherCount: number;
   totalQuantity: number;
   orderAmount: number;
   status: OrderStatus;
+  requester?: string;
+  approver?: string;
   /** 목록에서 썸네일로 쓸 대표 이미지 (BE가 first_item_image 등으로 보내면 표시) */
   image?: string;
   /** 목록 첫 품목의 카테고리 (BE가 items[0].category 등으로 보내면 표시) */
   firstItemCategory?: string;
+  /** 관리자 즉시 구매 여부 (BE: is_instant_purchase, purchase_type === 'instant' 등) */
+  isInstantPurchase?: boolean;
 }
 
 export interface OrdersListResponse {
@@ -106,13 +111,17 @@ function toOrder(o: Record<string, unknown>): Order {
   return {
     id: String(o.id ?? ""),
     requestDate: String(o.request_date ?? o.requestDate ?? o.created_at ?? o.createdAt ?? ""),
+    approvedAt: String(o.approved_at ?? o.approval_date ?? o.approvedAt ?? o.approvalDate ?? "").trim() || undefined,
     productLabel,
     otherCount: Number(o.other_count ?? o.otherCount ?? 0),
     totalQuantity,
     orderAmount: Number(o.order_amount ?? o.total_amount ?? o.orderAmount ?? o.totalAmount ?? 0),
     status: normalizeStatus(rawStatus),
+    requester: String(o.requester ?? o.request_user_name ?? o.requested_by ?? "").trim() || undefined,
+    approver: String(o.approver ?? o.approver_name ?? o.approved_by ?? "").trim() || undefined,
     ...(image && { image }),
     ...(firstItemCategory && { firstItemCategory }),
+    ...(o.is_instant_purchase === true || o.is_instant_purchase === "Y" || o.is_instant_purchase === "true" || o.isInstantPurchase === true || o.isInstantPurchase === "Y" || o.purchase_type === "instant" ? { isInstantPurchase: true } : {}),
   };
 }
 
@@ -159,16 +168,19 @@ function getOrdersArray(raw: unknown): unknown[] {
   return [];
 }
 
-/** 관리자: 구매 요청 목록 (GET /api/admin/orders, 응답 형식 동일) */
+/** 관리자: 구매 요청 목록 (GET /api/admin/orders). status 있으면 해당 상태만 조회 (예: pending) */
 export async function fetchAdminOrders(params?: {
   page?: number;
   limit?: number;
   sort?: string;
+  /** 미지정 시 BE 기본값. 구매 요청 관리에서는 pending만 보려면 'pending' 전달 */
+  status?: string;
 }): Promise<OrdersListResponse> {
   const search = new URLSearchParams();
   if (params?.page != null) search.set("page", String(params.page));
   if (params?.limit != null) search.set("limit", String(params.limit));
   if (params?.sort) search.set("sort", params.sort);
+  if (params?.status) search.set("status", params.status);
   const q = search.toString();
   const raw = await fetchJSON<{ data?: unknown[]; orders?: unknown[]; pagination?: Record<string, unknown> } | unknown[]>(
     `/api/admin/orders${q ? `?${q}` : ""}`
@@ -216,11 +228,12 @@ export interface CreateOrderItem {
   image?: string;
 }
 
-/** 장바구니 전체로 주문 (body 없음 → BE가 해당 유저 장바구니 전부로 주문 생성 후 카트에서 삭제) */
-export async function createOrderFromCart(): Promise<Order> {
+/** 장바구니 전체로 주문 (BE가 해당 유저 장바구니 전부로 주문 생성 후 카트에서 삭제) */
+export async function createOrderFromCart(options?: { instant_purchase?: boolean }): Promise<Order> {
+  const body = options?.instant_purchase === true ? { instant_purchase: true } : {};
   const response = await apiClient("/api/orders", {
     method: "POST",
-    body: JSON.stringify({}),
+    body: JSON.stringify(body),
   });
   if (!response.ok) {
     const result = await response.json().catch(() => ({}));
@@ -237,6 +250,8 @@ export async function createOrder(body: {
   totalQuantity: number;
   totalAmount: number;
   message?: string;
+  /** 관리자 즉시 구매 시 true (BE에서 관리자만 허용) */
+  instant_purchase?: boolean;
 }): Promise<Order> {
   const payload = {
     items: body.items.map((it) => ({
@@ -249,6 +264,7 @@ export async function createOrder(body: {
     total_quantity: Number(body.totalQuantity),
     total_amount: Number(body.totalAmount),
     ...(body.message != null && body.message !== "" && { request_message: body.message }),
+    ...(body.instant_purchase === true && { instant_purchase: true }),
   };
   const response = await apiClient("/api/orders", {
     method: "POST",
@@ -297,6 +313,8 @@ export interface OrderDetail {
   totalAmount: number;
   /** BE summary_title (예: "코카콜라 제로 및 1개") */
   summaryTitle?: string;
+  /** 관리자 즉시 구매 여부 */
+  isInstantPurchase?: boolean;
 }
 
 /** 구매 요청 상세 조회 (BE: snake_case → FE: camelCase) */
@@ -331,5 +349,6 @@ export async function fetchOrderDetail(orderId: string): Promise<OrderDetail | n
     totalCount: Number(d.total_count ?? d.totalCount ?? 0) || (Array.isArray(d.items) ? d.items.length : 0),
     totalAmount: Number(d.total_amount ?? d.totalAmount ?? 0),
     summaryTitle: d.summary_title != null ? String(d.summary_title) : undefined,
+    isInstantPurchase: d.is_instant_purchase === true || d.is_instant_purchase === "Y" || d.is_instant_purchase === "true" || d.isInstantPurchase === true || d.isInstantPurchase === "Y" || d.purchase_type === "instant",
   };
 }
