@@ -48,12 +48,12 @@ export default function ProfilePage() {
     }
   };
 
-  const roleLabel =
-    user?.is_super_admin === "Y"
-      ? "최고 관리자"
-      : user?.is_admin === "Y"
-        ? "관리자"
-        : "일반";
+  const isSuperAdmin = user?.is_super_admin === "Y";
+  const roleLabel = isSuperAdmin
+    ? "최고 관리자"
+    : user?.is_admin === "Y"
+      ? "관리자"
+      : "일반";
 
   const handlePasswordInputChange = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -166,7 +166,12 @@ export default function ProfilePage() {
               value={userData.company}
               onChange={handleCompanyChange}
               placeholder="기업명을 입력해주세요."
-              className="h-14 sm:h-16 w-full rounded-xl sm:rounded-2xl border-2 border-primary-300 bg-white px-4 sm:px-6 text-lg-r sm:text-xl-r text-black-500 outline-none placeholder:text-gray-400 focus:border-primary-400"
+              disabled={!isSuperAdmin}
+              className={`h-14 sm:h-16 w-full rounded-xl sm:rounded-2xl border-2 px-4 sm:px-6 text-lg-r sm:text-xl-r outline-none placeholder:text-gray-400 ${
+                isSuperAdmin
+                  ? "border-primary-300 bg-white text-black-500 focus:border-primary-400"
+                  : "cursor-not-allowed border-gray-200 bg-gray-100 text-gray-500"
+              }`}
             />
           </div>
 

@@ -21,6 +21,15 @@ export interface OrderSummaryProps {
   purchaseButtonLabel?: string;
   /** 계속 쇼핑하기 링크 (기본: /items) */
   continueShoppingHref?: string;
+  /** 관리자/최고관리자용: 예산 정보 (전달 시 총 주문금액 아래에 월/시작/남은 예산 표시) */
+  budget?: {
+    budget_amount: number;
+    spent_amount: number;
+    remaining: number;
+    initial_budget: number;
+  } | null;
+  /** 관리자/최고관리자용: 예산 부족 시 구매 버튼 비활성화 */
+  purchaseDisabled?: boolean;
 }
 
 export default function OrderSummary({
@@ -31,6 +40,8 @@ export default function OrderSummary({
   onPurchaseRequest,
   purchaseButtonLabel = "구매 요청",
   continueShoppingHref = "/items",
+  budget,
+  purchaseDisabled = false,
 }: OrderSummaryProps) {
   return (
     <aside
@@ -44,7 +55,7 @@ export default function OrderSummary({
         className="flex w-full flex-col justify-center shrink-0 rounded-2xl bg-white p-4 text-black-400 max-[1100px]:bg-background-peach sm:p-6"
         style={{
           width: "100%",
-          height: "clamp(230px, 15.1vw, 290px)",
+          minHeight: "clamp(230px, 15.1vw, 290px)",
           fontSize: "clamp(13px, 0.83vw, 14px)",
           borderRadius: "16px",
           border: "1px solid var(--Line-Line-100, #F2F2F2)",
@@ -163,6 +174,58 @@ export default function OrderSummary({
                 {formatPrice(totalAmount)}
               </span>
             </div>
+            {budget != null && (
+              <div className="mt-3 space-y-2 border-t border-line-gray pt-3">
+                <div
+                  className="flex items-center justify-between"
+                  style={{
+                    color: "var(--Black-Black-100, #6B6B6B)",
+                    fontFamily: "Pretendard, sans-serif",
+                    fontSize: "14px",
+                    fontStyle: "normal",
+                    fontWeight: 500,
+                    lineHeight: "22px",
+                  }}
+                >
+                  <span>월 예산</span>
+                  <span className="font-semibold text-black-500">
+                    {formatPrice(budget.budget_amount)}
+                  </span>
+                </div>
+                <div
+                  className="flex items-center justify-between"
+                  style={{
+                    color: "var(--Black-Black-100, #6B6B6B)",
+                    fontFamily: "Pretendard, sans-serif",
+                    fontSize: "14px",
+                    fontStyle: "normal",
+                    fontWeight: 500,
+                    lineHeight: "22px",
+                  }}
+                >
+                  <span>시작 예산</span>
+                  <span className="font-semibold text-black-500">
+                    {formatPrice(budget.initial_budget)}
+                  </span>
+                </div>
+                <div
+                  className="flex items-center justify-between"
+                  style={{
+                    color: "var(--Black-Black-100, #6B6B6B)",
+                    fontFamily: "Pretendard, sans-serif",
+                    fontSize: "14px",
+                    fontStyle: "normal",
+                    fontWeight: 500,
+                    lineHeight: "22px",
+                  }}
+                >
+                  <span>남은 예산</span>
+                  <span className="font-bold text-black-500">
+                    {formatPrice(budget.remaining)}
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -174,7 +237,12 @@ export default function OrderSummary({
           <button
             type="button"
             onClick={onPurchaseRequest}
-            className="h-[64px] w-full rounded-xl bg-primary-400 text-white"
+            disabled={purchaseDisabled}
+            className={`h-[64px] w-full rounded-xl transition-colors ${
+              purchaseDisabled
+                ? "cursor-not-allowed bg-gray-300 text-gray-500"
+                : "bg-primary-400 text-white hover:bg-primary-300"
+            }`}
             style={{ fontSize: "clamp(14px, 0.94vw, 18px)", fontWeight: 600 }}
           >
             {purchaseButtonLabel}

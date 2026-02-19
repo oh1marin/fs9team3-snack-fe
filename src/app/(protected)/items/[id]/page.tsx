@@ -56,6 +56,11 @@ export default function ProductDetailPage() {
       });
 
       if (!response.ok) {
+        if (response.status === 401) {
+          const { handleTokenExpired } = await import("@/lib/api/handleTokenExpired");
+          handleTokenExpired();
+          return;
+        }
         throw new Error("상품을 불러올 수 없습니다");
       }
 

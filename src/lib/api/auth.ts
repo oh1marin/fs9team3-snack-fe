@@ -57,6 +57,15 @@ export const getCurrentUserAPI = async () => {
 
   if (!response.ok) {
     if (response.status === 401) {
+      const { handleTokenExpired } = await import("./handleTokenExpired");
+      if (typeof window !== "undefined") {
+        if (
+          !window.location.pathname.startsWith("/login") &&
+          !window.location.pathname.startsWith("/signup")
+        ) {
+          handleTokenExpired();
+        }
+      }
       const error = new Error(result.message || "인증이 만료되었습니다.");
       (error as any).status = 401;
       throw error;
@@ -83,6 +92,15 @@ export const changePasswordAPI = async (password: string) => {
   const result = await response.json();
 
   if (!response.ok) {
+    if (response.status === 401) {
+      const { handleTokenExpired } = await import("./handleTokenExpired");
+      if (typeof window !== "undefined") {
+        handleTokenExpired();
+      }
+      const error = new Error(result.message || "인증이 만료되었습니다.");
+      (error as any).status = 401;
+      throw error;
+    }
     throw new Error(result.message || "비밀번호 변경에 실패했습니다.");
   }
 

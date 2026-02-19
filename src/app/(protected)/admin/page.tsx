@@ -798,6 +798,8 @@ function formatBudgetAmount(n: number | undefined): string {
   return n.toLocaleString("ko-KR");
 }
 
+const MAX_BUDGET = 100_000_000; // 1억 원
+
 function parseBudgetInput(s: string): number {
   const n = parseInt(s.replace(/[^0-9]/g, ""), 10);
   return Number.isNaN(n) ? 0 : n;
@@ -816,11 +818,12 @@ function BudgetSection() {
     try {
       const res = await fetchBudgetCurrentAPI();
       const b = res.budget ?? {};
+      const init = res.initial_budget;
       setMonthlyBudget(
         b.budget_amount != null ? formatBudgetAmount(b.budget_amount) : "",
       );
       setStartingBudget(
-        b.spent_amount != null ? formatBudgetAmount(b.spent_amount) : "",
+        init?.amount != null ? formatBudgetAmount(init.amount) : "",
       );
     } catch (err) {
       const msg =
@@ -836,12 +839,20 @@ function BudgetSection() {
     loadBudget();
   }, []);
 
+  const budgetAmount = parseBudgetInput(monthlyBudget);
+  const initialBudget = parseBudgetInput(startingBudget);
+  const isMonthlyOver = budgetAmount > MAX_BUDGET;
+  const isStartingOver = initialBudget > MAX_BUDGET;
+  const isBudgetOverLimit = isMonthlyOver || isStartingOver;
+
   const handleSave = async () => {
-    const budgetAmount = parseBudgetInput(monthlyBudget);
-    const spentAmount = parseBudgetInput(startingBudget);
-    const body: { budget_amount?: number; spent_amount?: number } = {};
+    if (isBudgetOverLimit) {
+      toast.error("예산은 1억 원을 초과할 수 없습니다.");
+      return;
+    }
+    const body: { budget_amount?: number; initial_budget?: number } = {};
     if (budgetAmount >= 0) body.budget_amount = budgetAmount;
-    if (spentAmount >= 0) body.spent_amount = spentAmount;
+    if (initialBudget >= 0) body.initial_budget = initialBudget;
     if (Object.keys(body).length === 0) {
       toast.info("변경할 값을 입력해 주세요.");
       return;
@@ -897,13 +908,21 @@ function BudgetSection() {
                   v ? parseInt(v, 10).toLocaleString("ko-KR") : "",
                 );
               }}
-              className="h-16 w-full rounded-2xl border px-4 text-left text-base text-black-400 outline-none placeholder:text-gray-400 focus:border-primary-400"
+              className={`h-16 w-full rounded-2xl border-2 px-4 text-left text-base outline-none placeholder:text-gray-400 focus:border-primary-400 ${
+                isMonthlyOver
+                  ? "border-red-500 text-red-600"
+                  : "border-[#FCC49C] text-black-400"
+              }`}
               style={{
                 borderRadius: "16px",
-                border: "1px solid var(--Primary-orange-300, #FCC49C)",
                 background: "var(--gray-gray-50, #FFF)",
               }}
             />
+            {isMonthlyOver && (
+              <span className="text-sm font-medium text-red-600">
+                예산은 1억 원을 초과할 수 없습니다.
+              </span>
+            )}
           </label>
           <label className="flex w-full flex-col items-start gap-2">
             <span className="text-base font-medium text-black-400">
@@ -918,24 +937,32 @@ function BudgetSection() {
                   v ? parseInt(v, 10).toLocaleString("ko-KR") : "",
                 );
               }}
-              className="h-16 w-full rounded-2xl border px-4 text-left text-base text-black-400 outline-none placeholder:text-gray-400 focus:border-primary-400"
+              className={`h-16 w-full rounded-2xl border-2 px-4 text-left text-base outline-none placeholder:text-gray-400 focus:border-primary-400 ${
+                isStartingOver
+                  ? "border-red-500 text-red-600"
+                  : "border-[#FCC49C] text-black-400"
+              }`}
               style={{
                 borderRadius: "16px",
-                border: "1px solid var(--Primary-orange-300, #FCC49C)",
                 background: "var(--gray-gray-50, #FFF)",
               }}
             />
+            {isStartingOver && (
+              <span className="text-sm font-medium text-red-600">
+                예산은 1억 원을 초과할 수 없습니다.
+              </span>
+            )}
           </label>
           <div className="w-full border-b border-line-gray" />
           <div className="mt-4 flex w-full justify-center">
             <button
               type="button"
               onClick={handleSave}
-              disabled={saving}
-              className="h-16 w-full max-w-[640px] font-semibold text-white transition-colors hover:opacity-90 disabled:opacity-50"
+              disabled={saving || isBudgetOverLimit}
+              className="h-16 w-full max-w-[640px] font-semibold text-white transition-colors hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
               style={{
                 borderRadius: "16px",
-                background: "var(--Primary-orange-400, #F97B22)",
+                background: isBudgetOverLimit ? "#9CA3AF" : "var(--Primary-orange-400, #F97B22)",
               }}
             >
               {saving ? "수정 중..." : "수정하기"}

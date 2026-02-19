@@ -83,8 +83,15 @@ export interface BudgetCurrent {
   [key: string]: unknown;
 }
 
+export interface InitialBudgetDto {
+  id?: string;
+  amount?: number;
+  updated_at?: string;
+}
+
 export interface FetchBudgetCurrentResponse {
   budget: BudgetCurrent;
+  initial_budget?: InitialBudgetDto;
 }
 
 /** 최고관리자: 이번 달 예산 조회 (GET /api/super-admin/budget/current) */
@@ -94,6 +101,7 @@ export async function fetchBudgetCurrentAPI(): Promise<FetchBudgetCurrentRespons
 
 export interface UpdateBudgetCurrentBody {
   budget_amount?: number;
+  initial_budget?: number;
   spent_amount?: number;
 }
 
