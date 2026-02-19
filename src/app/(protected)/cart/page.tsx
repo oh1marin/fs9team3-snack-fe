@@ -9,6 +9,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import OrderSummary from "@/components/OrderSummary";
 import { toast } from "react-toastify";
 import { createOrder, createOrderFromCart, type CreateOrderItem } from "@/lib/api/orders";
+import { fetchBudgetCurrentAPI } from "@/lib/api/superAdmin";
 import { getImageSrc } from "@/lib/utils/image";
 
 const PURCHASE_COMPLETE_KEY = "snack_purchase_complete";
@@ -35,14 +36,51 @@ export default function CartPage() {
   const { items, cartLoaded, refetchCart, budget, updateQuantity, removeItem, removeAll, removeSelected } =
     useCart();
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [fallbackRemaining, setFallbackRemaining] = useState<number | null>(null);
 
   // 상품 담고 "장바구니 바로가기"로 진입해도 목록 갱신되도록 페이지 마운트 시 재조회
   useEffect(() => {
     refetchCart();
   }, [refetchCart]);
 
-  // 관리자/최고관리자: cart API에서 budget 포함 시 사용 (일반 사용자는 budget undefined)
-  const remainingBudget = canSeeBudget && budget ? budget.remaining : null;
+  // 관리자/최고관리자: cart API에 budget 없거나 remaining 0일 때 예산 API fallback
+  useEffect(() => {
+    if (!canSeeBudget) {
+      setFallbackRemaining(null);
+      return;
+    }
+    const fromCart = budget?.remaining;
+    if (fromCart != null && fromCart > 0) {
+      setFallbackRemaining(null);
+      return;
+    }
+    let mounted = true;
+    fetchBudgetCurrentAPI()
+      .then((res) => {
+        if (!mounted) return;
+        const b = res.budget ?? {};
+        const remaining =
+          typeof b.remaining === "number"
+            ? b.remaining
+            : typeof b.budget_amount === "number" && typeof b.spent_amount === "number"
+              ? Math.max(0, b.budget_amount - b.spent_amount)
+              : null;
+        setFallbackRemaining(remaining);
+      })
+      .catch(() => {
+        if (mounted) setFallbackRemaining(null);
+      });
+    return () => {
+      mounted = false;
+    };
+  }, [canSeeBudget, budget?.remaining]);
+
+  // cart budget 우선 (양수일 때), 없거나 0이면 fallback (예산 API) 사용
+  const remainingBudget = canSeeBudget
+    ? (budget?.remaining != null && budget.remaining > 0
+        ? budget.remaining
+        : fallbackRemaining ?? budget?.remaining ?? null)
+    : null;
 
   const selectedItems = items.filter((it) => selectedIds.has(it.id));
   const productAmount = selectedItems.reduce(
@@ -499,7 +537,7 @@ export default function CartPage() {
             onPurchaseRequest={() => handlePurchaseRequest(isAdmin)}
             purchaseButtonLabel={purchaseButtonLabel}
             continueShoppingHref="/items"
-            budget={canSeeBudget && budget ? budget : undefined}
+            remainingBudget={canSeeBudget && budget != null ? budget.remaining : undefined}
             purchaseDisabled={isBudgetExceeded}
           />
         </div>
@@ -671,26 +709,12 @@ export default function CartPage() {
               <span className="text-black-400">총 주문금액</span>
               <span className="text-right text-primary-400">{formatPrice(totalAmount)}</span>
             </div>
-            {canSeeBudget && budget != null && (
-              <div className="space-y-2 border-t border-line-gray pt-3">
-                <div className="flex justify-between text-sm text-gray-500">
-                  <span>월 예산</span>
-                  <span className="text-right font-semibold text-black-400">
-                    {formatPrice(budget.budget_amount)}
-                  </span>
-                </div>
-                <div className="flex justify-between text-sm text-gray-500">
-                  <span>시작 예산</span>
-                  <span className="text-right font-semibold text-black-400">
-                    {formatPrice(budget.initial_budget)}
-                  </span>
-                </div>
-                <div className="flex justify-between text-sm text-gray-500">
-                  <span>남은 예산</span>
-                  <span className="text-right font-semibold text-black-400">
-                    {formatPrice(budget.remaining)}
-                  </span>
-                </div>
+            {canSeeBudget && remainingBudget != null && (
+              <div className="flex justify-between border-t border-line-gray pt-3">
+                <span className="text-base font-bold text-black-400">남은 예산</span>
+                <span className="text-right text-lg font-bold text-primary-400">
+                  {formatPrice(remainingBudget)}
+                </span>
               </div>
             )}
           </div>

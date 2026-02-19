@@ -1,7 +1,7 @@
 "use client";
 
 import { logoutAction } from "@/lib/actions/auth";
-import { setClientAccessToken } from "@/lib/api/authToken";
+import { setClientAccessToken, setClientRefreshToken } from "@/lib/api/authToken";
 import { authService } from "@/lib/service/authService";
 import { userService } from "@/lib/service/userService";
 
@@ -110,6 +110,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       );
     }
     if (result.accessToken) setClientAccessToken(result.accessToken);
+    if (result.refreshToken) setClientRefreshToken(result.refreshToken);
     setUser(result.user ?? result.userData ?? null);
     setIsLoading(false);
     return result.message;
@@ -129,6 +130,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       );
     }
     if (result.accessToken) setClientAccessToken(result.accessToken);
+    if (result.refreshToken) setClientRefreshToken(result.refreshToken);
     setUser(result.user ?? result.userData ?? null);
     setIsLoading(false);
     return result.message;
@@ -140,7 +142,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (e) {
       // 백엔드 실패해도 로컬은 로그아웃 처리
     }
-    setClientAccessToken(null);
+    const { clearClientTokens } = await import("@/lib/api/authToken");
+    clearClientTokens();
     await logoutAction();
     setUser(null);
     return "로그아웃되었습니다.";

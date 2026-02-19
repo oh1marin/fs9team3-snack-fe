@@ -1,5 +1,36 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
+/** refreshToken으로 새 accessToken, refreshToken 발급 (토큰 회전) */
+export async function refreshAuthAPI(): Promise<{
+  accessToken: string;
+  refreshToken: string;
+}> {
+  const { getClientRefreshToken } = await import("./authToken");
+  const refreshToken = getClientRefreshToken();
+  const body: { refreshToken?: string } = {};
+  if (refreshToken) body.refreshToken = refreshToken;
+
+  const response = await fetch(`${API_URL}/api/auth/refresh`, {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    const error = new Error(result.message || "토큰 갱신에 실패했습니다.");
+    (error as any).status = response.status;
+    throw error;
+  }
+
+  return {
+    accessToken: result.accessToken,
+    refreshToken: result.refreshToken,
+  };
+}
+
 export const signupAPI = async (data: {
   email: string;
   password: string;
@@ -44,8 +75,11 @@ export const loginAPI = async (email: string, password: string) => {
   return result;
 };
 
-export const getCurrentUserAPI = async () => {
-  const { getClientAccessToken } = await import("./authToken");
+export const getCurrentUserAPI = async (
+  isRetry = false
+): Promise<Record<string, unknown>> => {
+  const { getClientAccessToken, setClientAccessToken, setClientRefreshToken } =
+    await import("./authToken");
   const token = getClientAccessToken();
   const response = await fetch(`${API_URL}/api/auth/me`, {
     method: "GET",
@@ -57,15 +91,31 @@ export const getCurrentUserAPI = async () => {
 
   if (!response.ok) {
     if (response.status === 401) {
-      const { handleTokenExpired } = await import("./handleTokenExpired");
-      if (typeof window !== "undefined") {
-        if (
-          !window.location.pathname.startsWith("/login") &&
-          !window.location.pathname.startsWith("/signup")
-        ) {
-          handleTokenExpired();
+      if (typeof window === "undefined") {
+        const error = new Error(result.message || "인증이 만료되었습니다.");
+        (error as any).status = 401;
+        throw error;
+      }
+      if (
+        window.location.pathname.startsWith("/login") ||
+        window.location.pathname.startsWith("/signup")
+      ) {
+        const error = new Error(result.message || "인증이 만료되었습니다.");
+        (error as any).status = 401;
+        throw error;
+      }
+      if (!isRetry) {
+        try {
+          const { accessToken, refreshToken } = await refreshAuthAPI();
+          setClientAccessToken(accessToken);
+          setClientRefreshToken(refreshToken);
+          return getCurrentUserAPI(true);
+        } catch {
+          // refresh 실패 시 아래에서 처리
         }
       }
+      const { handleTokenExpired } = await import("./handleTokenExpired");
+      handleTokenExpired();
       const error = new Error(result.message || "인증이 만료되었습니다.");
       (error as any).status = 401;
       throw error;
@@ -76,8 +126,12 @@ export const getCurrentUserAPI = async () => {
   return result;
 };
 
-export const changePasswordAPI = async (password: string) => {
-  const { getClientAccessToken } = await import("./authToken");
+export const changePasswordAPI = async (
+  password: string,
+  isRetry = false
+): Promise<{ message?: string }> => {
+  const { getClientAccessToken, setClientAccessToken, setClientRefreshToken } =
+    await import("./authToken");
   const token = getClientAccessToken();
   const response = await fetch(`${API_URL}/api/auth/password`, {
     method: "PATCH",
@@ -93,10 +147,18 @@ export const changePasswordAPI = async (password: string) => {
 
   if (!response.ok) {
     if (response.status === 401) {
-      const { handleTokenExpired } = await import("./handleTokenExpired");
-      if (typeof window !== "undefined") {
-        handleTokenExpired();
+      if (typeof window !== "undefined" && !isRetry) {
+        try {
+          const { accessToken, refreshToken } = await refreshAuthAPI();
+          setClientAccessToken(accessToken);
+          setClientRefreshToken(refreshToken);
+          return changePasswordAPI(password, true);
+        } catch {
+          // refresh 실패 시 아래에서 처리
+        }
       }
+      const { handleTokenExpired } = await import("./handleTokenExpired");
+      if (typeof window !== "undefined") handleTokenExpired();
       const error = new Error(result.message || "인증이 만료되었습니다.");
       (error as any).status = 401;
       throw error;

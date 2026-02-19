@@ -21,13 +21,8 @@ export interface OrderSummaryProps {
   purchaseButtonLabel?: string;
   /** 계속 쇼핑하기 링크 (기본: /items) */
   continueShoppingHref?: string;
-  /** 관리자/최고관리자용: 예산 정보 (전달 시 총 주문금액 아래에 월/시작/남은 예산 표시) */
-  budget?: {
-    budget_amount: number;
-    spent_amount: number;
-    remaining: number;
-    initial_budget: number;
-  } | null;
+  /** 관리자/최고관리자용: 남은 예산 금액 (전달 시 총 주문금액 아래에 한 줄 표시) */
+  remainingBudget?: number | null;
   /** 관리자/최고관리자용: 예산 부족 시 구매 버튼 비활성화 */
   purchaseDisabled?: boolean;
 }
@@ -40,7 +35,7 @@ export default function OrderSummary({
   onPurchaseRequest,
   purchaseButtonLabel = "구매 요청",
   continueShoppingHref = "/items",
-  budget,
+  remainingBudget,
   purchaseDisabled = false,
 }: OrderSummaryProps) {
   return (
@@ -174,56 +169,34 @@ export default function OrderSummary({
                 {formatPrice(totalAmount)}
               </span>
             </div>
-            {budget != null && (
-              <div className="mt-3 space-y-2 border-t border-line-gray pt-3">
-                <div
-                  className="flex items-center justify-between"
+            {remainingBudget != null && (
+              <div className="mt-3 flex items-center justify-between">
+                <span
                   style={{
-                    color: "var(--Black-Black-100, #6B6B6B)",
+                    color: "var(--Black-Black-500, #040404)",
                     fontFamily: "Pretendard, sans-serif",
-                    fontSize: "14px",
+                    fontSize: "16px",
                     fontStyle: "normal",
-                    fontWeight: 500,
-                    lineHeight: "22px",
+                    fontWeight: 700,
+                    lineHeight: "26px",
+                    textAlign: "center",
                   }}
                 >
-                  <span>월 예산</span>
-                  <span className="font-semibold text-black-500">
-                    {formatPrice(budget.budget_amount)}
-                  </span>
-                </div>
-                <div
-                  className="flex items-center justify-between"
+                  남은 예산
+                </span>
+                <span
+                  className="font-bold text-primary-400"
                   style={{
-                    color: "var(--Black-Black-100, #6B6B6B)",
                     fontFamily: "Pretendard, sans-serif",
-                    fontSize: "14px",
+                    fontSize: "24px",
                     fontStyle: "normal",
-                    fontWeight: 500,
-                    lineHeight: "22px",
+                    fontWeight: 700,
+                    lineHeight: "32px",
+                    textAlign: "center",
                   }}
                 >
-                  <span>시작 예산</span>
-                  <span className="font-semibold text-black-500">
-                    {formatPrice(budget.initial_budget)}
-                  </span>
-                </div>
-                <div
-                  className="flex items-center justify-between"
-                  style={{
-                    color: "var(--Black-Black-100, #6B6B6B)",
-                    fontFamily: "Pretendard, sans-serif",
-                    fontSize: "14px",
-                    fontStyle: "normal",
-                    fontWeight: 500,
-                    lineHeight: "22px",
-                  }}
-                >
-                  <span>남은 예산</span>
-                  <span className="font-bold text-black-500">
-                    {formatPrice(budget.remaining)}
-                  </span>
-                </div>
+                  {formatPrice(remainingBudget)}
+                </span>
               </div>
             )}
           </div>
