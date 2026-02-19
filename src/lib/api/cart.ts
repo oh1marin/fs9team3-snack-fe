@@ -55,16 +55,32 @@ function toCartItemDto(d: Record<string, unknown>): CartItemDto {
   };
 }
 
+function parseNum(v: unknown): number {
+  if (v == null) return 0;
+  if (typeof v === "number" && !Number.isNaN(v)) return v;
+  const n = Number(v);
+  return Number.isNaN(n) ? 0 : n;
+}
+
 function toCartBudget(b: Record<string, unknown> | null | undefined): CartBudget | undefined {
   if (!b || typeof b !== "object") return undefined;
-  const budgetAmount = Number(b.budget_amount ?? b.budgetAmount ?? 0);
-  const spentAmount = Number(b.spent_amount ?? b.spentAmount ?? 0);
-  const remaining = Number(b.remaining ?? 0);
-  const initialBudget = Number(b.initial_budget ?? b.initialBudget ?? budgetAmount);
+  const budgetAmount = parseNum(b.budget_amount ?? b.budgetAmount);
+  const spentAmount = parseNum(b.spent_amount ?? b.spentAmount);
+  const rawRemaining = b.remaining ?? b.remainingBudget ?? b.remaining_amount ?? b.remainingAmount;
+  // BE가 remaining 미포함 시 budget_amount - spent_amount로 계산
+  const parsedRemaining = parseNum(rawRemaining);
+  const calculatedRemaining = Math.max(0, budgetAmount - spentAmount);
+  const remaining =
+    rawRemaining !== undefined && rawRemaining !== null && parsedRemaining > 0
+      ? parsedRemaining
+      : budgetAmount > 0 || spentAmount > 0
+        ? calculatedRemaining
+        : parsedRemaining;
+  const initialBudget = parseNum(b.initial_budget ?? b.initialBudget) || budgetAmount;
   return {
     budget_amount: budgetAmount,
     spent_amount: spentAmount,
-    remaining: remaining >= 0 ? remaining : Math.max(0, budgetAmount - spentAmount),
+    remaining: Math.max(0, remaining),
     initial_budget: initialBudget,
   };
 }
