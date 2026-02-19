@@ -10,8 +10,19 @@ export interface CartItemDto {
   quantity: number;
 }
 
+/** 장바구니 예산 (관리자/최고관리자만 응답에 포함) */
+export interface CartBudget {
+  budget_amount: number;
+  spent_amount: number;
+  remaining: number;
+  initial_budget: number;
+}
+
 export interface CartResponse {
   items: CartItemDto[];
+  total_amount?: number;
+  shipping_fee?: number;
+  budget?: CartBudget;
 }
 
 /** BE 응답 한 줄을 id/title/price/image/quantity(camelCase)로 통일. price는 반드시 단가(unit). total_price만 오면 단가 = total_price/quantity */
@@ -44,6 +55,20 @@ function toCartItemDto(d: Record<string, unknown>): CartItemDto {
   };
 }
 
+function toCartBudget(b: Record<string, unknown> | null | undefined): CartBudget | undefined {
+  if (!b || typeof b !== "object") return undefined;
+  const budgetAmount = Number(b.budget_amount ?? b.budgetAmount ?? 0);
+  const spentAmount = Number(b.spent_amount ?? b.spentAmount ?? 0);
+  const remaining = Number(b.remaining ?? 0);
+  const initialBudget = Number(b.initial_budget ?? b.initialBudget ?? budgetAmount);
+  return {
+    budget_amount: budgetAmount,
+    spent_amount: spentAmount,
+    remaining: remaining >= 0 ? remaining : Math.max(0, budgetAmount - spentAmount),
+    initial_budget: initialBudget,
+  };
+}
+
 function normalizeCartResponse(raw: unknown): CartResponse {
   if (Array.isArray(raw)) {
     return { items: raw.map((x) => toCartItemDto((x as Record<string, unknown>) ?? {})) };
@@ -52,7 +77,15 @@ function normalizeCartResponse(raw: unknown): CartResponse {
   if (!obj) return { items: [] };
   const list = obj.items ?? obj.data ?? obj.cart;
   const arr = Array.isArray(list) ? list : [];
-  return { items: arr.map((x) => toCartItemDto((x as Record<string, unknown>) ?? {})) };
+  const items = arr.map((x) => toCartItemDto((x as Record<string, unknown>) ?? {}));
+  const budgetRaw = obj.budget;
+  const budget = budgetRaw && typeof budgetRaw === "object" ? toCartBudget(budgetRaw as Record<string, unknown>) : undefined;
+  return {
+    items,
+    total_amount: typeof obj.total_amount === "number" ? obj.total_amount : undefined,
+    shipping_fee: typeof obj.shipping_fee === "number" ? obj.shipping_fee : undefined,
+    budget,
+  };
 }
 
 /** 장바구니 목록 조회 (BE snake_case 수용) */

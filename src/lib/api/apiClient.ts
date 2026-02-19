@@ -1,4 +1,5 @@
 import { getClientAccessToken } from "./authToken";
+import { handleTokenExpired } from "./handleTokenExpired";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
@@ -21,12 +22,13 @@ export async function apiClient(
 
   if (response.status === 401) {
     if (typeof window !== "undefined") {
-      if (!window.location.pathname.startsWith("/login") && 
-          !window.location.pathname.startsWith("/signup")) {
-        window.location.href = "/login";
+      if (
+        !window.location.pathname.startsWith("/login") &&
+        !window.location.pathname.startsWith("/signup")
+      ) {
+        handleTokenExpired();
       }
     }
-    
     const error = new Error("인증이 만료되었습니다.");
     (error as any).status = 401;
     throw error;
