@@ -20,6 +20,8 @@ interface User {
   nickname?: string;
   /** 관리자 여부: 'Y' | 'N'. 일반 유저 N, 관리자 Y */
   is_admin?: string;
+  /** 최고관리자 여부: 'Y' | 'N'. 최고관리자만 초대 발송 등 가능 */
+  is_super_admin?: string;
   [key: string]: any;
 }
 
@@ -35,6 +37,7 @@ interface AuthContextType {
     email: string,
     password: string,
     passwordConfirmation: string,
+    invitationToken?: string,
   ) => Promise<string | undefined>;
 }
 
@@ -86,6 +89,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     email: string,
     password: string,
     passwordConfirmation: string,
+    invitationToken?: string,
   ) => {
     const res = await fetch("/api/auth/signup", {
       method: "POST",
@@ -96,6 +100,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         email,
         password,
         passwordConfirmation,
+        ...(invitationToken ? { invitationToken } : {}),
       }),
     });
     const result = await res.json();
