@@ -24,15 +24,36 @@ export default function ProfilePage() {
   const [passwordError, setPasswordError] = useState("");
   const [passwordConfirmError, setPasswordConfirmError] = useState("");
 
+  const PROFILE_COMPANY_KEY = "profile_company";
+
   useEffect(() => {
     if (user) {
+      const savedCompany =
+        typeof window !== "undefined"
+          ? localStorage.getItem(`${PROFILE_COMPANY_KEY}_${user.id}`)
+          : null;
       setUserData({
-        company: user.company_name || "코드잇",
-        name: user.name || "",
-        email: user.email || "",
+        company: savedCompany ?? user.company_name ?? "코드잇",
+        name: user.nickname ?? user.name ?? "",
+        email: user.email ?? "",
       });
     }
   }, [user]);
+
+  const handleCompanyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setUserData((prev) => ({ ...prev, company: value }));
+    if (user?.id && typeof window !== "undefined") {
+      localStorage.setItem(`${PROFILE_COMPANY_KEY}_${user.id}`, value);
+    }
+  };
+
+  const roleLabel =
+    user?.is_super_admin === "Y"
+      ? "최고 관리자"
+      : user?.is_admin === "Y"
+        ? "관리자"
+        : "일반";
 
   const handlePasswordInputChange = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -143,8 +164,21 @@ export default function ProfilePage() {
             <input
               type="text"
               value={userData.company}
-              disabled
-              className="h-14 sm:h-16 w-full rounded-xl sm:rounded-2xl border-2 border-gray-200 bg-gray-100 px-4 sm:px-6 text-lg-r sm:text-xl-r text-gray-400"
+              onChange={handleCompanyChange}
+              placeholder="기업명을 입력해주세요."
+              className="h-14 sm:h-16 w-full rounded-xl sm:rounded-2xl border-2 border-primary-300 bg-white px-4 sm:px-6 text-lg-r sm:text-xl-r text-black-500 outline-none placeholder:text-gray-400 focus:border-primary-400"
+            />
+          </div>
+
+          <div>
+            <label className="mb-2 sm:mb-3 block text-lg-m sm:text-xl-m text-black-500">
+              권한
+            </label>
+            <input
+              type="text"
+              value={roleLabel}
+              readOnly
+              className="h-14 sm:h-16 w-full rounded-xl sm:rounded-2xl border-2 border-gray-200 bg-gray-100 px-4 sm:px-6 text-lg-r sm:text-xl-r text-gray-600"
             />
           </div>
 

@@ -8,12 +8,15 @@ type JWTPayload = { exp?: number; iat?: number; [key: string]: unknown };
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const backendBody = {
+    const backendBody: Record<string, unknown> = {
       email: body.email,
       password: body.password,
       passwordConfirm: body.passwordConfirmation ?? body.passwordConfirm,
       name: body.nickname ?? body.name,
     };
+    if (body.invitationToken) {
+      backendBody.invitationToken = body.invitationToken;
+    }
 
     const backendRes = await fetch(`${API_URL}/api/auth/signup`, {
       method: "POST",

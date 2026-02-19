@@ -154,7 +154,9 @@ export default function CartCompletePage() {
                 </span>
                 <span
                   className="font-bold text-primary-400"
-                  style={{ fontSize: "clamp(1.125rem, 0.5vw + 1rem, 1.375rem)" }}
+                  style={{
+                    fontSize: "clamp(1.125rem, 0.5vw + 1rem, 1.375rem)",
+                  }}
                 >
                   {formatPrice(data.totalAmount)}
                 </span>
@@ -169,7 +171,9 @@ export default function CartCompletePage() {
                 </span>
                 <span
                   className="mt-1.5 block font-bold text-primary-400"
-                  style={{ fontSize: "clamp(1.125rem, 0.5vw + 1rem, 1.375rem)" }}
+                  style={{
+                    fontSize: "clamp(1.125rem, 0.5vw + 1rem, 1.375rem)",
+                  }}
                 >
                   {formatPrice(data.totalAmount)}
                 </span>
