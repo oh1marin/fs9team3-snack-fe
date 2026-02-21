@@ -124,6 +124,46 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const addToCart = useCallback(
     async (itemId: string, quantity = 1, snapshot?: CartItemSnapshot) => {
+      const existing = itemsRef.current.find(
+        (it) => it.itemId === itemId || it.id === itemId,
+      );
+      if (existing) {
+        let prevItems: CartItem[] = [];
+        setItems((current) => {
+          prevItems = current;
+          return current.map((it) =>
+            it.id === existing.id
+              ? { ...it, quantity: it.quantity + quantity }
+              : it,
+          );
+        });
+        const nextCnt = cartCountRef.current + quantity;
+        setCartCount(nextCnt);
+        setCartCountStore(nextCnt);
+        try {
+          const res = await updateCartItemQuantityApi(
+            existing.id,
+            existing.quantity + quantity,
+          );
+          if (res.items && res.items.length > 0) {
+            const nextItems = res.items.map(dtoToItem);
+            const cnt = getTotalCount(nextItems);
+            setItems(nextItems);
+            setCartCount(cnt);
+            setCartCountStore(cnt);
+            if (res.budget != null) setBudget(res.budget);
+          } else {
+            await refetchCart();
+          }
+        } catch {
+          const cnt = getTotalCount(prevItems);
+          setItems(prevItems);
+          setCartCount(cnt);
+          setCartCountStore(cnt);
+          throw new Error("수량 변경에 실패했습니다.");
+        }
+        return;
+      }
       const optimisticCount = cartCountRef.current + quantity;
       setCartCount(optimisticCount);
       setCartCountStore(optimisticCount);
