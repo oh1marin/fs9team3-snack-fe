@@ -331,7 +331,11 @@ function parseOrderDetailToResponse(d: Record<string, unknown>): OrderDetail {
     requestDate: String(d.request_date ?? d.requestDate ?? ""),
     requestMessage: String(d.request_message ?? d.requestMessage ?? ""),
     requester: String(d.requester ?? d.request_user_name ?? d.requested_by ?? "").trim(),
-    approvalDate: String(d.approval_date ?? d.approvalDate ?? ""),
+    approvalDate: String(
+      d.approval_date ?? d.approvalDate ?? d.approved_at ?? d.approvedAt ??
+      d.rejected_at ?? d.rejectedAt ?? d.cancelled_at ?? d.cancelledAt ?? d.canceled_at ?? d.canceledAt ??
+      ""
+    ),
     approver: String(d.approver ?? ""),
     status: normalizeStatus(d.status),
     resultMessage: String(d.result_message ?? d.resultMessage ?? ""),

@@ -3,7 +3,12 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { fetchOrderDetail, formatRequestDate, formatSummaryTitle, type OrderDetail } from "@/lib/api/orders";
+import {
+  fetchOrderDetail,
+  formatRequestDate,
+  formatSummaryTitle,
+  type OrderDetail,
+} from "@/lib/api/orders";
 import { getImageSrc } from "@/lib/utils/image";
 
 function formatPrice(n: number) {
@@ -63,7 +68,13 @@ export default function AdminPurchaseHistoryDetailPage() {
           </h2>
           {(data.summaryTitle || data.items.length > 0) && (
             <p className="mb-4 text-base text-gray-600">
-              상품이름: {data.summaryTitle ? formatSummaryTitle(data.summaryTitle) : (data.items[0]?.name ? `${data.items[0].name} 및 ${data.totalCount}개` : "—")} / 총 수량: {data.totalCount}개
+              상품이름:{" "}
+              {data.summaryTitle
+                ? formatSummaryTitle(data.summaryTitle)
+                : data.items[0]?.name
+                  ? `${data.items[0].name} 및 ${data.totalCount}개`
+                  : "—"}{" "}
+              / 총 수량: {data.totalCount}개
             </p>
           )}
           <div
@@ -157,35 +168,19 @@ export default function AdminPurchaseHistoryDetailPage() {
             <h3 className="border-b border-line-gray pb-3 text-base font-semibold text-black-400">
               요청 정보
             </h3>
-            <p className="mt-4 text-base text-black-400">{formatRequestDate(data.requestDate)}</p>
+            <p className="mt-4 text-base text-black-400">
+              {formatRequestDate(data.requestDate)}
+            </p>
             <div className="mt-4">
               <label className="block text-sm font-medium text-gray-600">
                 요청인
               </label>
-              <div className="mt-1.5 flex flex-wrap items-center gap-2">
-                <input
-                  type="text"
-                  readOnly
-                  value="김스낵"
-                  className="flex-1 min-w-0 rounded-lg border border-line-gray bg-background-peach px-4 py-3 text-base text-black-400"
-                />
-                {data.isInstantPurchase && (
-                  <span
-                    className="shrink-0 rounded-lg border px-3 py-1.5 text-center font-semibold"
-                    style={{
-                      color: "var(--Primary-orange-400, #F97B22)",
-                      fontFamily: "Pretendard, sans-serif",
-                      fontSize: "16px",
-                      fontWeight: 600,
-                      lineHeight: "26px",
-                      borderColor: "var(--Primary-orange-200, #FDE1CD)",
-                      background: "var(--Primary-orange-100, #FEF3EB)",
-                    }}
-                  >
-                    즉시 구매
-                  </span>
-                )}
-              </div>
+              <input
+                type="text"
+                readOnly
+                value="김스낵"
+                className="mt-1.5 w-full rounded-lg border border-line-gray bg-background-peach px-4 py-3 text-base text-black-400"
+              />
             </div>
             <div className="mt-4">
               <label className="block text-sm font-medium text-gray-600">
@@ -194,7 +189,17 @@ export default function AdminPurchaseHistoryDetailPage() {
               <textarea
                 readOnly
                 rows={4}
-                value={data.requestMessage}
+                value={
+                  (() => {
+                    const productName =
+                      data.items[0]?.name ??
+                      (data.summaryTitle
+                        ? data.summaryTitle.replace(/ 및 \d+개$/, "").trim()
+                        : "") ??
+                      "상품";
+                    return `${productName} 인기가 많아요. 많이 주문하면 좋을 것 같아요!`;
+                  })()
+                }
                 className="mt-1.5 w-full resize-none rounded-lg border border-line-gray bg-background-peach px-4 py-3 text-base text-black-400"
               />
             </div>
@@ -204,7 +209,9 @@ export default function AdminPurchaseHistoryDetailPage() {
             <h3 className="border-b border-line-gray pb-3 text-base font-semibold text-black-400">
               승인 정보
             </h3>
-            <p className="mt-4 text-base text-black-400">{formatRequestDate(data.approvalDate)}</p>
+            <p className="mt-4 text-base text-black-400">
+              {formatRequestDate(data.approvalDate)}
+            </p>
             <div className="mt-4">
               <label className="block text-sm font-medium text-gray-600">
                 담당자
@@ -212,18 +219,7 @@ export default function AdminPurchaseHistoryDetailPage() {
               <input
                 type="text"
                 readOnly
-                value={data.approver || "김코드"}
-                className="mt-1.5 w-full rounded-lg border border-line-gray bg-background-peach px-4 py-3 text-base text-black-400"
-              />
-            </div>
-            <div className="mt-4">
-              <label className="block text-sm font-medium text-gray-600">
-                상태
-              </label>
-              <input
-                type="text"
-                readOnly
-                value={data.status}
+                value="김코드"
                 className="mt-1.5 w-full rounded-lg border border-line-gray bg-background-peach px-4 py-3 text-base text-black-400"
               />
             </div>
@@ -234,7 +230,7 @@ export default function AdminPurchaseHistoryDetailPage() {
               <textarea
                 readOnly
                 rows={4}
-                value={data.resultMessage}
+                value="재고가 얼마 남지 않아 승인합니다."
                 className="mt-1.5 w-full resize-none rounded-lg border border-line-gray bg-background-peach px-4 py-3 text-base text-black-400"
               />
             </div>

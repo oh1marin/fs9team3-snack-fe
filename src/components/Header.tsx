@@ -116,7 +116,7 @@ export default function Header({ hasToken = false }: { hasToken?: boolean }) {
             </Link>
             <Link
               href="/orders"
-              className={`text-sm font-semibold transition-colors min-[376px]:text-base ${pathname === "/orders" ? "text-primary-400" : "text-gray-400 hover:text-primary-400"}`}
+              className={`text-sm font-semibold transition-colors min-[376px]:text-base ${pathname === "/orders" || pathname.startsWith("/orders/") ? "text-primary-400" : "text-gray-400 hover:text-primary-400"}`}
             >
               구매 요청 내역
             </Link>
@@ -124,7 +124,7 @@ export default function Header({ hasToken = false }: { hasToken?: boolean }) {
               <>
                 <Link
                   href="/admin/orders"
-                  className={`text-sm font-semibold transition-colors min-[376px]:text-base ${pathname === "/admin/orders" ? "text-primary-400" : "text-gray-400 hover:text-primary-400"}`}
+                  className={`text-sm font-semibold transition-colors min-[376px]:text-base ${pathname.startsWith("/admin/orders") ? "text-primary-400" : "text-gray-400 hover:text-primary-400"}`}
                 >
                   구매 요청 관리
                 </Link>
@@ -269,7 +269,7 @@ export default function Header({ hasToken = false }: { hasToken?: boolean }) {
               <Link
                 href="/orders"
                 onClick={() => setMenuOpen(false)}
-                className={`rounded-lg px-4 py-3 text-base font-medium ${pathname === "/orders" ? "bg-primary-100 text-primary-400" : "text-gray-600 hover:bg-gray-100"}`}
+                className={`rounded-lg px-4 py-3 text-base font-medium ${pathname === "/orders" || pathname.startsWith("/orders/") ? "bg-primary-100 text-primary-400" : "text-gray-600 hover:bg-gray-100"}`}
               >
                 구매 요청 내역
               </Link>
@@ -278,7 +278,7 @@ export default function Header({ hasToken = false }: { hasToken?: boolean }) {
                   <Link
                     href="/admin/orders"
                     onClick={() => setMenuOpen(false)}
-                    className={`rounded-lg px-4 py-3 text-base font-medium ${pathname === "/admin/orders" ? "bg-primary-100 text-primary-400" : "text-gray-600 hover:bg-gray-100"}`}
+                    className={`rounded-lg px-4 py-3 text-base font-medium ${pathname.startsWith("/admin/orders") ? "bg-primary-100 text-primary-400" : "text-gray-600 hover:bg-gray-100"}`}
                   >
                     구매 요청 관리
                   </Link>

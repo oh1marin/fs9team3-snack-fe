@@ -423,7 +423,7 @@ function MembersSection({
                   type="button"
                   onClick={() => setDeleteTarget(m)}
                   disabled={isCurrentUser(m)}
-                  className="rounded-lg border border-line-gray bg-white px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="rounded-lg border border-line-gray bg-gray-200 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-300 disabled:cursor-not-allowed disabled:opacity-50"
                   title={
                     isCurrentUser(m)
                       ? "본인 계정은 탈퇴할 수 없습니다."
@@ -860,7 +860,10 @@ function BudgetSection() {
     setSaving(true);
     try {
       await updateBudgetCurrentAPI(body);
-      toast.success("예산이 수정되었습니다.");
+      toast.success("예산이 수정되었습니다.", {
+        containerId: "budget-toast",
+        className: "toast-budget-orange",
+      });
       loadBudget();
     } catch (err) {
       toast.error(
@@ -910,12 +913,11 @@ function BudgetSection() {
               }}
               className={`h-16 w-full rounded-2xl border-2 px-4 text-left text-base outline-none placeholder:text-gray-400 focus:border-primary-400 ${
                 isMonthlyOver
-                  ? "border-red-500 text-red-600"
-                  : "border-[#FCC49C] text-black-400"
+                  ? "border-red-500 text-red-600 bg-white"
+                  : "border-[#FCC49C] text-black-400 bg-white"
               }`}
               style={{
                 borderRadius: "16px",
-                background: "var(--gray-gray-50, #FFF)",
               }}
             />
             {isMonthlyOver && (
@@ -939,12 +941,11 @@ function BudgetSection() {
               }}
               className={`h-16 w-full rounded-2xl border-2 px-4 text-left text-base outline-none placeholder:text-gray-400 focus:border-primary-400 ${
                 isStartingOver
-                  ? "border-red-500 text-red-600"
-                  : "border-[#FCC49C] text-black-400"
+                  ? "border-red-500 text-red-600 bg-white"
+                  : "border-[#FCC49C] text-black-400 bg-white"
               }`}
               style={{
                 borderRadius: "16px",
-                background: "var(--gray-gray-50, #FFF)",
               }}
             />
             {isStartingOver && (

@@ -351,3 +351,20 @@ button:disabled,
 .cart-table .cart-col-divider {
   border-left: 1px solid #E6E6E6 !important;
 }
+
+/* 예산 수정 토스트 - 상단 가운데, 주황색 (배경·체크 아이콘 포함) */
+.Toastify__toast.toast-budget-orange {
+  background: #F97B22 !important;
+  color: #fff !important;
+}
+.Toastify__toast.toast-budget-orange .Toastify__toast-icon {
+  color: #fff !important;
+}
+.Toastify__toast.toast-budget-orange .Toastify__toast-icon svg,
+.Toastify__toast.toast-budget-orange svg {
+  fill: #fff !important;
+}
+.Toastify__toast.toast-budget-orange .Toastify__progress-bar,
+.Toastify__toast.toast-budget-orange .Toastify__progress-bar--success {
+  background: rgba(255, 255, 255, 0.8) !important;
+}
