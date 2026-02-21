@@ -25,6 +25,12 @@ interface User {
   [key: string]: any;
 }
 
+function isUser(value: unknown): value is User {
+  if (!value || typeof value !== "object") return false;
+  const v = value as Record<string, unknown>;
+  return typeof v.id === "string" && typeof v.email === "string";
+}
+
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
@@ -60,9 +66,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       setIsLoading(true);
       const response = await userService.getMe();
-      const userData =
+      const candidate =
         response?.user ?? response?.data ?? (response?.id ? response : null);
-      setUser(userData || null);
+      setUser(isUser(candidate) ? candidate : null);
       setIsLoading(false);
     } catch (error: any) {
       if (error.status === 401) {
