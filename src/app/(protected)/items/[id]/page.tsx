@@ -11,6 +11,7 @@ import { useModal } from "@/contexts/ModalContext";
 import { toast } from "react-toastify";
 import { getClientAccessToken } from "@/lib/api/authToken";
 import { getImageSrc } from "@/lib/utils/image";
+import DeleteModal from "@/components/DeleteModal";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
@@ -40,6 +41,7 @@ export default function ProductDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const { openModal, closeModal } = useModal();
   const { addToCart } = useCart();
@@ -57,7 +59,8 @@ export default function ProductDetailPage() {
 
       if (!response.ok) {
         if (response.status === 401) {
-          const { handleTokenExpired } = await import("@/lib/api/handleTokenExpired");
+          const { handleTokenExpired } =
+            await import("@/lib/api/handleTokenExpired");
           handleTokenExpired();
           return;
         }
@@ -67,7 +70,9 @@ export default function ProductDetailPage() {
       const data = await response.json();
       setProduct(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "상품을 불러올 수 없습니다");
+      setError(
+        err instanceof Error ? err.message : "상품을 불러올 수 없습니다",
+      );
     } finally {
       setLoading(false);
     }
@@ -83,16 +88,47 @@ export default function ProductDetailPage() {
   const handleEditProduct = () => {
     if (product) {
       openModal(
-        <ProductModal 
-          onClose={closeModal} 
+        <ProductModal
+          onClose={closeModal}
           onSuccess={() => {
             fetchProduct();
           }}
           editMode={true}
           product={product}
-        />
+        />,
       );
     }
+  };
+
+  const handleDeleteProduct = () => {
+    if (!product) return;
+
+    openModal(
+      <DeleteModal
+        itemName={product.title}
+        cancelText="더 생각해볼게요"
+        onClose={closeModal}
+        onConfirm={async () => {
+          try {
+            const token = getClientAccessToken();
+
+            const response = await fetch(`${API_URL}/api/items/${productId}`, {
+              method: "DELETE",
+              credentials: "include",
+              headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+            });
+
+            if (!response.ok) throw new Error("삭제 실패");
+
+            closeModal();
+            toast.success("상품이 삭제되었습니다.");
+            router.push("/items");
+          } catch {
+            toast.error("상품 삭제에 실패했습니다.");
+          }
+        }}
+      />,
+    );
   };
 
   const handleAddToCart = async () => {
@@ -111,10 +147,12 @@ export default function ProductDetailPage() {
             closeModal();
             router.push("/cart");
           }}
-        />
+        />,
       );
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "장바구니 담기에 실패했습니다.");
+      toast.error(
+        err instanceof Error ? err.message : "장바구니 담기에 실패했습니다.",
+      );
     }
   };
 
@@ -132,7 +170,9 @@ export default function ProductDetailPage() {
     return (
       <div className="mx-auto min-h-screen w-full max-w-[1920px] bg-background-peach px-4 py-8">
         <div className="flex flex-col justify-center items-center h-96 gap-4">
-          <p className="text-lg-m text-gray-400">{error || "상품을 찾을 수 없습니다"}</p>
+          <p className="text-lg-m text-gray-400">
+            {error || "상품을 찾을 수 없습니다"}
+          </p>
           <Link href={listReturnUrl} className="text-primary-400 underline">
             목록으로 돌아가기
           </Link>
@@ -177,16 +217,18 @@ export default function ProductDetailPage() {
         </div>
 
         <div className="flex flex-col gap-4 sm:gap-6">
-          <p className="text-md-m sm:text-lg-m text-gray-400">{product.category_sub}          </p>
+          <p className="text-md-m sm:text-lg-m text-gray-400">
+            {product.category_sub}
+          </p>
 
           <h1 className="text-2xl-b sm:text-3xl-b text-black-500">
             {product.title}
           </h1>
 
           <div>
-            <span 
+            <span
               className="inline-block px-3 py-1.5 rounded text-primary-400 text-sm sm:text-md-sb"
-              style={{ backgroundColor: '#FEE8B0' }}
+              style={{ backgroundColor: "#FEE8B0" }}
             >
               {product.count || 0}회 구매
             </span>
@@ -204,13 +246,48 @@ export default function ProductDetailPage() {
             <p className="text-2xl-b sm:text-3xl-b text-black-500">
               {product.price.toLocaleString()}원
             </p>
+
+            {/* 점 3개 메뉴 */}
             {product.isOwner && (
-              <button
-                onClick={handleEditProduct}
-                className="px-4 py-2 rounded-lg border-2 border-primary-300 bg-white text-md-sb text-primary-400 transition-colors hover:bg-primary-100"
-              >
-                상품 수정
-              </button>
+              <div className="relative">
+                <button
+                  onClick={() => setMenuOpen((v) => !v)}
+                  className="flex flex-col items-center justify-center w-10 h-10 gap-1 rounded-full hover:bg-gray-100 transition-colors"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-gray-500" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-gray-500" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-gray-500" />
+                </button>
+
+                {menuOpen && (
+                  <>
+                    <div
+                      className="fixed inset-0 z-10"
+                      onClick={() => setMenuOpen(false)}
+                    />
+                    <div className="absolute right-0 top-12 z-20 w-36 rounded-xl bg-white shadow-lg border border-gray-100 overflow-hidden">
+                      <button
+                        onClick={() => {
+                          setMenuOpen(false);
+                          handleEditProduct();
+                        }}
+                        className="w-full px-4 py-3 text-left text-md-r text-black-400 hover:bg-gray-50 transition-colors"
+                      >
+                        상품 수정
+                      </button>
+                      <button
+                        onClick={() => {
+                          setMenuOpen(false);
+                          handleDeleteProduct();
+                        }}
+                        className="w-full px-4 py-3 text-left text-md-r text-red-400 hover:bg-red-50 transition-colors"
+                      >
+                        상품 삭제
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
             )}
           </div>
 
@@ -223,7 +300,7 @@ export default function ProductDetailPage() {
                 5포인트 적립 예정
               </span>
             </div>
-            
+
             <div className="flex items-start gap-3 sm:gap-4">
               <span className="w-20 sm:w-24 flex-shrink-0 text-md-m sm:text-lg-m text-black-300">
                 배송방법
@@ -232,7 +309,7 @@ export default function ProductDetailPage() {
                 택배
               </span>
             </div>
-            
+
             <div className="flex items-start gap-3 sm:gap-4">
               <span className="w-20 sm:w-24 flex-shrink-0 text-md-m sm:text-lg-m text-black-300">
                 배송비
@@ -249,9 +326,10 @@ export default function ProductDetailPage() {
                 <span className="w-20 sm:w-24 flex-shrink-0 text-md-m sm:text-lg-m text-black-300">
                   제품링크
                 </span>
-                <a 
-                  href={product.link} 
-                  target="_blank" 
+
+                <a
+                  href={product.link}
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="text-md-r sm:text-lg-r text-primary-400 hover:underline break-all"
                 >
@@ -265,22 +343,28 @@ export default function ProductDetailPage() {
             <div className="flex flex-wrap items-center gap-3">
               <div
                 className="flex shrink-0 items-center justify-end gap-2 px-4 rounded-2xl border-2 border-primary-300 bg-white"
-                style={{
-                  width: 200,
-                  height: 64,
-                }}
+                style={{ width: 200, height: 64 }}
               >
                 <span className="min-w-[3.25rem] text-right text-lg-m text-primary-400">
                   {quantity} 개
                 </span>
-                <div className="flex flex-col items-center justify-center" style={{ gap: 5 }}>
+                <div
+                  className="flex flex-col items-center justify-center"
+                  style={{ gap: 5 }}
+                >
                   <button
                     type="button"
                     onClick={() => setQuantity((q) => q + 1)}
                     className="flex items-center justify-center w-8 h-8 text-primary-400 transition-colors hover:opacity-80"
                     aria-label="수량 증가"
                   >
-                    <Image src="/upsemo.png" alt="수량 증가" width={20} height={20} className="object-contain" />
+                    <Image
+                      src="/upsemo.png"
+                      alt="수량 증가"
+                      width={20}
+                      height={20}
+                      className="object-contain"
+                    />
                   </button>
                   <button
                     type="button"
@@ -288,7 +372,13 @@ export default function ProductDetailPage() {
                     className="flex items-center justify-center w-8 h-8 text-primary-400 transition-colors hover:opacity-80"
                     aria-label="수량 감소"
                   >
-                    <Image src="/downsemo.png" alt="수량 감소" width={20} height={20} className="object-contain" />
+                    <Image
+                      src="/downsemo.png"
+                      alt="수량 감소"
+                      width={20}
+                      height={20}
+                      className="object-contain"
+                    />
                   </button>
                 </div>
               </div>
