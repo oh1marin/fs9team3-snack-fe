@@ -1,23 +1,16 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
-import Image from "next/image";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/contexts/CartContext";
 import {
   fetchOrderDetail,
-  fetchOrderDetailAdmin,
-  updateAdminOrderStatus,
   formatRequestDate,
-  formatSummaryTitle,
   type OrderDetail,
 } from "@/lib/api/orders";
 import { toast } from "react-toastify";
 import { getImageSrc } from "@/lib/utils/image";
-
-type ResultModalType = "approve" | "reject" | null;
 
 function formatPrice(n: number) {
   return n.toLocaleString("ko-KR") + "원";
@@ -27,26 +20,9 @@ export default function OrderDetailPage() {
   const params = useParams();
   const id = params?.id as string;
   const router = useRouter();
-  const { user } = useAuth();
   const { addToCart } = useCart();
   const [data, setData] = useState<OrderDetail | null | undefined>(undefined);
-  const [resultModal, setResultModal] = useState<ResultModalType>(null);
-  const [processing, setProcessing] = useState(false);
   const [addingToCart, setAddingToCart] = useState(false);
-
-  const rawAdmin =
-    user?.is_admin ?? (user as { isAdmin?: string | boolean })?.isAdmin;
-  const isAdmin =
-    rawAdmin === "Y" ||
-    rawAdmin === "y" ||
-    rawAdmin === true ||
-    String(rawAdmin ?? "").toLowerCase() === "true";
-
-  const reloadData = useCallback(() => {
-    if (!id) return;
-    const fetcher = isAdmin ? fetchOrderDetailAdmin : fetchOrderDetail;
-    fetcher(id).then((res) => setData(res ?? null));
-  }, [id, isAdmin]);
 
   useEffect(() => {
     if (!id) {
@@ -54,46 +30,13 @@ export default function OrderDetailPage() {
       return;
     }
     let cancelled = false;
-    const fetcher = isAdmin ? fetchOrderDetailAdmin : fetchOrderDetail;
-    fetcher(id).then((res) => {
+    fetchOrderDetail(id).then((res) => {
       if (!cancelled) setData(res ?? null);
     });
     return () => {
       cancelled = true;
     };
-  }, [id, isAdmin]);
-
-  const handleApprove = async () => {
-    if (!id) return;
-    try {
-      setProcessing(true);
-      await updateAdminOrderStatus(id, "approved");
-      setResultModal("approve");
-      reloadData();
-    } catch (err) {
-      toast.error(
-        err instanceof Error ? err.message : "승인 처리에 실패했습니다.",
-      );
-    } finally {
-      setProcessing(false);
-    }
-  };
-
-  const handleReject = async () => {
-    if (!id) return;
-    try {
-      setProcessing(true);
-      await updateAdminOrderStatus(id, "cancelled");
-      setResultModal("reject");
-      reloadData();
-    } catch (err) {
-      toast.error(
-        err instanceof Error ? err.message : "반려 처리에 실패했습니다.",
-      );
-    } finally {
-      setProcessing(false);
-    }
-  };
+  }, [id]);
 
   const handleAddToCart = async () => {
     if (!data?.items?.length) return;
@@ -124,9 +67,6 @@ export default function OrderDetailPage() {
     }
   };
 
-  const isPending = data?.status === "승인 대기";
-  const showApproveRejectButtons = isAdmin && isPending;
-
   if (data === undefined) {
     return (
       <main className="mx-auto flex min-h-[50vh] w-full max-w-[1920px] flex-col items-center justify-center bg-background-peach px-4 py-16">
@@ -136,12 +76,11 @@ export default function OrderDetailPage() {
   }
 
   if (!data) {
-    const listHref = isAdmin ? "/admin/orders" : "/orders";
     return (
       <main className="mx-auto flex min-h-[50vh] w-full max-w-[1920px] flex-col items-center justify-center bg-background-peach px-4 py-16">
         <p className="mb-4 text-gray-500">요청 내역을 찾을 수 없습니다.</p>
         <Link
-          href={listHref}
+          href="/orders"
           className="rounded-xl bg-[#FDF0DF] px-6 py-3 font-semibold text-primary-400 transition-colors hover:bg-primary-200/50"
         >
           목록 보기
@@ -153,7 +92,6 @@ export default function OrderDetailPage() {
   return (
     <main className="mx-auto min-h-0 w-full max-w-[1920px] overflow-x-auto bg-background-peach px-2 py-8 sm:px-4">
       <div className="mx-auto flex w-full max-w-[1600px] flex-col gap-4 lg:flex-row lg:items-start lg:gap-[24px]">
-        {/* 왼쪽: 요청 품목 - lg에서 1041px 고정해서 오른쪽 블록과 간격 확실히 적용 */}
         <section className="min-w-0 flex-1 lg:w-[1041px] lg:flex-none">
           <h1 className="mb-2 text-2xl font-bold text-black-400">
             구매 요청 내역
@@ -161,17 +99,6 @@ export default function OrderDetailPage() {
           <h2 className="mb-2 text-lg font-semibold text-black-400">
             요청 품목
           </h2>
-          {(data.summaryTitle || data.items.length > 0) && (
-            <p className="mb-4 text-base text-gray-600">
-              상품이름:{" "}
-              {data.summaryTitle
-                ? formatSummaryTitle(data.summaryTitle)
-                : data.items[0]?.name
-                  ? `${data.items[0].name} 및 ${data.totalCount}개`
-                  : "—"}{" "}
-              / 총 수량: {data.totalCount}개
-            </p>
-          )}
           <div
             className="mb-6 flex flex-col overflow-y-auto"
             style={{
@@ -260,49 +187,25 @@ export default function OrderDetailPage() {
             className="flex flex-nowrap items-center gap-4"
             style={{ width: "1041px", maxWidth: "100%" }}
           >
-            {showApproveRejectButtons ? (
-              <div className="flex w-full flex-1 gap-4">
-                <button
-                  type="button"
-                  onClick={handleReject}
-                  disabled={processing}
-                  className="flex h-16 flex-1 items-center justify-center rounded-2xl bg-[#EFEFEF] p-4 text-base font-medium text-black-400 transition-colors hover:bg-gray-200 disabled:opacity-50"
-                >
-                  요청 반려
-                </button>
-                <button
-                  type="button"
-                  onClick={handleApprove}
-                  disabled={processing}
-                  className="flex h-16 flex-1 items-center justify-center rounded-2xl bg-primary-400 p-4 text-base font-medium text-white transition-colors hover:bg-primary-300 disabled:opacity-50"
-                >
-                  요청 승인
-                </button>
-              </div>
-            ) : (
-              <div className="flex w-full flex-1 gap-4">
-                <Link
-                  href={isAdmin ? "/admin/orders" : "/orders"}
-                  className="flex flex-1 items-center justify-center rounded-2xl bg-[#FDF0DF] py-4 text-base font-semibold text-primary-400 transition-colors hover:bg-primary-200/50"
-                  style={{ minHeight: 64 }}
-                >
-                  목록 보기
-                </Link>
-                <button
-                  type="button"
-                  onClick={handleAddToCart}
-                  disabled={addingToCart}
-                  className="flex flex-1 items-center justify-center rounded-2xl bg-primary-400 py-4 text-base font-medium text-white transition-colors hover:bg-primary-300 disabled:opacity-50"
-                  style={{ minHeight: 64 }}
-                >
-                  {addingToCart ? "담는 중..." : "장바구니에 다시 담기"}
-                </button>
-              </div>
-            )}
+            <Link
+              href="/orders"
+              className="flex flex-1 items-center justify-center rounded-2xl bg-[#FDF0DF] py-4 text-base font-semibold text-primary-400 transition-colors hover:bg-primary-200/50"
+              style={{ minHeight: 64 }}
+            >
+              목록 보기
+            </Link>
+            <button
+              type="button"
+              onClick={handleAddToCart}
+              disabled={addingToCart}
+              className="flex flex-1 items-center justify-center rounded-2xl bg-primary-400 py-4 text-base font-medium text-white transition-colors hover:bg-primary-300 disabled:opacity-50"
+              style={{ minHeight: 64 }}
+            >
+              {addingToCart ? "담는 중..." : "장바구니에 다시 담기"}
+            </button>
           </div>
         </section>
 
-        {/* 오른쪽: 요청 정보 / 승인 정보 - 구분선만 */}
         <aside className="w-full shrink-0 lg:w-[380px]">
           <div className="border-b border-line-gray bg-background-peach p-6">
             <h3 className="border-b border-line-gray pb-3 text-base font-semibold text-black-400">
@@ -329,7 +232,17 @@ export default function OrderDetailPage() {
               <textarea
                 readOnly
                 rows={4}
-                value={data.requestMessage}
+                value={
+                  (() => {
+                    const productName =
+                      data.items[0]?.name ??
+                      (data.summaryTitle
+                        ? data.summaryTitle.replace(/ 및 \d+개$/, "").trim()
+                        : "") ??
+                      "상품";
+                    return `${productName} 인기가 많아요. 많이 주문하면 좋을 것 같아요!`;
+                  })()
+                }
                 className="mt-1.5 w-full resize-none rounded-lg border border-line-gray bg-background-peach px-4 py-3 text-base text-black-400"
               />
             </div>
@@ -339,19 +252,13 @@ export default function OrderDetailPage() {
             <h3 className="border-b border-line-gray pb-3 text-base font-semibold text-black-400">
               승인 정보
             </h3>
-            <p className="mt-4 text-base text-black-400">
-              {formatRequestDate(data.approvalDate)}
-            </p>
             <div className="mt-4">
               <label className="block text-sm font-medium text-gray-600">
-                담당자
+                {data.status === "구매 반려" ? "반려일" : "승인일"}
               </label>
-              <input
-                type="text"
-                readOnly
-                value={data.approver}
-                className="mt-1.5 w-full rounded-lg border border-line-gray bg-background-peach px-4 py-3 text-base text-black-400"
-              />
+              <p className="mt-1.5 text-base text-black-400">
+                {formatRequestDate(data.approvalDate)}
+              </p>
             </div>
             <div className="mt-4">
               <label className="block text-sm font-medium text-gray-600">
@@ -366,117 +273,22 @@ export default function OrderDetailPage() {
             </div>
             <div className="mt-4">
               <label className="block text-sm font-medium text-gray-600">
-                결과 메시지
+                {data.status === "구매 반려" ? "반려 메시지" : "승인 메시지"}
               </label>
               <textarea
                 readOnly
                 rows={4}
-                value={data.resultMessage}
+                value={
+                  data.status === "구매 반려"
+                    ? "다른 상품들도 더 추가하여 구매요청 부탁드립니다."
+                    : "재고가 얼마 남지 않아 승인합니다."
+                }
                 className="mt-1.5 w-full resize-none rounded-lg border border-line-gray bg-background-peach px-4 py-3 text-base text-black-400"
               />
             </div>
           </div>
         </aside>
       </div>
-
-      {resultModal === "approve" && (
-        <div
-          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="approval-complete-title"
-        >
-          <div className="w-full max-w-md rounded-2xl bg-[#FBF8F4] px-6 py-8 shadow-lg">
-            <div className="flex flex-col items-center">
-              <Image
-                src="/happydog.png"
-                alt=""
-                width={200}
-                height={120}
-                className="object-contain"
-              />
-              <h2
-                id="approval-complete-title"
-                className="mt-4 text-xl font-bold text-black-400"
-              >
-                승인 완료
-              </h2>
-              <p className="mt-2 text-base text-gray-600">
-                승인이 완료되었어요!
-              </p>
-              <p className="mt-1 text-sm text-gray-500">
-                구매 내역을 통해 배송현황을 확인해보세요
-              </p>
-              <div className="mt-8 flex w-full gap-3">
-                <Link
-                  href="/"
-                  className="flex-1 rounded-xl bg-[#FDF0DF] py-3.5 text-center font-medium text-primary-400 transition-colors hover:bg-primary-200/50"
-                  onClick={() => setResultModal(null)}
-                >
-                  홈으로
-                </Link>
-                <Link
-                  href="/admin/purchase-history"
-                  className="flex-1 rounded-xl bg-primary-400 py-3.5 text-center font-medium text-white transition-colors hover:bg-primary-300"
-                  onClick={() => setResultModal(null)}
-                >
-                  구매 내역 보기
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {resultModal === "reject" && (
-        <div
-          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="reject-complete-title"
-        >
-          <div className="w-full max-w-md rounded-2xl bg-[#FBF8F4] px-6 py-8 shadow-lg">
-            <div className="flex flex-col items-center">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/sorrydog.png"
-                alt=""
-                width={200}
-                height={120}
-                className="h-[120px] w-auto object-contain"
-              />
-              <h2
-                id="reject-complete-title"
-                className="mt-4 text-xl font-bold text-black-400"
-              >
-                요청 반려
-              </h2>
-              <p className="mt-2 text-base text-gray-600">
-                요청이 반려되었어요
-              </p>
-              <p className="mt-1 text-sm text-gray-500">
-                목록에서 다른 요청을 확인해보세요
-              </p>
-              <div className="mt-8 flex w-full gap-3">
-                <Link
-                  href="/"
-                  className="flex-1 rounded-xl bg-[#FDF0DF] py-3.5 text-center font-medium text-primary-400 transition-colors hover:bg-primary-200/50"
-                  onClick={() => setResultModal(null)}
-                >
-                  홈으로
-                </Link>
-                <Link
-                  href="/admin/orders"
-                  className="flex-1 rounded-xl bg-primary-400 py-3.5 text-center font-medium text-white transition-colors hover:bg-primary-300"
-                  onClick={() => setResultModal(null)}
-                >
-                  구매 요청 목록
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </main>
   );
 }

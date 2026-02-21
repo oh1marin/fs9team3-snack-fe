@@ -14,6 +14,8 @@ import {
 } from "@/lib/api/orders";
 import { toast } from "react-toastify";
 import { getImageSrc } from "@/lib/utils/image";
+import { useCart } from "@/contexts/CartContext";
+import { fetchBudgetCurrentAPI } from "@/lib/api/superAdmin";
 
 type ConfirmType = "approve" | "reject";
 
@@ -34,6 +36,7 @@ const SORT_MAP: Record<SortOption, string> = {
 };
 
 export default function AdminOrdersPage() {
+  const { refetchCart } = useCart();
   const [sortOption, setSortOption] = useState<SortOption>("최신순");
   const [showSortDropdown, setShowSortDropdown] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -50,6 +53,7 @@ export default function AdminOrdersPage() {
   const [approvalDetailLoading, setApprovalDetailLoading] = useState(false);
   const [approvalMessage, setApprovalMessage] = useState("");
   const [approving, setApproving] = useState(false);
+  const [budgetRemaining, setBudgetRemaining] = useState<number | null>(null);
 
   const [loadError, setLoadError] = useState<string | null>(null);
 
@@ -86,10 +90,28 @@ export default function AdminOrdersPage() {
     if (confirmModal?.type === "approve" && confirmModal?.orderId) {
       setApprovalDetail(null);
       setApprovalMessage("");
+      setBudgetRemaining(null);
       setApprovalDetailLoading(true);
-      fetchOrderDetailAdmin(confirmModal.orderId)
-        .then((detail) => setApprovalDetail(detail ?? null))
-        .catch(() => setApprovalDetail(null))
+      Promise.all([
+        fetchOrderDetailAdmin(confirmModal.orderId),
+        fetchBudgetCurrentAPI(),
+      ])
+        .then(([detail, budgetRes]) => {
+          setApprovalDetail(detail ?? null);
+          const b = budgetRes?.budget ?? {};
+          const remaining =
+            typeof b.remaining === "number"
+              ? b.remaining
+              : typeof b.budget_amount === "number" &&
+                  typeof b.spent_amount === "number"
+                ? Math.max(0, b.budget_amount - b.spent_amount)
+                : null;
+          setBudgetRemaining(remaining);
+        })
+        .catch(() => {
+          setApprovalDetail(null);
+          setBudgetRemaining(null);
+        })
         .finally(() => setApprovalDetailLoading(false));
     }
   }, [confirmModal?.type, confirmModal?.orderId]);
@@ -120,8 +142,10 @@ export default function AdminOrdersPage() {
       setConfirmModal(null);
       setApprovalDetail(null);
       setApprovalMessage("");
+      setBudgetRemaining(null);
       toast.success("구매 요청을 승인했습니다.");
       loadOrders();
+      refetchCart();
     } catch (err) {
       toast.error(
         err instanceof Error ? err.message : "승인 처리에 실패했습니다.",
@@ -137,6 +161,7 @@ export default function AdminOrdersPage() {
     setConfirmModal(null);
     setApprovalDetail(null);
     setApprovalMessage("");
+    setBudgetRemaining(null);
   };
   const onConfirmYes = async () => {
     if (!confirmModal) return;
@@ -284,14 +309,14 @@ export default function AdminOrdersPage() {
             {orders.flatMap((row) => [
               <Link
                 key={`${row.id}-1`}
-                href={`/orders/${row.id}`}
+                href={`/admin/orders/${row.id}`}
                 className="flex h-20 items-center border-b border-line-gray pl-5 text-center text-base text-black-400 hover:bg-gray-50"
               >
                 {formatRequestDate(row.requestDate)}
               </Link>,
               <Link
                 key={`${row.id}-2`}
-                href={`/orders/${row.id}`}
+                href={`/admin/orders/${row.id}`}
                 className="flex h-20 items-center gap-3 border-b border-line-gray pl-3 text-left text-base hover:bg-gray-50"
               >
                 <div className="h-14 w-14 shrink-0 min-[1082px]:hidden">
@@ -330,7 +355,7 @@ export default function AdminOrdersPage() {
               </Link>,
               <Link
                 key={`${row.id}-3`}
-                href={`/orders/${row.id}`}
+                href={`/admin/orders/${row.id}`}
                 className="flex h-20 flex-col items-center justify-center gap-0.5 border-b border-line-gray text-center text-base text-black-400 hover:bg-gray-50"
               >
                 <span className="text-sm text-gray-500">
@@ -347,7 +372,7 @@ export default function AdminOrdersPage() {
               </Link>,
               <Link
                 key={`${row.id}-4`}
-                href={`/orders/${row.id}`}
+                href={`/admin/orders/${row.id}`}
                 className="flex h-20 items-center justify-center border-b border-line-gray text-center text-base text-black-400 hover:bg-gray-50"
               >
                 김스낵
@@ -627,7 +652,24 @@ export default function AdminOrdersPage() {
                         남은 예산 금액
                       </span>
                       <span className="text-xl font-semibold text-black-400">
-                        —
+                        {budgetRemaining != null
+                          ? formatPrice(budgetRemaining)
+                          : "—"}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-lg">
+                      <span className="font-medium text-gray-600">
+                        구매 후 예산
+                      </span>
+                      <span className="text-xl font-semibold text-black-400">
+                        {budgetRemaining != null && approvalDetail
+                          ? formatPrice(
+                              Math.max(
+                                0,
+                                budgetRemaining - approvalDetail.totalAmount
+                              )
+                            )
+                          : "—"}
                       </span>
                     </div>
                   </div>
