@@ -116,6 +116,11 @@ export default function ItemsPage() {
       });
 
       if (!response.ok) {
+        if (response.status === 401) {
+          const { handleTokenExpired } = await import("@/lib/api/handleTokenExpired");
+          handleTokenExpired();
+          return;
+        }
         const errorText = await response.text();
         throw new Error(`데이터를 불러올 수 없습니다 (${response.status}): ${errorText}`);
       }

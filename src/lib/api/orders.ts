@@ -2,12 +2,13 @@ import { fetchJSON, apiClient } from "./apiClient";
 
 export type OrderStatus = "승인 대기" | "구매 반려" | "승인 완료";
 
-// BE Prisma: status = pending | approved | cancelled (cancelled = 반려)
+// BE Prisma: status = pending | approved | canceled (canceled = 반려)
 const STATUS_MAP: Record<string, OrderStatus> = {
   pending: "승인 대기",
   approved: "승인 완료",
   rejected: "구매 반려",
   cancelled: "구매 반려",
+  canceled: "구매 반려",
   대기: "승인 대기",
   완료: "승인 완료",
   반려: "구매 반려",
@@ -203,11 +204,16 @@ export async function fetchAdminOrders(params?: {
 /** 관리자: 주문 승인/반려 (PATCH /api/admin/orders/:id, status: approved | cancelled) */
 export async function updateAdminOrderStatus(
   orderId: string,
-  status: "approved" | "cancelled"
+  status: "approved" | "cancelled",
+  options?: { resultMessage?: string }
 ): Promise<Order> {
+  const body: Record<string, unknown> = { status };
+  if (options?.resultMessage != null && options.resultMessage.trim() !== "") {
+    body.result_message = options.resultMessage.trim();
+  }
   const response = await apiClient(`/api/admin/orders/${orderId}`, {
     method: "PATCH",
-    body: JSON.stringify({ status }),
+    body: JSON.stringify(body),
   });
   if (!response.ok) {
     const result = await response.json().catch(() => ({}));
@@ -291,6 +297,7 @@ export async function cancelOrder(orderId: string): Promise<void> {
 }
 
 export interface OrderDetailItem {
+  itemId: string;
   image: string;
   category: string;
   name: string;
@@ -317,33 +324,34 @@ export interface OrderDetail {
   isInstantPurchase?: boolean;
 }
 
-/** 구매 요청 상세 조회 (BE: snake_case → FE: camelCase) */
-export async function fetchOrderDetail(orderId: string): Promise<OrderDetail | null> {
-  const response = await apiClient(`/api/orders/${orderId}`, { method: "GET" });
-  if (!response.ok) return null;
-  const data = await response.json();
-  const d = data?.data ?? data;
-  if (!d?.id) return null;
+/** 주문 상세를 OrderDetail 형식으로 파싱 (공통) */
+function parseOrderDetailToResponse(d: Record<string, unknown>): OrderDetail {
   return {
-    id: String(d.id),
+    id: String(d.id ?? ""),
     requestDate: String(d.request_date ?? d.requestDate ?? ""),
     requestMessage: String(d.request_message ?? d.requestMessage ?? ""),
-    requester: String(d.requester ?? ""),
-    approvalDate: String(d.approval_date ?? d.approvalDate ?? ""),
+    requester: String(d.requester ?? d.request_user_name ?? d.requested_by ?? "").trim(),
+    approvalDate: String(
+      d.approval_date ?? d.approvalDate ?? d.approved_at ?? d.approvedAt ??
+      d.rejected_at ?? d.rejectedAt ?? d.cancelled_at ?? d.cancelledAt ?? d.canceled_at ?? d.canceledAt ??
+      ""
+    ),
     approver: String(d.approver ?? ""),
     status: normalizeStatus(d.status),
     resultMessage: String(d.result_message ?? d.resultMessage ?? ""),
     items: Array.isArray(d.items)
-      ? d.items.map((it: Record<string, unknown>) => {
+      ? (d.items as Record<string, unknown>[]).map((it) => {
           const sub = (it.item ?? it.product) as Record<string, unknown> | undefined;
+          const itemId = String(it.item_id ?? it.itemId ?? sub?.id ?? "").trim();
           return {
-          image: String(it.image ?? it.image_url ?? it.img ?? sub?.image ?? sub?.image_url ?? "").trim(),
-          category: String(it.category ?? it.category_sub ?? sub?.category_sub ?? sub?.category ?? ""),
-          name: String(it.name ?? it.title ?? sub?.title ?? sub?.name ?? ""),
-          unitPrice: Number(it.unit_price ?? it.unitPrice ?? sub?.price ?? 0),
-          quantity: Number(it.quantity ?? 0),
-          totalPrice: Number(it.total_price ?? it.totalPrice ?? 0),
-        };
+            itemId: itemId || String(it.id ?? ""),
+            image: String(it.image ?? it.image_url ?? it.img ?? sub?.image ?? sub?.image_url ?? "").trim(),
+            category: String(it.category ?? it.category_sub ?? sub?.category_sub ?? sub?.category ?? ""),
+            name: String(it.name ?? it.title ?? sub?.title ?? sub?.name ?? ""),
+            unitPrice: Number(it.unit_price ?? it.unitPrice ?? sub?.price ?? 0),
+            quantity: Number(it.quantity ?? 0),
+            totalPrice: Number(it.total_price ?? it.totalPrice ?? 0),
+          };
         })
       : [],
     totalCount: Number(d.total_count ?? d.totalCount ?? 0) || (Array.isArray(d.items) ? d.items.length : 0),
@@ -352,3 +360,24 @@ export async function fetchOrderDetail(orderId: string): Promise<OrderDetail | n
     isInstantPurchase: d.is_instant_purchase === true || d.is_instant_purchase === "Y" || d.is_instant_purchase === "true" || d.isInstantPurchase === true || d.isInstantPurchase === "Y" || d.purchase_type === "instant",
   };
 }
+
+/** 구매 요청 상세 조회 (일반 유저용 - 본인 주문만) */
+export async function fetchOrderDetail(orderId: string): Promise<OrderDetail | null> {
+  const response = await apiClient(`/api/orders/${orderId}`, { method: "GET" });
+  if (!response.ok) return null;
+  const data = await response.json();
+  const d = data?.data ?? data;
+  if (!d?.id) return null;
+  return parseOrderDetailToResponse(d as Record<string, unknown>);
+}
+
+/** 관리자용 주문 상세 조회 (모든 사용자 주문 조회 가능) */
+export async function fetchOrderDetailAdmin(orderId: string): Promise<OrderDetail | null> {
+  const response = await apiClient(`/api/admin/orders/${orderId}`, { method: "GET" });
+  if (!response.ok) return null;
+  const data = await response.json();
+  const d = data?.data ?? data;
+  if (!d?.id) return null;
+  return parseOrderDetailToResponse(d as Record<string, unknown>);
+}
+

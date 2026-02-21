@@ -9,6 +9,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import OrderSummary from "@/components/OrderSummary";
 import { toast } from "react-toastify";
 import { createOrder, createOrderFromCart, type CreateOrderItem } from "@/lib/api/orders";
+import { fetchBudgetCurrentAPI } from "@/lib/api/superAdmin";
 import { getImageSrc } from "@/lib/utils/image";
 
 const PURCHASE_COMPLETE_KEY = "snack_purchase_complete";
@@ -28,16 +29,58 @@ export default function CartPage() {
     rawAdmin === "y" ||
     rawAdmin === true ||
     String(rawAdmin ?? "").toLowerCase() === "true";
+  const isSuperAdmin = user?.is_super_admin === "Y";
+  const canSeeBudget = isAdmin || isSuperAdmin;
   const purchaseButtonLabel = isAdmin ? "즉시 구매" : "구매 요청";
   const instantButtonLabel = isAdmin ? "즉시 구매" : "즉시 요청";
-  const { items, cartLoaded, refetchCart, updateQuantity, removeItem, removeAll, removeSelected } =
+  const { items, cartLoaded, refetchCart, budget, updateQuantity, removeItem, removeAll, removeSelected } =
     useCart();
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [fallbackRemaining, setFallbackRemaining] = useState<number | null>(null);
 
   // 상품 담고 "장바구니 바로가기"로 진입해도 목록 갱신되도록 페이지 마운트 시 재조회
   useEffect(() => {
     refetchCart();
   }, [refetchCart]);
+
+  // 관리자/최고관리자: cart API에 budget 없거나 remaining 0일 때 예산 API fallback
+  useEffect(() => {
+    if (!canSeeBudget) {
+      setFallbackRemaining(null);
+      return;
+    }
+    const fromCart = budget?.remaining;
+    if (fromCart != null && fromCart > 0) {
+      setFallbackRemaining(null);
+      return;
+    }
+    let mounted = true;
+    fetchBudgetCurrentAPI()
+      .then((res) => {
+        if (!mounted) return;
+        const b = res.budget ?? {};
+        const remaining =
+          typeof b.remaining === "number"
+            ? b.remaining
+            : typeof b.budget_amount === "number" && typeof b.spent_amount === "number"
+              ? Math.max(0, b.budget_amount - b.spent_amount)
+              : null;
+        setFallbackRemaining(remaining);
+      })
+      .catch(() => {
+        if (mounted) setFallbackRemaining(null);
+      });
+    return () => {
+      mounted = false;
+    };
+  }, [canSeeBudget, budget?.remaining]);
+
+  // cart budget 우선 (양수일 때), 없거나 0이면 fallback (예산 API) 사용
+  const remainingBudget = canSeeBudget
+    ? (budget?.remaining != null && budget.remaining > 0
+        ? budget.remaining
+        : fallbackRemaining ?? budget?.remaining ?? null)
+    : null;
 
   const selectedItems = items.filter((it) => selectedIds.has(it.id));
   const productAmount = selectedItems.reduce(
@@ -47,6 +90,13 @@ export default function CartPage() {
   const deliveryFee = selectedItems.length > 0 ? DELIVERY_FEE : 0;
   const totalAmount = productAmount + deliveryFee;
   const totalQuantity = selectedItems.reduce((sum, it) => sum + it.quantity, 0);
+
+  // 관리자/최고관리자: 예산 부족 시 구매 버튼 비활성화 (체크된 상품 합산 기준)
+  const isBudgetExceeded =
+    canSeeBudget &&
+    remainingBudget != null &&
+    selectedItems.length > 0 &&
+    totalAmount > remainingBudget;
 
   const toggleSelect = (id: string) => {
     setSelectedIds((prev) => {
@@ -96,6 +146,15 @@ export default function CartPage() {
   };
 
   const handleInstantRequest = async (item: CartItem) => {
+    const itemTotalAmount = item.price * item.quantity + DELIVERY_FEE;
+    if (
+      canSeeBudget &&
+      remainingBudget != null &&
+      itemTotalAmount > remainingBudget
+    ) {
+      toast.warn("남은 예산이 부족합니다.");
+      return;
+    }
     const totalQuantity = item.quantity;
     const productAmount = item.price * item.quantity;
     const totalAmount = productAmount + DELIVERY_FEE;
@@ -143,6 +202,10 @@ export default function CartPage() {
   const handlePurchaseRequest = async (instantPurchase = false) => {
     if (selectedItems.length === 0) {
       toast.warn("상품을 선택해 주세요.");
+      return;
+    }
+    if (isBudgetExceeded) {
+      toast.warn("남은 예산이 부족합니다.");
       return;
     }
     const first = selectedItems[0];
@@ -405,12 +468,24 @@ export default function CartPage() {
                         <button
                           type="button"
                           onClick={() => handleInstantRequest(item)}
-                          className="text-xl-sb rounded-full text-white transition-colors hover:bg-primary-300"
+                          disabled={
+                            canSeeBudget &&
+                            remainingBudget != null &&
+                            item.price * item.quantity + DELIVERY_FEE >
+                              remainingBudget
+                          }
+                          className={`text-xl-sb rounded-full transition-colors ${
+                            canSeeBudget &&
+                            remainingBudget != null &&
+                            item.price * item.quantity + DELIVERY_FEE >
+                              remainingBudget
+                              ? "cursor-not-allowed bg-gray-300 text-gray-500"
+                              : "bg-primary-400 text-white hover:bg-primary-300"
+                          }`}
                           style={{
                             width: "clamp(100px, 6.82vw, 131px)",
                             height: "clamp(44px, 2.6vw, 50px)",
                             marginTop: "20px",
-                            background: "var(--color-primary-400, #F97B22)",
                           }}
                         >
                           즉시 요청
@@ -462,6 +537,8 @@ export default function CartPage() {
             onPurchaseRequest={() => handlePurchaseRequest(isAdmin)}
             purchaseButtonLabel={purchaseButtonLabel}
             continueShoppingHref="/items"
+            remainingBudget={canSeeBudget && budget != null ? budget.remaining : undefined}
+            purchaseDisabled={isBudgetExceeded}
           />
         </div>
 
@@ -558,9 +635,22 @@ export default function CartPage() {
                       <button
                         type="button"
                         onClick={() => handleInstantRequest(item)}
-                        className="w-[120px] shrink-0 rounded-full bg-primary-400 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-primary-300 sm:w-[160px] sm:px-4 sm:py-2 sm:text-sm min-[400px]:w-[200px]"
+                        disabled={
+                          canSeeBudget &&
+                          remainingBudget != null &&
+                          item.price * item.quantity + DELIVERY_FEE >
+                            remainingBudget
+                        }
+                        className={`w-[120px] shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors sm:w-[160px] sm:px-4 sm:py-2 sm:text-sm min-[400px]:w-[200px] ${
+                          canSeeBudget &&
+                          remainingBudget != null &&
+                          item.price * item.quantity + DELIVERY_FEE >
+                            remainingBudget
+                            ? "cursor-not-allowed bg-gray-300 text-gray-500"
+                            : "bg-primary-400 text-white hover:bg-primary-300"
+                        }`}
                       >
-                          {instantButtonLabel}
+                        {instantButtonLabel}
                       </button>
                     </div>
                   </div>
@@ -619,10 +709,14 @@ export default function CartPage() {
               <span className="text-black-400">총 주문금액</span>
               <span className="text-right text-primary-400">{formatPrice(totalAmount)}</span>
             </div>
-            <div className="flex justify-between py-3 text-sm text-gray-500">
-              <span>남은 예산 금액</span>
-              <span className="text-right">—</span>
-            </div>
+            {canSeeBudget && remainingBudget != null && (
+              <div className="flex justify-between border-t border-line-gray pt-3">
+                <span className="text-base font-bold text-black-400">남은 예산</span>
+                <span className="text-right text-lg font-bold text-primary-400">
+                  {formatPrice(remainingBudget)}
+                </span>
+              </div>
+            )}
           </div>
 
           <div className="flex flex-wrap items-center justify-center gap-3 pt-4">
@@ -635,7 +729,12 @@ export default function CartPage() {
             <button
               type="button"
               onClick={() => handlePurchaseRequest(isAdmin)}
-              className="h-12 w-[340px] shrink-0 rounded-xl bg-primary-400 font-semibold text-white transition-colors hover:bg-primary-300"
+              disabled={isBudgetExceeded}
+              className={`h-12 w-[340px] shrink-0 rounded-xl font-semibold transition-colors ${
+                isBudgetExceeded
+                  ? "cursor-not-allowed bg-gray-300 text-gray-500"
+                  : "bg-primary-400 text-white hover:bg-primary-300"
+              }`}
             >
               {purchaseButtonLabel}
             </button>

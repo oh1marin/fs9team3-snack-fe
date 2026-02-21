@@ -24,15 +24,40 @@ export default function ProfilePage() {
   const [passwordError, setPasswordError] = useState("");
   const [passwordConfirmError, setPasswordConfirmError] = useState("");
 
+  const [initialCompany, setInitialCompany] = useState("");
+
   useEffect(() => {
     if (user) {
+      const company = user.company_name ?? "코드잇";
       setUserData({
-        company: user.company_name || "코드잇",
-        name: user.name || "",
-        email: user.email || "",
+        company,
+        name: user.nickname ?? user.name ?? "",
+        email: user.email ?? "",
       });
+      setInitialCompany(company);
     }
   }, [user]);
+
+  const handleCompanyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.slice(0, 10);
+    setUserData((prev) => ({ ...prev, company: value }));
+  };
+
+  const handleCompanySave = () => {
+    setInitialCompany(userData.company);
+    toast.success("기업명이 저장되었습니다.");
+  };
+
+  const isSuperAdmin = user?.is_super_admin === "Y";
+  const isCompanyChanged =
+    isSuperAdmin &&
+    userData.company.trim().length > 0 &&
+    userData.company.trim() !== initialCompany.trim();
+  const roleLabel = isSuperAdmin
+    ? "최고 관리자"
+    : user?.is_admin === "Y"
+      ? "관리자"
+      : "일반";
 
   const handlePasswordInputChange = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -92,31 +117,35 @@ export default function ProfilePage() {
     );
   }
 
-  const handlePasswordChange = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (passwords.password !== passwords.passwordConfirm) {
-      toast.error("비밀번호가 일치하지 않습니다.");
-      return;
+    if (isCompanyChanged) {
+      handleCompanySave();
     }
 
-    if (passwords.password.length < 8) {
-      toast.error("비밀번호는 최소 8자 이상이어야 합니다.");
-      return;
-    }
-
-    try {
-      const message = await userService.changePassword(passwords.password);
-      toast.success(message);
-      setPasswords({ password: "", passwordConfirm: "" });
-      setPasswordError("");
-      setPasswordConfirmError("");
-    } catch (error) {
-      toast.error(
-        error instanceof Error
-          ? error.message
-          : "비밀번호 변경 중 오류가 발생했습니다."
-      );
+    if (isFormValid) {
+      if (passwords.password !== passwords.passwordConfirm) {
+        toast.error("비밀번호가 일치하지 않습니다.");
+        return;
+      }
+      if (passwords.password.length < 8) {
+        toast.error("비밀번호는 최소 8자 이상이어야 합니다.");
+        return;
+      }
+      try {
+        const message = await userService.changePassword(passwords.password);
+        toast.success(message);
+        setPasswords({ password: "", passwordConfirm: "" });
+        setPasswordError("");
+        setPasswordConfirmError("");
+      } catch (error) {
+        toast.error(
+          error instanceof Error
+            ? error.message
+            : "비밀번호 변경 중 오류가 발생했습니다."
+        );
+      }
     }
   };
 
@@ -128,6 +157,15 @@ export default function ProfilePage() {
     !passwordError &&
     !passwordConfirmError;
 
+  const hasAnyChange = isCompanyChanged || isFormValid;
+
+  const getSubmitButtonText = () => {
+    if (isCompanyChanged && isFormValid) return "기업명, 비밀번호 변경하기";
+    if (isCompanyChanged) return "기업명 변경하기";
+    if (isFormValid) return "비밀번호 변경하기";
+    return "변경하기";
+  };
+
   return (
     <div className="mx-auto flex min-h-[calc(100vh-88px)] w-full max-w-[1920px] items-center justify-center bg-background-peach px-4 sm:px-6 py-8 sm:py-12">
       <div className="w-full max-w-[560px]">
@@ -135,7 +173,7 @@ export default function ProfilePage() {
           내 프로필
         </h1>
 
-        <form onSubmit={handlePasswordChange} className="space-y-4 sm:space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           <div>
             <label className="mb-2 sm:mb-3 block text-lg-m sm:text-xl-m text-black-500">
               기업명
@@ -143,8 +181,27 @@ export default function ProfilePage() {
             <input
               type="text"
               value={userData.company}
-              disabled
-              className="h-14 sm:h-16 w-full rounded-xl sm:rounded-2xl border-2 border-gray-200 bg-gray-100 px-4 sm:px-6 text-lg-r sm:text-xl-r text-gray-400"
+              onChange={handleCompanyChange}
+              placeholder="기업명을 입력해주세요."
+              maxLength={10}
+              disabled={!isSuperAdmin}
+              className={`h-14 sm:h-16 w-full rounded-xl sm:rounded-2xl border-2 px-4 sm:px-6 text-lg-r sm:text-xl-r outline-none placeholder:text-gray-400 ${
+                isSuperAdmin
+                  ? "border-primary-300 bg-white text-black-500 focus:border-primary-400"
+                  : "cursor-not-allowed border-gray-200 bg-gray-100 text-gray-500"
+              }`}
+            />
+          </div>
+
+          <div>
+            <label className="mb-2 sm:mb-3 block text-lg-m sm:text-xl-m text-black-500">
+              권한
+            </label>
+            <input
+              type="text"
+              value={roleLabel}
+              readOnly
+              className="h-14 sm:h-16 w-full rounded-xl sm:rounded-2xl border-2 border-gray-200 bg-gray-100 px-4 sm:px-6 text-lg-r sm:text-xl-r text-gray-600"
             />
           </div>
 
@@ -170,6 +227,7 @@ export default function ProfilePage() {
             />
           </div>
 
+          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
           <div>
             <label className="mb-2 sm:mb-3 block text-lg-m sm:text-xl-m text-black-500">
               비밀번호
@@ -232,16 +290,17 @@ export default function ProfilePage() {
 
           <button
             type="submit"
-            disabled={!isFormValid}
+            disabled={!hasAnyChange}
             className={`mt-6 sm:mt-8 h-14 sm:h-16 w-full rounded-xl sm:rounded-2xl text-lg-sb sm:text-xl-sb transition-colors ${
-              isFormValid
+              hasAnyChange
                 ? "bg-primary-400 text-white hover:bg-primary-300"
                 : "bg-gray-200 text-gray-400 cursor-not-allowed"
             }`}
           >
-            변경하기
+            {getSubmitButtonText()}
           </button>
-        </form>
+          </form>
+        </div>
       </div>
     </div>
   );

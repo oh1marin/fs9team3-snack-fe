@@ -136,8 +136,8 @@ export default function ProductModal({ onClose, onSuccess, editMode = false, pro
       
       if (!response.ok) {
         if (response.status === 401) {
-          alert("로그인이 필요합니다. 로그인 페이지로 이동합니다.");
-          window.location.href = "/login";
+          const { handleTokenExpired } = await import("@/lib/api/handleTokenExpired");
+          handleTokenExpired();
           return;
         }
         const errorText = await response.text();

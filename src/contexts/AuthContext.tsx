@@ -1,11 +1,18 @@
 "use client";
 
 import { logoutAction } from "@/lib/actions/auth";
-import { setClientAccessToken } from "@/lib/api/authToken";
+import { setClientAccessToken, setClientRefreshToken } from "@/lib/api/authToken";
 import { authService } from "@/lib/service/authService";
 import { userService } from "@/lib/service/userService";
 
-import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+  ReactNode,
+} from "react";
 
 interface User {
   id: string;
@@ -13,6 +20,8 @@ interface User {
   nickname?: string;
   /** 관리자 여부: 'Y' | 'N'. 일반 유저 N, 관리자 Y */
   is_admin?: string;
+  /** 최고관리자 여부: 'Y' | 'N'. 최고관리자만 초대 발송 등 가능 */
+  is_super_admin?: string;
   [key: string]: any;
 }
 
@@ -27,7 +36,8 @@ interface AuthContextType {
     nickname: string,
     email: string,
     password: string,
-    passwordConfirmation: string
+    passwordConfirmation: string,
+    invitationToken?: string,
   ) => Promise<string | undefined>;
 }
 
@@ -78,7 +88,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     nickname: string,
     email: string,
     password: string,
-    passwordConfirmation: string
+    passwordConfirmation: string,
+    invitationToken?: string,
   ) => {
     const res = await fetch("/api/auth/signup", {
       method: "POST",
@@ -89,13 +100,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         email,
         password,
         passwordConfirmation,
+        ...(invitationToken ? { invitationToken } : {}),
       }),
     });
     const result = await res.json();
     if (!res.ok) {
-      throw new Error(result.message ?? result.error ?? "회원가입에 실패했습니다.");
+      throw new Error(
+        result.message ?? result.error ?? "회원가입에 실패했습니다.",
+      );
     }
     if (result.accessToken) setClientAccessToken(result.accessToken);
+    if (result.refreshToken) setClientRefreshToken(result.refreshToken);
     setUser(result.user ?? result.userData ?? null);
     setIsLoading(false);
     return result.message;
@@ -110,9 +125,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
     const result = await res.json();
     if (!res.ok) {
-      throw new Error(result.message ?? result.error ?? "로그인에 실패했습니다.");
+      throw new Error(
+        result.message ?? result.error ?? "로그인에 실패했습니다.",
+      );
     }
     if (result.accessToken) setClientAccessToken(result.accessToken);
+    if (result.refreshToken) setClientRefreshToken(result.refreshToken);
     setUser(result.user ?? result.userData ?? null);
     setIsLoading(false);
     return result.message;
@@ -124,7 +142,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (e) {
       // 백엔드 실패해도 로컬은 로그아웃 처리
     }
-    setClientAccessToken(null);
+    const { clearClientTokens } = await import("@/lib/api/authToken");
+    clearClientTokens();
     await logoutAction();
     setUser(null);
     return "로그아웃되었습니다.";
@@ -137,7 +156,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [getUser]);
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, refreshUser, setInitialUser, login, logout, register }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        isLoading,
+        refreshUser,
+        setInitialUser,
+        login,
+        logout,
+        register,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

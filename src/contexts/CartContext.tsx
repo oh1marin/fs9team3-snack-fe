@@ -15,6 +15,7 @@ import {
   updateCartItemQuantity as updateCartItemQuantityApi,
   removeCartItem as removeCartItemApi,
   clearCart as clearCartApi,
+  type CartBudget,
 } from "@/lib/api/cart";
 
 export interface CartItemSnapshot {
@@ -56,6 +57,8 @@ interface CartContextValue {
   cartCount: number;
   items: CartItem[];
   cartLoaded: boolean;
+  /** 관리자/최고관리자 전용: 장바구니 API에서 내려주는 예산 (없으면 undefined) */
+  budget: CartBudget | undefined;
   refetchCart: () => Promise<void>;
   addToCart: (
     itemId: string,
@@ -74,6 +77,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [cartCount, setCartCount] = useState(0);
   const [cartLoaded, setCartLoaded] = useState(false);
+  const [budget, setBudget] = useState<CartBudget | undefined>(undefined);
   const itemsRef = useRef<CartItem[]>(items);
   const cartCountRef = useRef(cartCount);
   itemsRef.current = items;
@@ -86,6 +90,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setItems(nextItems);
     setCartCount(count);
     setCartCountStore(count);
+    setBudget(res.budget);
   }, []);
 
   useEffect(() => {
@@ -98,6 +103,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           setItems(nextItems);
           setCartCount(count);
           setCartCountStore(count);
+          setBudget(res.budget);
         }
       })
       .catch(() => {
@@ -105,6 +111,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           setItems([]);
           setCartCount(0);
           setCartCountStore(0);
+          setBudget(undefined);
         }
       })
       .finally(() => {
@@ -117,6 +124,46 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const addToCart = useCallback(
     async (itemId: string, quantity = 1, snapshot?: CartItemSnapshot) => {
+      const existing = itemsRef.current.find(
+        (it) => it.itemId === itemId || it.id === itemId,
+      );
+      if (existing) {
+        let prevItems: CartItem[] = [];
+        setItems((current) => {
+          prevItems = current;
+          return current.map((it) =>
+            it.id === existing.id
+              ? { ...it, quantity: it.quantity + quantity }
+              : it,
+          );
+        });
+        const nextCnt = cartCountRef.current + quantity;
+        setCartCount(nextCnt);
+        setCartCountStore(nextCnt);
+        try {
+          const res = await updateCartItemQuantityApi(
+            existing.id,
+            existing.quantity + quantity,
+          );
+          if (res.items && res.items.length > 0) {
+            const nextItems = res.items.map(dtoToItem);
+            const cnt = getTotalCount(nextItems);
+            setItems(nextItems);
+            setCartCount(cnt);
+            setCartCountStore(cnt);
+            if (res.budget != null) setBudget(res.budget);
+          } else {
+            await refetchCart();
+          }
+        } catch {
+          const cnt = getTotalCount(prevItems);
+          setItems(prevItems);
+          setCartCount(cnt);
+          setCartCountStore(cnt);
+          throw new Error("수량 변경에 실패했습니다.");
+        }
+        return;
+      }
       const optimisticCount = cartCountRef.current + quantity;
       setCartCount(optimisticCount);
       setCartCountStore(optimisticCount);
@@ -134,6 +181,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           const synced = getTotalCount(nextItems);
           setCartCount(synced);
           setCartCountStore(synced);
+          if (res.budget != null) setBudget(res.budget);
         } else {
           await refetchCart();
         }
@@ -157,6 +205,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           setItems(nextItems);
           setCartCount(cnt);
           setCartCountStore(cnt);
+          if (res.budget != null) setBudget(res.budget);
         } catch {
           const next = itemsRef.current.filter((it) => it.id !== itemId);
           const cnt = getTotalCount(next);
@@ -188,6 +237,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           setItems(nextItems);
           setCartCount(cnt);
           setCartCountStore(cnt);
+          if (res.budget != null) setBudget(res.budget);
         }
       } catch {
         const cnt = getTotalCount(prevItems);
@@ -208,6 +258,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       setItems(nextItems);
       setCartCount(cnt);
       setCartCountStore(cnt);
+      if (res.budget != null) setBudget(res.budget);
     } catch {
       const next = itemsRef.current.filter((it) => it.id !== itemId);
       const cnt = getTotalCount(next);
@@ -224,6 +275,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       setItems([]);
       setCartCount(0);
       setCartCountStore(0);
+      setBudget(undefined);
     } catch {
       throw new Error("장바구니 비우기에 실패했습니다.");
     }
@@ -240,6 +292,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       setItems(nextItems);
       setCartCount(cnt);
       setCartCountStore(cnt);
+      if (res.budget != null) setBudget(res.budget);
     } catch {
       const next = itemsRef.current.filter((it) => !set.has(it.id));
       const cnt = getTotalCount(next);
@@ -256,6 +309,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         cartCount,
         items,
         cartLoaded,
+        budget,
         refetchCart,
         addToCart,
         updateQuantity,

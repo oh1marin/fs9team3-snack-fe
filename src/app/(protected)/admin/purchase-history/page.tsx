@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { fetchAdminOrders, formatRequestDate, formatSummaryTitle, type Order } from "@/lib/api/orders";
+// import { fetchBudgetCurrentAPI } from "@/lib/api/superAdmin";
 import { toast } from "react-toastify";
 
 type SortOption = "최신순" | "낮은 금액순" | "높은 금액순";
@@ -24,6 +25,14 @@ export default function AdminPurchaseHistoryPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // 예산/연간 지출 연동 기능 - 데이터 불일치 이슈로 주석 처리
+  // const [budgetInfo, setBudgetInfo] = useState<{ spent: number; remaining: number } | null>(null);
+  // const [yearlySpent, setYearlySpent] = useState<number | null>(null);
+  // const loadBudget = useCallback(async () => { ... }, []);
+  // const loadYearlySpent = useCallback(async () => { ... }, []);
+  // useEffect(() => { loadBudget(); }, [loadBudget]);
+  // useEffect(() => { loadYearlySpent(); }, [loadYearlySpent]);
 
   const loadOrders = useCallback(async () => {
     setLoading(true);
@@ -173,7 +182,7 @@ export default function AdminPurchaseHistoryPage() {
                   {formatAmount(row.orderAmount)}원
                 </Link>,
                 <Link key={`${row.id}-4`} href={detailHref} className="flex h-20 flex-wrap items-center justify-center gap-2 border-b border-line-gray px-2 text-base text-black-400 hover:bg-gray-50">
-                  <span>{row.requester ?? "김스낵"}</span>
+                  <span>김스낵</span>
                   {row.isInstantPurchase && (
                     <span
                       className="shrink-0 rounded-lg border px-2 py-0.5 text-center text-sm font-semibold"

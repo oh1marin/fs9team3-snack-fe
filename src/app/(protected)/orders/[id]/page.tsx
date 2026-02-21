@@ -2,8 +2,14 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
-import { fetchOrderDetail, formatRequestDate, formatSummaryTitle, type OrderDetail } from "@/lib/api/orders";
+import { useParams, useRouter } from "next/navigation";
+import { useCart } from "@/contexts/CartContext";
+import {
+  fetchOrderDetail,
+  formatRequestDate,
+  type OrderDetail,
+} from "@/lib/api/orders";
+import { toast } from "react-toastify";
 import { getImageSrc } from "@/lib/utils/image";
 
 function formatPrice(n: number) {
@@ -13,7 +19,10 @@ function formatPrice(n: number) {
 export default function OrderDetailPage() {
   const params = useParams();
   const id = params?.id as string;
+  const router = useRouter();
+  const { addToCart } = useCart();
   const [data, setData] = useState<OrderDetail | null | undefined>(undefined);
+  const [addingToCart, setAddingToCart] = useState(false);
 
   useEffect(() => {
     if (!id) {
@@ -28,6 +37,35 @@ export default function OrderDetailPage() {
       cancelled = true;
     };
   }, [id]);
+
+  const handleAddToCart = async () => {
+    if (!data?.items?.length) return;
+    const validItems = data.items.filter((it) => it.itemId);
+    if (validItems.length === 0) {
+      toast.error("담을 수 있는 상품이 없습니다.");
+      return;
+    }
+    try {
+      setAddingToCart(true);
+      for (const it of validItems) {
+        await addToCart(it.itemId, it.quantity, {
+          id: it.itemId,
+          itemId: it.itemId,
+          title: it.name,
+          price: it.unitPrice,
+          image: it.image,
+        });
+      }
+      toast.success("장바구니에 담았어요!");
+      router.push("/cart");
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : "장바구니 담기에 실패했습니다.",
+      );
+    } finally {
+      setAddingToCart(false);
+    }
+  };
 
   if (data === undefined) {
     return (
@@ -54,7 +92,6 @@ export default function OrderDetailPage() {
   return (
     <main className="mx-auto min-h-0 w-full max-w-[1920px] overflow-x-auto bg-background-peach px-2 py-8 sm:px-4">
       <div className="mx-auto flex w-full max-w-[1600px] flex-col gap-4 lg:flex-row lg:items-start lg:gap-[24px]">
-        {/* 왼쪽: 요청 품목 - lg에서 1041px 고정해서 오른쪽 블록과 간격 확실히 적용 */}
         <section className="min-w-0 flex-1 lg:w-[1041px] lg:flex-none">
           <h1 className="mb-2 text-2xl font-bold text-black-400">
             구매 요청 내역
@@ -62,11 +99,6 @@ export default function OrderDetailPage() {
           <h2 className="mb-2 text-lg font-semibold text-black-400">
             요청 품목
           </h2>
-          {(data.summaryTitle || data.items.length > 0) && (
-            <p className="mb-4 text-base text-gray-600">
-              상품이름: {data.summaryTitle ? formatSummaryTitle(data.summaryTitle) : (data.items[0]?.name ? `${data.items[0].name} 및 ${data.totalCount}개` : "—")} / 총 수량: {data.totalCount}개
-            </p>
-          )}
           <div
             className="mb-6 flex flex-col overflow-y-auto"
             style={{
@@ -151,31 +183,37 @@ export default function OrderDetailPage() {
               </span>
             </p>
           </div>
-          <div className="flex flex-nowrap items-center gap-4" style={{ width: "1041px", maxWidth: "100%" }}>
+          <div
+            className="flex flex-nowrap items-center gap-4"
+            style={{ width: "1041px", maxWidth: "100%" }}
+          >
             <Link
               href="/orders"
-              className="flex shrink-0 items-center justify-center rounded-xl bg-[#FDF0DF] text-base font-semibold text-primary-400 transition-colors hover:bg-primary-200/50"
-              style={{ width: 509, height: 64 }}
+              className="flex flex-1 items-center justify-center rounded-2xl bg-[#FDF0DF] py-4 text-base font-semibold text-primary-400 transition-colors hover:bg-primary-200/50"
+              style={{ minHeight: 64 }}
             >
               목록 보기
             </Link>
-            <Link
-              href="/cart"
-              className="flex shrink-0 items-center justify-center rounded-xl bg-primary-400 text-base font-medium text-white transition-colors hover:bg-primary-300"
-              style={{ width: 509, height: 64 }}
+            <button
+              type="button"
+              onClick={handleAddToCart}
+              disabled={addingToCart}
+              className="flex flex-1 items-center justify-center rounded-2xl bg-primary-400 py-4 text-base font-medium text-white transition-colors hover:bg-primary-300 disabled:opacity-50"
+              style={{ minHeight: 64 }}
             >
-              장바구니에 다시 담기
-            </Link>
+              {addingToCart ? "담는 중..." : "장바구니에 다시 담기"}
+            </button>
           </div>
         </section>
 
-        {/* 오른쪽: 요청 정보 / 승인 정보 - 구분선만 */}
         <aside className="w-full shrink-0 lg:w-[380px]">
           <div className="border-b border-line-gray bg-background-peach p-6">
             <h3 className="border-b border-line-gray pb-3 text-base font-semibold text-black-400">
               요청 정보
             </h3>
-            <p className="mt-4 text-base text-black-400">{formatRequestDate(data.requestDate)}</p>
+            <p className="mt-4 text-base text-black-400">
+              {formatRequestDate(data.requestDate)}
+            </p>
             <div className="mt-4">
               <label className="block text-sm font-medium text-gray-600">
                 요청인
@@ -183,7 +221,7 @@ export default function OrderDetailPage() {
               <input
                 type="text"
                 readOnly
-                value={data.requester}
+                value="김스낵"
                 className="mt-1.5 w-full rounded-lg border border-line-gray bg-background-peach px-4 py-3 text-base text-black-400"
               />
             </div>
@@ -194,7 +232,17 @@ export default function OrderDetailPage() {
               <textarea
                 readOnly
                 rows={4}
-                value={data.requestMessage}
+                value={
+                  (() => {
+                    const productName =
+                      data.items[0]?.name ??
+                      (data.summaryTitle
+                        ? data.summaryTitle.replace(/ 및 \d+개$/, "").trim()
+                        : "") ??
+                      "상품";
+                    return `${productName} 인기가 많아요. 많이 주문하면 좋을 것 같아요!`;
+                  })()
+                }
                 className="mt-1.5 w-full resize-none rounded-lg border border-line-gray bg-background-peach px-4 py-3 text-base text-black-400"
               />
             </div>
@@ -204,17 +252,13 @@ export default function OrderDetailPage() {
             <h3 className="border-b border-line-gray pb-3 text-base font-semibold text-black-400">
               승인 정보
             </h3>
-            <p className="mt-4 text-base text-black-400">{formatRequestDate(data.approvalDate)}</p>
             <div className="mt-4">
               <label className="block text-sm font-medium text-gray-600">
-                담당자
+                {data.status === "구매 반려" ? "반려일" : "승인일"}
               </label>
-              <input
-                type="text"
-                readOnly
-                value={data.approver}
-                className="mt-1.5 w-full rounded-lg border border-line-gray bg-background-peach px-4 py-3 text-base text-black-400"
-              />
+              <p className="mt-1.5 text-base text-black-400">
+                {formatRequestDate(data.approvalDate)}
+              </p>
             </div>
             <div className="mt-4">
               <label className="block text-sm font-medium text-gray-600">
@@ -229,12 +273,16 @@ export default function OrderDetailPage() {
             </div>
             <div className="mt-4">
               <label className="block text-sm font-medium text-gray-600">
-                결과 메시지
+                {data.status === "구매 반려" ? "반려 메시지" : "승인 메시지"}
               </label>
               <textarea
                 readOnly
                 rows={4}
-                value={data.resultMessage}
+                value={
+                  data.status === "구매 반려"
+                    ? "다른 상품들도 더 추가하여 구매요청 부탁드립니다."
+                    : "재고가 얼마 남지 않아 승인합니다."
+                }
                 className="mt-1.5 w-full resize-none rounded-lg border border-line-gray bg-background-peach px-4 py-3 text-base text-black-400"
               />
             </div>
