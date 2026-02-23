@@ -9,6 +9,7 @@ import {
   formatSummaryTitle,
   type OrderDetail,
 } from "@/lib/api/orders";
+import Image from "next/image";
 import { getImageSrc } from "@/lib/utils/image";
 
 function formatPrice(n: number) {
@@ -100,13 +101,12 @@ export default function AdminPurchaseHistoryDetailPage() {
                 <div className="flex min-w-0 flex-1 items-center gap-4">
                   <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-gray-100">
                     {item.image ? (
-                      /* eslint-disable-next-line @next/next/no-img-element */
-                      <img
+                      <Image
                         src={getImageSrc(item.image)}
                         alt={item.name}
-                        className="h-full w-full object-contain"
-                        referrerPolicy="no-referrer"
-                        loading="lazy"
+                        fill
+                        className="object-contain"
+                        sizes="64px"
                       />
                     ) : (
                       <div className="flex h-full w-full items-center justify-center text-xs text-gray-400">

@@ -8,7 +8,11 @@ import { useCart, type CartItem } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
 import OrderSummary from "@/components/OrderSummary";
 import { toast } from "react-toastify";
-import { createOrder, createOrderFromCart, type CreateOrderItem } from "@/lib/api/orders";
+import {
+  createOrder,
+  createOrderFromCart,
+  type CreateOrderItem,
+} from "@/lib/api/orders";
 import { fetchBudgetCurrentAPI } from "@/lib/api/superAdmin";
 import { getImageSrc } from "@/lib/utils/image";
 
@@ -23,7 +27,8 @@ function formatPrice(n: number) {
 export default function CartPage() {
   const router = useRouter();
   const { user } = useAuth();
-  const rawAdmin = user?.is_admin ?? (user as { isAdmin?: string | boolean })?.isAdmin;
+  const rawAdmin =
+    user?.is_admin ?? (user as { isAdmin?: string | boolean })?.isAdmin;
   const isAdmin =
     rawAdmin === "Y" ||
     rawAdmin === "y" ||
@@ -33,17 +38,25 @@ export default function CartPage() {
   const canSeeBudget = isAdmin || isSuperAdmin;
   const purchaseButtonLabel = isAdmin ? "즉시 구매" : "구매 요청";
   const instantButtonLabel = isAdmin ? "즉시 구매" : "즉시 요청";
-  const { items, cartLoaded, refetchCart, budget, updateQuantity, removeItem, removeAll, removeSelected } =
-    useCart();
+  const {
+    items,
+    cartLoaded,
+    refetchCart,
+    budget,
+    updateQuantity,
+    removeItem,
+    removeAll,
+    removeSelected,
+  } = useCart();
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [fallbackRemaining, setFallbackRemaining] = useState<number | null>(null);
+  const [fallbackRemaining, setFallbackRemaining] = useState<number | null>(
+    null,
+  );
 
-  // 상품 담고 "장바구니 바로가기"로 진입해도 목록 갱신되도록 페이지 마운트 시 재조회
   useEffect(() => {
     refetchCart();
   }, [refetchCart]);
 
-  // 관리자/최고관리자: cart API에 budget 없거나 remaining 0일 때 예산 API fallback
   useEffect(() => {
     if (!canSeeBudget) {
       setFallbackRemaining(null);
@@ -62,7 +75,8 @@ export default function CartPage() {
         const remaining =
           typeof b.remaining === "number"
             ? b.remaining
-            : typeof b.budget_amount === "number" && typeof b.spent_amount === "number"
+            : typeof b.budget_amount === "number" &&
+                typeof b.spent_amount === "number"
               ? Math.max(0, b.budget_amount - b.spent_amount)
               : null;
         setFallbackRemaining(remaining);
@@ -75,23 +89,21 @@ export default function CartPage() {
     };
   }, [canSeeBudget, budget?.remaining]);
 
-  // cart budget 우선 (양수일 때), 없거나 0이면 fallback (예산 API) 사용
   const remainingBudget = canSeeBudget
-    ? (budget?.remaining != null && budget.remaining > 0
-        ? budget.remaining
-        : fallbackRemaining ?? budget?.remaining ?? null)
+    ? budget?.remaining != null && budget.remaining > 0
+      ? budget.remaining
+      : (fallbackRemaining ?? budget?.remaining ?? null)
     : null;
 
   const selectedItems = items.filter((it) => selectedIds.has(it.id));
   const productAmount = selectedItems.reduce(
     (sum, it) => sum + it.price * it.quantity,
-    0
+    0,
   );
   const deliveryFee = selectedItems.length > 0 ? DELIVERY_FEE : 0;
   const totalAmount = productAmount + deliveryFee;
   const totalQuantity = selectedItems.reduce((sum, it) => sum + it.quantity, 0);
 
-  // 관리자/최고관리자: 예산 부족 시 구매 버튼 비활성화 (체크된 상품 합산 기준)
   const isBudgetExceeded =
     canSeeBudget &&
     remainingBudget != null &&
@@ -121,7 +133,9 @@ export default function CartPage() {
     try {
       await updateQuantity(item.id, next);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "수량 변경에 실패했습니다.");
+      toast.error(
+        err instanceof Error ? err.message : "수량 변경에 실패했습니다.",
+      );
     }
   };
 
@@ -131,7 +145,9 @@ export default function CartPage() {
       setSelectedIds(new Set());
       toast.success("전체 상품이 삭제되었습니다.");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "장바구니 비우기에 실패했습니다.");
+      toast.error(
+        err instanceof Error ? err.message : "장바구니 비우기에 실패했습니다.",
+      );
     }
   };
 
@@ -141,7 +157,9 @@ export default function CartPage() {
       setSelectedIds(new Set());
       toast.success("선택 상품이 삭제되었습니다.");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "선택 삭제에 실패했습니다.");
+      toast.error(
+        err instanceof Error ? err.message : "선택 삭제에 실패했습니다.",
+      );
     }
   };
 
@@ -168,14 +186,16 @@ export default function CartPage() {
       purchaseMode: "instant" as const,
     };
     try {
-      const orderItems: CreateOrderItem[] = [{
-        id: item.id,
-        itemId: item.itemId,
-        title: item.title || "상품",
-        quantity: item.quantity,
-        price: item.price,
-        image: item.image,
-      }];
+      const orderItems: CreateOrderItem[] = [
+        {
+          id: item.id,
+          itemId: item.itemId,
+          title: item.title || "상품",
+          quantity: item.quantity,
+          price: item.price,
+          image: item.image,
+        },
+      ];
       await createOrder({
         items: orderItems,
         totalQuantity,
@@ -195,7 +215,9 @@ export default function CartPage() {
       });
       router.push("/cart/complete");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "구매 요청에 실패했습니다.");
+      toast.error(
+        err instanceof Error ? err.message : "구매 요청에 실패했습니다.",
+      );
     }
   };
 
@@ -219,9 +241,12 @@ export default function CartPage() {
       purchaseMode: instantPurchase ? ("instant" as const) : ("cart" as const),
     };
     try {
-      const isFullCart = selectedItems.length === items.length && items.length > 0;
+      const isFullCart =
+        selectedItems.length === items.length && items.length > 0;
       if (isFullCart) {
-        await createOrderFromCart(instantPurchase ? { instant_purchase: true } : undefined);
+        await createOrderFromCart(
+          instantPurchase ? { instant_purchase: true } : undefined,
+        );
       } else {
         const orderItems: CreateOrderItem[] = selectedItems.map((it) => ({
           id: it.id,
@@ -244,13 +269,17 @@ export default function CartPage() {
       toast.success("주문이 생성되었습니다.");
       router.push("/cart/complete");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "구매 요청에 실패했습니다.");
+      toast.error(
+        err instanceof Error ? err.message : "구매 요청에 실패했습니다.",
+      );
     }
   };
 
   return (
     <main className="mx-auto flex min-h-0 w-full max-w-[1920px] flex-col overflow-x-hidden bg-background-peach px-4 py-8 sm:px-6">
-      <h1 className="mb-8 text-left text-2xl font-bold text-black-400 max-[1100px]:ml-0 min-[1101px]:ml-[calc(clamp(2rem,8.33vw,10rem)-80px)]">장바구니</h1>
+      <h1 className="mb-8 text-left text-2xl font-bold text-black-400 max-[1100px]:ml-0 min-[1101px]:ml-[calc(clamp(2rem,8.33vw,10rem)-80px)]">
+        장바구니
+      </h1>
 
       {!cartLoaded ? (
         <div className="flex min-h-[200px] items-center justify-center">
@@ -270,201 +299,483 @@ export default function CartPage() {
         </div>
       ) : (
         <>
-        {/* 데스크톱: 1101px 초과 시 기존 테이블 + OrderSummary */}
-        <div className="hidden min-[1101px]:flex flex-row items-start gap-6">
-          <div className="min-w-0 flex-1 overflow-hidden rounded-2xl p-2 sm:p-4">
-            <div className="overflow-x-hidden overflow-y-auto" style={{ maxHeight: "clamp(560px, 39.8vw, 760px)" }}>
-              <table className="cart-table w-full" style={{ borderCollapse: "separate", borderSpacing: 0, tableLayout: "fixed", minWidth: 0 }}>
-                <thead className="sticky top-0 z-10 bg-background-peach">
-                  <tr className="bg-background-peach">
-                    <th className="py-6 pl-4 pr-2 sm:py-11 sm:pl-10 sm:pr-6" style={{ width: "47.4%" }}>
-                      <div className="flex items-center" style={{ marginLeft: "calc(clamp(2rem, 8.33vw, 10rem) - 120px)", gap: "clamp(8px, 1.67vw, 32px)" }}>
-                        <label className="cursor-pointer shrink-0">
-                          <input
-                            type="checkbox"
-                            checked={
-                              items.length > 0 &&
-                              selectedIds.size === items.length
-                            }
-                            onChange={toggleSelectAll}
-                            className="cart-checkbox h-5 w-5 focus:outline-none focus:ring-2 focus:ring-[#F97B22] focus:ring-offset-2"
-                          />
-                        </label>
-                        <span
-                          className="flex-1 text-left"
+          {/* 데스크톱: 1101px 초과 시 기존 테이블 + OrderSummary */}
+          <div className="hidden min-[1101px]:flex flex-row items-start gap-6">
+            <div className="min-w-0 flex-1 overflow-hidden rounded-2xl p-2 sm:p-4">
+              <div
+                className="overflow-x-hidden overflow-y-auto"
+                style={{ maxHeight: "clamp(560px, 39.8vw, 760px)" }}
+              >
+                <table
+                  className="cart-table w-full"
+                  style={{
+                    borderCollapse: "separate",
+                    borderSpacing: 0,
+                    tableLayout: "fixed",
+                    minWidth: 0,
+                  }}
+                >
+                  <thead className="sticky top-0 z-10 bg-background-peach">
+                    <tr className="bg-background-peach">
+                      <th
+                        className="py-6 pl-4 pr-2 sm:py-11 sm:pl-10 sm:pr-6"
+                        style={{ width: "47.4%" }}
+                      >
+                        <div
+                          className="flex items-center"
                           style={{
-                            color: "var(--color-black-100, #6B6B6B)",
-                            fontFamily: "Pretendard, sans-serif",
-                            fontSize: "clamp(14px, 1.04vw, 20px)",
-                            fontStyle: "normal",
-                            fontWeight: 400,
-                            lineHeight: "32px",
+                            marginLeft:
+                              "calc(clamp(2rem, 8.33vw, 10rem) - 120px)",
+                            gap: "clamp(8px, 1.67vw, 32px)",
                           }}
                         >
-                          상품정보
-                        </span>
-                      </div>
-                    </th>
-                    <th className="cart-col-divider py-6 px-2 text-center text-xs font-semibold text-black-400 sm:py-11 sm:px-6 sm:text-sm" style={{ borderLeft: "1px solid #E6E6E6", width: "17.55%" }}>
-                      수량
-                    </th>
-                    <th className="cart-col-divider py-6 px-2 text-center text-xs font-semibold text-black-400 sm:py-11 sm:px-6 sm:text-sm" style={{ borderLeft: "1px solid #E6E6E6", width: "17.55%" }}>
-                      주문 금액
-                    </th>
-                    <th className="cart-col-divider py-6 pl-2 pr-4 text-center text-xs font-semibold text-black-400 sm:pl-6 sm:pr-10 sm:text-sm" style={{ borderLeft: "1px solid #E6E6E6", width: "17.66%" }}>
-                      배송 정보
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {items.map((item, index) => (
-                    <tr
-                      key={item.id}
-                      className="bg-background-peach"
-                      style={{ height: "clamp(128px, 8.75vw, 168px)" }}
-                    >
-                      <td className="relative py-4 pl-4 pr-2 align-top sm:py-5 sm:pl-10 sm:pr-6" style={{ width: "47.4%", height: "clamp(128px, 8.75vw, 168px)", overflow: "hidden" }}>
-                        <div className="flex items-start gap-2 pr-4 sm:gap-4 sm:pr-10" style={{ gap: "clamp(8px, 0.83vw, 16px)" }}>
-                          <div className="flex min-w-0 flex-1 items-start" style={{ marginLeft: "calc(clamp(2rem, 8.33vw, 10rem) - 120px)", gap: "clamp(8px, 0.83vw, 16px)" }}>
+                          <label className="cursor-pointer shrink-0">
                             <input
                               type="checkbox"
-                              checked={selectedIds.has(item.id)}
-                              onChange={() => toggleSelect(item.id)}
-                              className="cart-checkbox h-4 w-4 shrink-0 focus:outline-none focus:ring-2 focus:ring-[#F97B22] focus:ring-offset-2 sm:h-5 sm:w-5"
+                              checked={
+                                items.length > 0 &&
+                                selectedIds.size === items.length
+                              }
+                              onChange={toggleSelectAll}
+                              className="cart-checkbox h-5 w-5 focus:outline-none focus:ring-2 focus:ring-[#F97B22] focus:ring-offset-2"
                             />
-                            <div
-                              className="relative shrink-0 overflow-hidden rounded-lg bg-gray-100"
-                              style={{ width: "clamp(70px, 6.25vw, 120px)", height: "clamp(70px, 6.25vw, 120px)", minWidth: "clamp(70px, 6.25vw, 120px)", minHeight: "clamp(70px, 6.25vw, 120px)" }}
-                            >
-                              {item.image ? (
-                                <Image
-                                  src={getImageSrc(item.image)}
-                                  alt={item.title}
-                                  fill
-                                  className="object-contain"
-                                  sizes="120px"
-                                  unoptimized
-                                />
-                              ) : (
-                                <div className="flex h-full w-full items-center justify-center text-xs text-gray-400">
-                                  이미지 없음
-                                </div>
-                              )}
-                            </div>
-                            <div className="flex min-w-0 flex-1 flex-col justify-center pl-2 text-left sm:pl-4">
-                              <p
-                                className="mt-1 first:mt-0 line-clamp-2 text-left sm:mt-1.5"
-                                style={{
-                                  color: "var(--color-black-400, #1F1F1F)",
-                                  fontFamily: "Pretendard, sans-serif",
-                                  fontSize: "clamp(14px, 1.04vw, 20px)",
-                                  fontStyle: "normal",
-                                  fontWeight: 400,
-                                  lineHeight: "32px",
-                                }}
-                              >
-                                {item.title || "상품"}
-                              </p>
-                              <p
-                                className="mt-1 text-left sm:mt-1.5"
-                                style={{
-                                  color: "var(--color-black-400, #1F1F1F)",
-                                  fontFamily: "Pretendard, sans-serif",
-                                  fontSize: "clamp(16px, 1.25vw, 24px)",
-                                  fontStyle: "normal",
-                                  fontWeight: 700,
-                                  lineHeight: "32px",
-                                }}
-                              >
-                                {formatPrice(item.price)}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={async () => {
-                            try {
-                              await removeItem(item.id);
-                              toast.success("상품이 삭제되었습니다.");
-                            } catch (err) {
-                              toast.error(err instanceof Error ? err.message : "삭제에 실패했습니다.");
-                            }
-                          }}
-                          className="absolute right-2 p-1.5 text-gray-400 transition-colors hover:text-black-400 sm:right-6 sm:p-2"
-                          style={{ top: "clamp(0.25rem, 1vw, 1rem)" }}
-                          aria-label="삭제"
-                        >
-                          <svg
-                            width="20"
-                            height="20"
-                            viewBox="0 0 20 20"
-                            fill="none"
-                          >
-                            <path
-                              d="M15 5L5 15M5 5l10 10"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                            />
-                          </svg>
-                        </button>
-                      </td>
-                      <td className="cart-col-divider w-[17.55%] py-4 px-2 align-middle sm:py-5 sm:px-6" style={{ borderLeft: "1px solid #E6E6E6" }}>
-                        <div className="flex items-center justify-center">
-                          <div
-                            className="flex shrink-0 items-center gap-1.5 sm:gap-3"
+                          </label>
+                          <span
+                            className="flex-1 text-left"
                             style={{
-                              width: "clamp(120px, 8.33vw, 160px)",
-                              minWidth: "120px",
-                              height: "clamp(46px, 3.5vw, 54px)",
-                              padding: "0 0.75rem",
-                              justifyContent: "flex-end",
-                              borderRadius: "16px",
-                              border: "1px solid var(--color-primary-300, #FCC49C)",
-                              background: "var(--color-gray-50, #FFF)",
+                              color: "var(--color-black-100, #6B6B6B)",
+                              fontFamily: "Pretendard, sans-serif",
+                              fontSize: "clamp(14px, 1.04vw, 20px)",
+                              fontStyle: "normal",
+                              fontWeight: 400,
+                              lineHeight: "32px",
                             }}
                           >
-                            <span className="min-w-[3.25rem] text-right text-lg-m text-primary-400">
-                              {item.quantity} 개
-                            </span>
-                            <div className="flex flex-col items-center justify-center" style={{ gap: 2 }}>
-                              <button
-                                type="button"
-                                onClick={() => handleQuantityChange(item, 1)}
-                                className="flex items-center justify-center text-primary-400 transition-colors hover:opacity-80"
-                                style={{ minWidth: "clamp(1.25rem, 1.67vw, 2rem)", minHeight: "clamp(1.25rem, 1.67vw, 2rem)", width: "clamp(1.25rem, 1.67vw, 2rem)", height: "clamp(1.25rem, 1.67vw, 2rem)" }}
-                                aria-label="수량 증가"
-                              >
-                                <Image src="/upsemo.png" alt="수량 증가" width={13} height={13} className="object-contain" />
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => handleQuantityChange(item, -1)}
-                                className="flex items-center justify-center text-primary-400 transition-colors hover:opacity-80"
-                                style={{ minWidth: "clamp(1.25rem, 1.67vw, 2rem)", minHeight: "clamp(1.25rem, 1.67vw, 2rem)", width: "clamp(1.25rem, 1.67vw, 2rem)", height: "clamp(1.25rem, 1.67vw, 2rem)" }}
-                                aria-label="수량 감소"
-                              >
-                                <Image src="/downsemo.png" alt="수량 감소" width={13} height={13} className="object-contain" />
-                              </button>
-                            </div>
-                          </div>
+                            상품정보
+                          </span>
                         </div>
-                      </td>
-                      <td className="cart-col-divider w-[17.55%] py-4 px-2 align-middle text-center sm:py-5 sm:px-6" style={{ borderLeft: "1px solid #E6E6E6" }}>
-                        <p
-                          className="text-center"
+                      </th>
+                      <th
+                        className="cart-col-divider py-6 px-2 text-center text-xs font-semibold text-black-400 sm:py-11 sm:px-6 sm:text-sm"
+                        style={{
+                          borderLeft: "1px solid #E6E6E6",
+                          width: "17.55%",
+                        }}
+                      >
+                        수량
+                      </th>
+                      <th
+                        className="cart-col-divider py-6 px-2 text-center text-xs font-semibold text-black-400 sm:py-11 sm:px-6 sm:text-sm"
+                        style={{
+                          borderLeft: "1px solid #E6E6E6",
+                          width: "17.55%",
+                        }}
+                      >
+                        주문 금액
+                      </th>
+                      <th
+                        className="cart-col-divider py-6 pl-2 pr-4 text-center text-xs font-semibold text-black-400 sm:pl-6 sm:pr-10 sm:text-sm"
+                        style={{
+                          borderLeft: "1px solid #E6E6E6",
+                          width: "17.66%",
+                        }}
+                      >
+                        배송 정보
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {items.map((item, index) => (
+                      <tr
+                        key={item.id}
+                        className="bg-background-peach"
+                        style={{ height: "clamp(128px, 8.75vw, 168px)" }}
+                      >
+                        <td
+                          className="relative py-4 pl-4 pr-2 align-top sm:py-5 sm:pl-10 sm:pr-6"
                           style={{
-                            color: "var(--color-black-400, #1F1F1F)",
-                            fontFamily: "Pretendard, sans-serif",
-                            fontSize: "24px",
-                            fontStyle: "normal",
-                            fontWeight: 700,
-                            lineHeight: "32px",
+                            width: "47.4%",
+                            height: "clamp(128px, 8.75vw, 168px)",
+                            overflow: "hidden",
                           }}
                         >
-                          {formatPrice(item.price * item.quantity)}
-                        </p>
+                          <div
+                            className="flex items-start gap-2 pr-4 sm:gap-4 sm:pr-10"
+                            style={{ gap: "clamp(8px, 0.83vw, 16px)" }}
+                          >
+                            <div
+                              className="flex min-w-0 flex-1 items-start"
+                              style={{
+                                marginLeft:
+                                  "calc(clamp(2rem, 8.33vw, 10rem) - 120px)",
+                                gap: "clamp(8px, 0.83vw, 16px)",
+                              }}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={selectedIds.has(item.id)}
+                                onChange={() => toggleSelect(item.id)}
+                                className="cart-checkbox h-4 w-4 shrink-0 focus:outline-none focus:ring-2 focus:ring-[#F97B22] focus:ring-offset-2 sm:h-5 sm:w-5"
+                              />
+                              <div
+                                className="relative shrink-0 overflow-hidden rounded-lg bg-gray-100"
+                                style={{
+                                  width: "clamp(70px, 6.25vw, 120px)",
+                                  height: "clamp(70px, 6.25vw, 120px)",
+                                  minWidth: "clamp(70px, 6.25vw, 120px)",
+                                  minHeight: "clamp(70px, 6.25vw, 120px)",
+                                }}
+                              >
+                                {item.image ? (
+                                  <Image
+                                    src={getImageSrc(item.image)}
+                                    alt={item.title}
+                                    fill
+                                    className="object-contain"
+                                    sizes="120px"
+                                    priority={index === 0}
+                                  />
+                                ) : (
+                                  <div className="flex h-full w-full items-center justify-center text-xs text-gray-400">
+                                    이미지 없음
+                                  </div>
+                                )}
+                              </div>
+                              <div className="flex min-w-0 flex-1 flex-col justify-center pl-2 text-left sm:pl-4">
+                                <p
+                                  className="mt-1 first:mt-0 line-clamp-2 text-left sm:mt-1.5"
+                                  style={{
+                                    color: "var(--color-black-400, #1F1F1F)",
+                                    fontFamily: "Pretendard, sans-serif",
+                                    fontSize: "clamp(14px, 1.04vw, 20px)",
+                                    fontStyle: "normal",
+                                    fontWeight: 400,
+                                    lineHeight: "32px",
+                                  }}
+                                >
+                                  {item.title || "상품"}
+                                </p>
+                                <p
+                                  className="mt-1 text-left sm:mt-1.5"
+                                  style={{
+                                    color: "var(--color-black-400, #1F1F1F)",
+                                    fontFamily: "Pretendard, sans-serif",
+                                    fontSize: "clamp(16px, 1.25vw, 24px)",
+                                    fontStyle: "normal",
+                                    fontWeight: 700,
+                                    lineHeight: "32px",
+                                  }}
+                                >
+                                  {formatPrice(item.price)}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={async () => {
+                              try {
+                                await removeItem(item.id);
+                                toast.success("상품이 삭제되었습니다.");
+                              } catch (err) {
+                                toast.error(
+                                  err instanceof Error
+                                    ? err.message
+                                    : "삭제에 실패했습니다.",
+                                );
+                              }
+                            }}
+                            className="absolute right-2 p-1.5 text-gray-400 transition-colors hover:text-black-400 sm:right-6 sm:p-2"
+                            style={{ top: "clamp(0.25rem, 1vw, 1rem)" }}
+                            aria-label="삭제"
+                          >
+                            <svg
+                              width="20"
+                              height="20"
+                              viewBox="0 0 20 20"
+                              fill="none"
+                            >
+                              <path
+                                d="M15 5L5 15M5 5l10 10"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                              />
+                            </svg>
+                          </button>
+                        </td>
+                        <td
+                          className="cart-col-divider w-[17.55%] py-4 px-2 align-middle sm:py-5 sm:px-6"
+                          style={{ borderLeft: "1px solid #E6E6E6" }}
+                        >
+                          <div className="flex items-center justify-center">
+                            <div
+                              className="flex shrink-0 items-center gap-1.5 sm:gap-3"
+                              style={{
+                                width: "clamp(120px, 8.33vw, 160px)",
+                                minWidth: "120px",
+                                height: "clamp(46px, 3.5vw, 54px)",
+                                padding: "0 0.75rem",
+                                justifyContent: "flex-end",
+                                borderRadius: "16px",
+                                border:
+                                  "1px solid var(--color-primary-300, #FCC49C)",
+                                background: "var(--color-gray-50, #FFF)",
+                              }}
+                            >
+                              <span className="min-w-[3.25rem] text-right text-lg-m text-primary-400">
+                                {item.quantity} 개
+                              </span>
+                              <div
+                                className="flex flex-col items-center justify-center"
+                                style={{ gap: 2 }}
+                              >
+                                <button
+                                  type="button"
+                                  onClick={() => handleQuantityChange(item, 1)}
+                                  className="flex items-center justify-center text-primary-400 transition-colors hover:opacity-80"
+                                  style={{
+                                    minWidth: "clamp(1.25rem, 1.67vw, 2rem)",
+                                    minHeight: "clamp(1.25rem, 1.67vw, 2rem)",
+                                    width: "clamp(1.25rem, 1.67vw, 2rem)",
+                                    height: "clamp(1.25rem, 1.67vw, 2rem)",
+                                  }}
+                                  aria-label="수량 증가"
+                                >
+                                  <Image
+                                    src="/upsemo.png"
+                                    alt="수량 증가"
+                                    width={13}
+                                    height={13}
+                                    className="object-contain"
+                                  />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleQuantityChange(item, -1)}
+                                  className="flex items-center justify-center text-primary-400 transition-colors hover:opacity-80"
+                                  style={{
+                                    minWidth: "clamp(1.25rem, 1.67vw, 2rem)",
+                                    minHeight: "clamp(1.25rem, 1.67vw, 2rem)",
+                                    width: "clamp(1.25rem, 1.67vw, 2rem)",
+                                    height: "clamp(1.25rem, 1.67vw, 2rem)",
+                                  }}
+                                  aria-label="수량 감소"
+                                >
+                                  <Image
+                                    src="/downsemo.png"
+                                    alt="수량 감소"
+                                    width={13}
+                                    height={13}
+                                    className="object-contain"
+                                  />
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td
+                          className="cart-col-divider w-[17.55%] py-4 px-2 align-middle text-center sm:py-5 sm:px-6"
+                          style={{ borderLeft: "1px solid #E6E6E6" }}
+                        >
+                          <p
+                            className="text-center"
+                            style={{
+                              color: "var(--color-black-400, #1F1F1F)",
+                              fontFamily: "Pretendard, sans-serif",
+                              fontSize: "24px",
+                              fontStyle: "normal",
+                              fontWeight: 700,
+                              lineHeight: "32px",
+                            }}
+                          >
+                            {formatPrice(item.price * item.quantity)}
+                          </p>
+                          <button
+                            type="button"
+                            onClick={() => handleInstantRequest(item)}
+                            disabled={
+                              canSeeBudget &&
+                              remainingBudget != null &&
+                              item.price * item.quantity + DELIVERY_FEE >
+                                remainingBudget
+                            }
+                            className={`text-xl-sb rounded-full transition-colors ${
+                              canSeeBudget &&
+                              remainingBudget != null &&
+                              item.price * item.quantity + DELIVERY_FEE >
+                                remainingBudget
+                                ? "cursor-not-allowed bg-gray-300 text-gray-500"
+                                : "bg-primary-400 text-white hover:bg-primary-300"
+                            }`}
+                            style={{
+                              width: "clamp(100px, 6.82vw, 131px)",
+                              height: "clamp(44px, 2.6vw, 50px)",
+                              marginTop: "20px",
+                            }}
+                          >
+                            즉시 요청
+                          </button>
+                        </td>
+                        <td
+                          className="cart-col-divider w-[17.66%] py-4 pl-2 pr-4 align-middle text-center sm:py-5 sm:pl-6 sm:pr-10"
+                          style={{ borderLeft: "1px solid #E6E6E6" }}
+                        >
+                          <p
+                            className="text-center"
+                            style={{
+                              color: "var(--color-black-400, #1F1F1F)",
+                              fontFamily: "Pretendard, sans-serif",
+                              fontSize: "20px",
+                              fontStyle: "normal",
+                              fontWeight: 700,
+                              lineHeight: "32px",
+                            }}
+                          >
+                            {formatPrice(DELIVERY_FEE)}
+                          </p>
+                          <p
+                            className="mt-1 text-center"
+                            style={{
+                              color: "var(--color-black-100, #6B6B6B)",
+                              fontFamily: "Pretendard, sans-serif",
+                              fontSize: "20px",
+                              fontStyle: "normal",
+                              fontWeight: 400,
+                              lineHeight: "32px",
+                            }}
+                          >
+                            택배 배송
+                          </p>
+                        </td>
+                      </tr>
+                    ))}
+                    <tr>
+                      <td
+                        colSpan={4}
+                        className="border-t border-line-gray"
+                        style={{ height: 0, padding: 0, lineHeight: 0 }}
+                      />
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <OrderSummary
+              totalQuantity={totalQuantity}
+              productAmount={productAmount}
+              deliveryFee={deliveryFee}
+              totalAmount={totalAmount}
+              onPurchaseRequest={() => handlePurchaseRequest(isAdmin)}
+              purchaseButtonLabel={purchaseButtonLabel}
+              continueShoppingHref="/items"
+              remainingBudget={
+                canSeeBudget && budget != null ? budget.remaining : undefined
+              }
+              purchaseDisabled={isBudgetExceeded}
+            />
+          </div>
+
+          {/* 1100px 이하: 태블릿/모바일 카드 레이아웃 */}
+          <div className="flex min-[1101px]:hidden flex-col gap-6">
+            <div className="flex items-center justify-between">
+              <label className="flex cursor-pointer items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={
+                    items.length > 0 && selectedIds.size === items.length
+                  }
+                  onChange={toggleSelectAll}
+                  className="cart-checkbox h-5 w-5 focus:outline-none focus:ring-2 focus:ring-primary-400 focus:ring-offset-2"
+                />
+                <span className="text-base text-black-400">전체 선택</span>
+              </label>
+              <div className="ml-6 flex gap-2">
+                <button
+                  type="button"
+                  onClick={handleDeleteAll}
+                  className="rounded-full border border-gray-200 bg-background-peach px-4 py-2.5 text-sm font-medium text-gray-500 transition-colors hover:bg-gray-100/80"
+                >
+                  전체 상품 삭제
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDeleteSelected}
+                  className="rounded-full border border-gray-200 bg-background-peach px-4 py-2.5 text-sm font-medium text-gray-500 transition-colors hover:bg-gray-100/80"
+                >
+                  선택 상품 삭제
+                </button>
+              </div>
+            </div>
+
+            <div className="flex flex-col">
+              {items.map((item, index) => (
+                <div key={item.id} className="flex flex-col gap-4 py-4">
+                  <div className="flex gap-3">
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.has(item.id)}
+                      onChange={() => toggleSelect(item.id)}
+                      className="cart-checkbox mt-1 h-4 w-4 shrink-0 focus:outline-none focus:ring-2 focus:ring-primary-400 focus:ring-offset-2"
+                    />
+                    <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-gray-100">
+                      {item.image ? (
+                        <Image
+                          src={getImageSrc(item.image)}
+                          alt={item.title}
+                          fill
+                          className="object-contain"
+                          sizes="80px"
+                          priority={index === 0}
+                        />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center text-xs text-gray-400">
+                          이미지 없음
+                        </div>
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="line-clamp-2 text-base font-medium text-black-400">
+                        {item.title || "상품"}
+                      </p>
+                      <p className="mt-1 text-right text-lg font-bold text-black-400">
+                        {formatPrice(item.price)}
+                      </p>
+                      <div className="mt-3 flex items-center gap-2">
+                        <div className="flex w-[120px] min-w-0 shrink-0 items-center gap-0.5 rounded-2xl border border-primary-300 bg-white px-2 py-1 sm:w-[160px] sm:gap-1 sm:px-3 sm:py-1.5 min-[400px]:w-[200px]">
+                          <span className="min-w-[1.5rem] flex-1 text-right text-xs text-primary-400 sm:min-w-[2rem] sm:text-sm">
+                            {item.quantity} 개
+                          </span>
+                          <div className="flex flex-col">
+                            <button
+                              type="button"
+                              onClick={() => handleQuantityChange(item, 1)}
+                              className="flex items-center justify-center text-primary-400 hover:opacity-80"
+                              aria-label="수량 증가"
+                            >
+                              <Image
+                                src="/upsemo.png"
+                                alt=""
+                                width={12}
+                                height={12}
+                              />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleQuantityChange(item, -1)}
+                              className="flex items-center justify-center text-primary-400 hover:opacity-80"
+                              aria-label="수량 감소"
+                            >
+                              <Image
+                                src="/downsemo.png"
+                                alt=""
+                                width={12}
+                                height={12}
+                              />
+                            </button>
+                          </div>
+                        </div>
                         <button
                           type="button"
                           onClick={() => handleInstantRequest(item)}
@@ -474,7 +785,7 @@ export default function CartPage() {
                             item.price * item.quantity + DELIVERY_FEE >
                               remainingBudget
                           }
-                          className={`text-xl-sb rounded-full transition-colors ${
+                          className={`w-[120px] shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors sm:w-[160px] sm:px-4 sm:py-2 sm:text-sm min-[400px]:w-[200px] ${
                             canSeeBudget &&
                             remainingBudget != null &&
                             item.price * item.quantity + DELIVERY_FEE >
@@ -482,264 +793,125 @@ export default function CartPage() {
                               ? "cursor-not-allowed bg-gray-300 text-gray-500"
                               : "bg-primary-400 text-white hover:bg-primary-300"
                           }`}
-                          style={{
-                            width: "clamp(100px, 6.82vw, 131px)",
-                            height: "clamp(44px, 2.6vw, 50px)",
-                            marginTop: "20px",
-                          }}
                         >
-                          즉시 요청
+                          {instantButtonLabel}
                         </button>
-                      </td>
-                      <td className="cart-col-divider w-[17.66%] py-4 pl-2 pr-4 align-middle text-center sm:py-5 sm:pl-6 sm:pr-10" style={{ borderLeft: "1px solid #E6E6E6" }}>
-                        <p
-                          className="text-center"
-                          style={{
-                            color: "var(--color-black-400, #1F1F1F)",
-                            fontFamily: "Pretendard, sans-serif",
-                            fontSize: "20px",
-                            fontStyle: "normal",
-                            fontWeight: 700,
-                            lineHeight: "32px",
-                          }}
-                        >
-                          {formatPrice(DELIVERY_FEE)}
-                        </p>
-                        <p
-                          className="mt-1 text-center"
-                          style={{
-                            color: "var(--color-black-100, #6B6B6B)",
-                            fontFamily: "Pretendard, sans-serif",
-                            fontSize: "20px",
-                            fontStyle: "normal",
-                            fontWeight: 400,
-                            lineHeight: "32px",
-                          }}
-                        >
-                          택배 배송
-                        </p>
-                      </td>
-                    </tr>
-                  ))}
-                  <tr>
-                    <td colSpan={4} className="border-t border-line-gray" style={{ height: 0, padding: 0, lineHeight: 0 }} />
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <OrderSummary
-            totalQuantity={totalQuantity}
-            productAmount={productAmount}
-            deliveryFee={deliveryFee}
-            totalAmount={totalAmount}
-            onPurchaseRequest={() => handlePurchaseRequest(isAdmin)}
-            purchaseButtonLabel={purchaseButtonLabel}
-            continueShoppingHref="/items"
-            remainingBudget={canSeeBudget && budget != null ? budget.remaining : undefined}
-            purchaseDisabled={isBudgetExceeded}
-          />
-        </div>
-
-        {/* 1100px 이하: 태블릿/모바일 카드 레이아웃 */}
-        <div className="flex min-[1101px]:hidden flex-col gap-6">
-          <div className="flex items-center justify-between">
-            <label className="flex cursor-pointer items-center gap-2">
-              <input
-                type="checkbox"
-                checked={items.length > 0 && selectedIds.size === items.length}
-                onChange={toggleSelectAll}
-                className="cart-checkbox h-5 w-5 focus:outline-none focus:ring-2 focus:ring-primary-400 focus:ring-offset-2"
-              />
-              <span className="text-base text-black-400">전체 선택</span>
-            </label>
-            <div className="ml-6 flex gap-2">
-              <button
-                type="button"
-                onClick={handleDeleteAll}
-                className="rounded-full border border-gray-200 bg-background-peach px-4 py-2.5 text-sm font-medium text-gray-500 transition-colors hover:bg-gray-100/80"
-              >
-                전체 상품 삭제
-              </button>
-              <button
-                type="button"
-                onClick={handleDeleteSelected}
-                className="rounded-full border border-gray-200 bg-background-peach px-4 py-2.5 text-sm font-medium text-gray-500 transition-colors hover:bg-gray-100/80"
-              >
-                선택 상품 삭제
-              </button>
-            </div>
-          </div>
-
-          <div className="flex flex-col">
-            {items.map((item) => (
-              <div
-                key={item.id}
-                className="flex flex-col gap-4 py-4"
-              >
-                <div className="flex gap-3">
-                  <input
-                    type="checkbox"
-                    checked={selectedIds.has(item.id)}
-                    onChange={() => toggleSelect(item.id)}
-                    className="cart-checkbox mt-1 h-4 w-4 shrink-0 focus:outline-none focus:ring-2 focus:ring-primary-400 focus:ring-offset-2"
-                  />
-                  <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-gray-100">
-                    {item.image ? (
-                      <Image
-                        src={getImageSrc(item.image)}
-                        alt={item.title}
-                        fill
-                        className="object-contain"
-                        sizes="80px"
-                        unoptimized
-                      />
-                    ) : (
-                      <div className="flex h-full w-full items-center justify-center text-xs text-gray-400">
-                        이미지 없음
                       </div>
-                    )}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="line-clamp-2 text-base font-medium text-black-400">
-                      {item.title || "상품"}
-                    </p>
-                    <p className="mt-1 text-right text-lg font-bold text-black-400">
-                      {formatPrice(item.price)}
-                    </p>
-                    <div className="mt-3 flex items-center gap-2">
-                      <div className="flex w-[120px] min-w-0 shrink-0 items-center gap-0.5 rounded-2xl border border-primary-300 bg-white px-2 py-1 sm:w-[160px] sm:gap-1 sm:px-3 sm:py-1.5 min-[400px]:w-[200px]">
-                        <span className="min-w-[1.5rem] flex-1 text-right text-xs text-primary-400 sm:min-w-[2rem] sm:text-sm">
-                          {item.quantity} 개
-                        </span>
-                        <div className="flex flex-col">
-                          <button
-                            type="button"
-                            onClick={() => handleQuantityChange(item, 1)}
-                            className="flex items-center justify-center text-primary-400 hover:opacity-80"
-                            aria-label="수량 증가"
-                          >
-                            <Image src="/upsemo.png" alt="" width={12} height={12} />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleQuantityChange(item, -1)}
-                            className="flex items-center justify-center text-primary-400 hover:opacity-80"
-                            aria-label="수량 감소"
-                          >
-                            <Image src="/downsemo.png" alt="" width={12} height={12} />
-                          </button>
-                        </div>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => handleInstantRequest(item)}
-                        disabled={
-                          canSeeBudget &&
-                          remainingBudget != null &&
-                          item.price * item.quantity + DELIVERY_FEE >
-                            remainingBudget
-                        }
-                        className={`w-[120px] shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors sm:w-[160px] sm:px-4 sm:py-2 sm:text-sm min-[400px]:w-[200px] ${
-                          canSeeBudget &&
-                          remainingBudget != null &&
-                          item.price * item.quantity + DELIVERY_FEE >
-                            remainingBudget
-                            ? "cursor-not-allowed bg-gray-300 text-gray-500"
-                            : "bg-primary-400 text-white hover:bg-primary-300"
-                        }`}
-                      >
-                        {instantButtonLabel}
-                      </button>
                     </div>
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        try {
+                          await removeItem(item.id);
+                          toast.success("상품이 삭제되었습니다.");
+                        } catch (err) {
+                          toast.error(
+                            err instanceof Error
+                              ? err.message
+                              : "삭제에 실패했습니다.",
+                          );
+                        }
+                      }}
+                      className="shrink-0 p-1 text-gray-400 hover:text-black-400"
+                      aria-label="삭제"
+                    >
+                      <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 20 20"
+                        fill="none"
+                      >
+                        <path
+                          d="M15 5L5 15M5 5l10 10"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                        />
+                      </svg>
+                    </button>
                   </div>
-                  <button
-                    type="button"
-                    onClick={async () => {
-                      try {
-                        await removeItem(item.id);
-                        toast.success("상품이 삭제되었습니다.");
-                      } catch (err) {
-                        toast.error(err instanceof Error ? err.message : "삭제에 실패했습니다.");
-                      }
-                    }}
-                    className="shrink-0 p-1 text-gray-400 hover:text-black-400"
-                    aria-label="삭제"
-                  >
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                      <path d="M15 5L5 15M5 5l10 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                    </svg>
-                  </button>
+                  <div className="border-t border-line-gray pt-3 text-sm">
+                    <p className="mb-1 font-medium text-black-400">주문금액</p>
+                    <p className="flex justify-between text-gray-500">
+                      <span>상품금액(총 {item.quantity}개)</span>
+                      <span className="text-right">
+                        {formatPrice(item.price * item.quantity)}
+                      </span>
+                    </p>
+                    <p className="flex justify-between text-gray-500">
+                      <span>배송비</span>
+                      <span className="text-right">
+                        {formatPrice(DELIVERY_FEE)}
+                      </span>
+                    </p>
+                    <p className="flex justify-between text-gray-500">
+                      <span>배송수단</span>
+                      <span className="text-right">택배</span>
+                    </p>
+                  </div>
                 </div>
-                <div className="border-t border-line-gray pt-3 text-sm">
-                  <p className="mb-1 font-medium text-black-400">주문금액</p>
-                  <p className="flex justify-between text-gray-500">
-                    <span>상품금액(총 {item.quantity}개)</span>
-                    <span className="text-right">{formatPrice(item.price * item.quantity)}</span>
-                  </p>
-                  <p className="flex justify-between text-gray-500">
-                    <span>배송비</span>
-                    <span className="text-right">{formatPrice(DELIVERY_FEE)}</span>
-                  </p>
-                  <p className="flex justify-between text-gray-500">
-                    <span>배송수단</span>
-                    <span className="text-right">택배</span>
-                  </p>
-                </div>
-              </div>
-            ))}
-          <div className="border-t border-line-gray" />
-          </div>
+              ))}
+              <div className="border-t border-line-gray" />
+            </div>
 
-          <div className="border-t border-line-gray pt-4">
-            <div className="flex justify-between py-3 text-base text-black-400">
-              <span>총 주문 상품</span>
-              <span className="text-right font-bold text-primary-400">{totalQuantity}개</span>
-            </div>
-            <div className="flex justify-between py-3 text-base text-gray-500">
-              <span>상품 금액</span>
-              <span className="text-right font-semibold text-black-400">{formatPrice(productAmount)}</span>
-            </div>
-            <div className="flex justify-between py-3 text-base text-gray-500">
-              <span>배송비</span>
-              <span className="text-right font-semibold text-black-400">{formatPrice(deliveryFee)}</span>
-            </div>
-            <div className="flex justify-between border-t border-line-gray py-3 text-base font-bold">
-              <span className="text-black-400">총 주문금액</span>
-              <span className="text-right text-primary-400">{formatPrice(totalAmount)}</span>
-            </div>
-            {canSeeBudget && remainingBudget != null && (
-              <div className="flex justify-between border-t border-line-gray pt-3">
-                <span className="text-base font-bold text-black-400">남은 예산</span>
-                <span className="text-right text-lg font-bold text-primary-400">
-                  {formatPrice(remainingBudget)}
+            <div className="border-t border-line-gray pt-4">
+              <div className="flex justify-between py-3 text-base text-black-400">
+                <span>총 주문 상품</span>
+                <span className="text-right font-bold text-primary-400">
+                  {totalQuantity}개
                 </span>
               </div>
-            )}
-          </div>
+              <div className="flex justify-between py-3 text-base text-gray-500">
+                <span>상품 금액</span>
+                <span className="text-right font-semibold text-black-400">
+                  {formatPrice(productAmount)}
+                </span>
+              </div>
+              <div className="flex justify-between py-3 text-base text-gray-500">
+                <span>배송비</span>
+                <span className="text-right font-semibold text-black-400">
+                  {formatPrice(deliveryFee)}
+                </span>
+              </div>
+              <div className="flex justify-between border-t border-line-gray py-3 text-base font-bold">
+                <span className="text-black-400">총 주문금액</span>
+                <span className="text-right text-primary-400">
+                  {formatPrice(totalAmount)}
+                </span>
+              </div>
+              {canSeeBudget && remainingBudget != null && (
+                <div className="flex justify-between border-t border-line-gray pt-3">
+                  <span className="text-base font-bold text-black-400">
+                    남은 예산
+                  </span>
+                  <span className="text-right text-lg font-bold text-primary-400">
+                    {formatPrice(remainingBudget)}
+                  </span>
+                </div>
+              )}
+            </div>
 
-          <div className="flex flex-wrap items-center justify-center gap-3 pt-4">
-            <Link
-              href="/items"
-              className="flex h-12 w-[340px] shrink-0 items-center justify-center rounded-xl bg-[#FDF0DF] font-semibold text-primary-400"
-            >
-              계속 쇼핑하기
-            </Link>
-            <button
-              type="button"
-              onClick={() => handlePurchaseRequest(isAdmin)}
-              disabled={isBudgetExceeded}
-              className={`h-12 w-[340px] shrink-0 rounded-xl font-semibold transition-colors ${
-                isBudgetExceeded
-                  ? "cursor-not-allowed bg-gray-300 text-gray-500"
-                  : "bg-primary-400 text-white hover:bg-primary-300"
-              }`}
-            >
-              {purchaseButtonLabel}
-            </button>
+            <div className="flex flex-wrap items-center justify-center gap-3 pt-4">
+              <Link
+                href="/items"
+                className="flex h-12 w-[340px] shrink-0 items-center justify-center rounded-xl bg-[#FDF0DF] font-semibold text-primary-400"
+              >
+                계속 쇼핑하기
+              </Link>
+              <button
+                type="button"
+                onClick={() => handlePurchaseRequest(isAdmin)}
+                disabled={isBudgetExceeded}
+                className={`h-12 w-[340px] shrink-0 rounded-xl font-semibold transition-colors ${
+                  isBudgetExceeded
+                    ? "cursor-not-allowed bg-gray-300 text-gray-500"
+                    : "bg-primary-400 text-white hover:bg-primary-300"
+                }`}
+              >
+                {purchaseButtonLabel}
+              </button>
+            </div>
           </div>
-        </div>
         </>
       )}
 
@@ -749,7 +921,11 @@ export default function CartPage() {
           type="button"
           onClick={handleDeleteAll}
           className="flex items-center justify-center rounded-full border border-gray-200 bg-background-peach text-md-sb text-black-300 transition-colors hover:bg-gray-100"
-          style={{ borderColor: "var(--color-gray-200, #E0E0E0)", width: 139, height: 50 }}
+          style={{
+            borderColor: "var(--color-gray-200, #E0E0E0)",
+            width: 139,
+            height: 50,
+          }}
         >
           전체 상품 삭제
         </button>
@@ -757,7 +933,11 @@ export default function CartPage() {
           type="button"
           onClick={handleDeleteSelected}
           className="flex items-center justify-center rounded-full border border-gray-200 bg-background-peach text-md-sb text-black-300 transition-colors hover:bg-gray-100"
-          style={{ borderColor: "var(--color-gray-200, #E0E0E0)", width: 139, height: 50 }}
+          style={{
+            borderColor: "var(--color-gray-200, #E0E0E0)",
+            width: 139,
+            height: 50,
+          }}
         >
           선택 상품 삭제
         </button>

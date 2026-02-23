@@ -205,7 +205,8 @@ export default function ProductDetailPage() {
                   alt={product.title}
                   fill
                   className="object-contain"
-                  unoptimized
+                  sizes="(max-width: 1024px) 100vw, 600px"
+                  priority
                 />
               </div>
             ) : (

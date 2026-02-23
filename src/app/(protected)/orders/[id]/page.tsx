@@ -10,6 +10,7 @@ import {
   type OrderDetail,
 } from "@/lib/api/orders";
 import { toast } from "react-toastify";
+import Image from "next/image";
 import { getImageSrc } from "@/lib/utils/image";
 
 function formatPrice(n: number) {
@@ -122,13 +123,12 @@ export default function OrderDetailPage() {
                 <div className="flex min-w-0 flex-1 items-center gap-4">
                   <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-gray-100">
                     {item.image ? (
-                      /* eslint-disable-next-line @next/next/no-img-element */
-                      <img
+                      <Image
                         src={getImageSrc(item.image)}
                         alt={item.name}
-                        className="h-full w-full object-contain"
-                        referrerPolicy="no-referrer"
-                        loading="lazy"
+                        fill
+                        className="object-contain"
+                        sizes="64px"
                       />
                     ) : (
                       <div className="flex h-full w-full items-center justify-center text-xs text-gray-400">
@@ -232,17 +232,15 @@ export default function OrderDetailPage() {
               <textarea
                 readOnly
                 rows={4}
-                value={
-                  (() => {
-                    const productName =
-                      data.items[0]?.name ??
-                      (data.summaryTitle
-                        ? data.summaryTitle.replace(/ 및 \d+개$/, "").trim()
-                        : "") ??
-                      "상품";
-                    return `${productName} 인기가 많아요. 많이 주문하면 좋을 것 같아요!`;
-                  })()
-                }
+                value={(() => {
+                  const productName =
+                    data.items[0]?.name ??
+                    (data.summaryTitle
+                      ? data.summaryTitle.replace(/ 및 \d+개$/, "").trim()
+                      : "") ??
+                    "상품";
+                  return `${productName} 인기가 많아요. 많이 주문하면 좋을 것 같아요!`;
+                })()}
                 className="mt-1.5 w-full resize-none rounded-lg border border-line-gray bg-background-peach px-4 py-3 text-base text-black-400"
               />
             </div>

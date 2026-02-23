@@ -330,6 +330,8 @@ export default function ProductModal({ onClose, onSuccess, editMode = false, pro
                     alt="상품 이미지"
                     fill
                     className="object-cover"
+                    sizes="(max-width: 640px) 128px, 160px"
+                    unoptimized={imagePreview.startsWith("blob:") || imagePreview.startsWith("data:")}
                   />
                 </div>
               ) : (

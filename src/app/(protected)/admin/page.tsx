@@ -625,10 +625,11 @@ function MembersSection({
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <Image
               src="/DOG!.png"
               alt=""
+              width={260}
+              height={200}
               className="h-auto w-full max-w-[260px] object-contain"
             />
             <h2
