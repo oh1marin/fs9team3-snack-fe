@@ -276,6 +276,7 @@ export default function ItemsPage() {
                       className="object-contain"
                       sizes="(max-width: 640px) calc(100vw - 2rem), (max-width: 768px) calc(50vw - 2rem), (max-width: 1024px) calc(33vw - 2rem), calc(25vw - 2rem)"
                       priority={index === 0}
+                      fetchPriority={index === 0 ? "high" : undefined}
                     />
                   ) : (
                     <div className="flex h-full items-center justify-center text-md-m text-gray-400">
