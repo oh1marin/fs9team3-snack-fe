@@ -232,7 +232,7 @@ export default function OrdersPage() {
               비고
             </div>
             {/* 본문: 구분선만, 높이 80px - 행 클릭 시 상세로 이동 */}
-            {orders.flatMap((row) => [
+            {orders.flatMap((row, rowIndex) => [
               <Link
                 key={`${row.id}-1`}
                 href={`/orders/${row.id}`}
@@ -249,11 +249,13 @@ export default function OrdersPage() {
                   {row.image ? (
                     <div className="relative h-14 w-14 overflow-hidden rounded-lg bg-gray-100">
                       <Image
-                        src={getImageSrc(row.image)}
+                        src={getImageSrc(row.image, 112)}
                         alt={row.productLabel}
                         fill
                         className="object-contain"
                         sizes="56px"
+                        loading={rowIndex === 0 ? "eager" : "lazy"}
+                        fetchPriority={rowIndex === 0 ? "high" : undefined}
                       />
                     </div>
                   ) : (
@@ -370,6 +372,7 @@ export default function OrdersPage() {
               alt=""
               width={260}
               height={200}
+              loading="lazy"
               className="h-auto w-full max-w-[260px] object-contain"
             />
             <h2
