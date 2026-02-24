@@ -4,14 +4,11 @@ import { useParams, useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import ProductModal from "@/components/ProductModal";
-import AddToCartModal from "@/components/AddToCartModal";
 import { useCart } from "@/contexts/CartContext";
 import { useModal } from "@/contexts/ModalContext";
 import { toast } from "react-toastify";
 import { getClientAccessToken } from "@/lib/api/authToken";
 import { getImageSrc } from "@/lib/utils/image";
-import DeleteModal from "@/components/DeleteModal";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
@@ -85,24 +82,22 @@ export default function ProductDetailPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [productId]);
 
-  const handleEditProduct = () => {
-    if (product) {
-      openModal(
-        <ProductModal
-          onClose={closeModal}
-          onSuccess={() => {
-            fetchProduct();
-          }}
-          editMode={true}
-          product={product}
-        />,
-      );
-    }
+  const handleEditProduct = async () => {
+    if (!product) return;
+    const { default: ProductModal } = await import("@/components/ProductModal");
+    openModal(
+      <ProductModal
+        onClose={closeModal}
+        onSuccess={() => fetchProduct()}
+        editMode={true}
+        product={product}
+      />,
+    );
   };
 
-  const handleDeleteProduct = () => {
+  const handleDeleteProduct = async () => {
     if (!product) return;
-
+    const { default: DeleteModal } = await import("@/components/DeleteModal");
     openModal(
       <DeleteModal
         itemName={product.title}
@@ -140,6 +135,9 @@ export default function ProductDetailPage() {
         price: product.price,
         image: product.image,
       });
+      const { default: AddToCartModal } = await import(
+        "@/components/AddToCartModal"
+      );
       openModal(
         <AddToCartModal
           onClose={closeModal}

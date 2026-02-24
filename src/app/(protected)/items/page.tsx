@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import ProductModal from "@/components/ProductModal";
 import ProductCardSkeleton from "@/components/ProductCardSkeleton";
 import { useModal } from "@/contexts/ModalContext";
 import SortButton from "@/app/ui/SortButton";
@@ -158,7 +157,8 @@ export default function ItemsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [categoryMain, categorySub, sortOption]);
 
-  const handleOpenProductModal = () => {
+  const handleOpenProductModal = async () => {
+    const { default: ProductModal } = await import("@/components/ProductModal");
     openModal(
       <ProductModal
         onClose={closeModal}
