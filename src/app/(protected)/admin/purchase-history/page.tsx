@@ -3,7 +3,12 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { fetchAdminOrders, formatRequestDate, formatSummaryTitle, type Order } from "@/lib/api/orders";
+import {
+  fetchAdminOrders,
+  formatRequestDate,
+  formatSummaryTitle,
+  type Order,
+} from "@/lib/api/orders";
 // import { fetchBudgetCurrentAPI } from "@/lib/api/superAdmin";
 import { toast } from "react-toastify";
 
@@ -47,7 +52,9 @@ export default function AdminPurchaseHistoryPage() {
       setOrders(list);
     } catch (err) {
       setOrders([]);
-      toast.error(err instanceof Error ? err.message : "구매 내역을 불러오지 못했습니다.");
+      toast.error(
+        err instanceof Error ? err.message : "구매 내역을 불러오지 못했습니다.",
+      );
     } finally {
       setLoading(false);
     }
@@ -73,19 +80,37 @@ export default function AdminPurchaseHistoryPage() {
 
       <section className="mb-8 ml-[clamp(2rem,8.33vw,10rem)] mr-[clamp(2rem,8.33vw,10rem)] grid grid-cols-1 gap-4 md:grid-cols-3 max-[1100px]:ml-0 max-[1100px]:mr-0">
         <article className="rounded-2xl border border-line-gray bg-white px-6 py-5">
-          <p className="text-base font-semibold text-black-400">이번 달 지출액</p>
-          <p className="mt-1 text-sm text-gray-400">지난 달보다 2,000,000원 덜 지출했어요</p>
-          <p className="mt-4 text-[36px] font-bold leading-none text-black-400">126,000원</p>
+          <p className="text-base font-semibold text-black-400">
+            이번 달 지출액
+          </p>
+          <p className="mt-1 text-sm text-gray-400">
+            지난 달보다 2,000,000원 덜 지출했어요
+          </p>
+          <p className="mt-4 text-[36px] font-bold leading-none text-black-400">
+            126,000원
+          </p>
         </article>
         <article className="rounded-2xl border border-line-gray bg-white px-6 py-5">
-          <p className="text-base font-semibold text-black-400">이번 달 남은 예산</p>
-          <p className="mt-1 text-sm text-gray-400">지난 달보다 50,000원 더 담아요</p>
-          <p className="mt-4 text-[36px] font-bold leading-none text-black-400">150,000원</p>
+          <p className="text-base font-semibold text-black-400">
+            이번 달 남은 예산
+          </p>
+          <p className="mt-1 text-sm text-gray-400">
+            지난 달보다 50,000원 더 담아요
+          </p>
+          <p className="mt-4 text-[36px] font-bold leading-none text-black-400">
+            150,000원
+          </p>
         </article>
         <article className="rounded-2xl border border-line-gray bg-white px-6 py-5">
-          <p className="text-base font-semibold text-black-400">올해 총 지출액</p>
-          <p className="mt-1 text-sm text-gray-400">지난 해보다 1,000,000원 더 지출했어요</p>
-          <p className="mt-4 text-[36px] font-bold leading-none text-black-400">23,000,000원</p>
+          <p className="text-base font-semibold text-black-400">
+            올해 총 지출액
+          </p>
+          <p className="mt-1 text-sm text-gray-400">
+            지난 해보다 1,000,000원 더 지출했어요
+          </p>
+          <p className="mt-4 text-[36px] font-bold leading-none text-black-400">
+            23,000,000원
+          </p>
         </article>
       </section>
 
@@ -97,28 +122,46 @@ export default function AdminPurchaseHistoryPage() {
             className="flex items-center gap-2.5 rounded-lg border border-line-gray bg-white px-5 py-3.5 text-base font-medium text-black-400"
           >
             {sortOption}
-            <svg width="16" height="16" viewBox="0 0 12 12" fill="none" className={`transition-transform ${showSortDropdown ? "rotate-180" : ""}`}>
-              <path d="M2.5 4.5L6 8L9.5 4.5" stroke="#999" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 12 12"
+              fill="none"
+              className={`transition-transform ${showSortDropdown ? "rotate-180" : ""}`}
+            >
+              <path
+                d="M2.5 4.5L6 8L9.5 4.5"
+                stroke="#999"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             </svg>
           </button>
           {showSortDropdown && (
             <>
-              <div className="fixed inset-0 z-10" aria-hidden onClick={() => setShowSortDropdown(false)} />
+              <div
+                className="fixed inset-0 z-10"
+                aria-hidden
+                onClick={() => setShowSortDropdown(false)}
+              />
               <ul className="absolute right-0 top-full z-20 mt-1.5 min-w-[182px] rounded-lg border border-line-gray bg-white py-1.5 shadow-lg">
-                {(["최신순", "낮은 금액순", "높은 금액순"] as const).map((opt) => (
-                  <li key={opt}>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setSortOption(opt);
-                        setShowSortDropdown(false);
-                      }}
-                      className={`w-full px-5 py-3.5 text-left text-base ${sortOption === opt ? "bg-primary-50 font-medium text-primary-400" : "text-black-400 hover:bg-gray-50"}`}
-                    >
-                      {opt}
-                    </button>
-                  </li>
-                ))}
+                {(["최신순", "낮은 금액순", "높은 금액순"] as const).map(
+                  (opt) => (
+                    <li key={opt}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSortOption(opt);
+                          setShowSortDropdown(false);
+                        }}
+                        className={`w-full px-5 py-3.5 text-left text-base ${sortOption === opt ? "bg-primary-50 font-medium text-primary-400" : "text-black-400 hover:bg-gray-50"}`}
+                      >
+                        {opt}
+                      </button>
+                    </li>
+                  ),
+                )}
               </ul>
             </>
           )}
@@ -127,22 +170,18 @@ export default function AdminPurchaseHistoryPage() {
 
       <div className="ml-[clamp(2rem,8.33vw,10rem)] mr-[clamp(2rem,8.33vw,10rem)] max-[1100px]:ml-0 max-[1100px]:mr-0">
         {loading ? (
-          <div className="flex min-h-[200px] items-center justify-center rounded-lg border border-line-gray bg-white">
-            <p className="text-gray-500">불러오는 중...</p>
-          </div>
+          <div className="min-h-[200px] animate-pulse rounded-lg border border-line-gray bg-gray-200/50" />
         ) : orders.length === 0 ? (
           <div className="flex min-h-[300px] flex-col items-center justify-center py-16">
-            <Image
-              src="/sadDog.png"
-              alt=""
-              width={388}
-              height={304}
-            />
+            <Image src="/sadDog.png" alt="" width={388} height={304} />
           </div>
         ) : (
           <div
             className="min-w-[1020px] overflow-x-auto"
-            style={{ display: "grid", gridTemplateColumns: "1fr 2fr 1fr 1fr 1fr 1fr" }}
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 2fr 1fr 1fr 1fr 1fr",
+            }}
           >
             <div className="flex h-20 items-center justify-center rounded-l-[100px] border-b border-l border-t border-gray-200 bg-white pl-5 text-center text-base font-semibold text-black-400">
               구매승인일
@@ -167,21 +206,41 @@ export default function AdminPurchaseHistoryPage() {
               const approvedDate = row.approvedAt ?? row.requestDate;
               const detailHref = `/admin/purchase-history/${row.id}`;
               return [
-                <Link key={`${row.id}-1`} href={detailHref} className="flex h-20 items-center justify-center border-b border-line-gray text-base text-black-400 hover:bg-gray-50">
+                <Link
+                  key={`${row.id}-1`}
+                  href={detailHref}
+                  className="flex h-20 items-center justify-center border-b border-line-gray text-base text-black-400 hover:bg-gray-50"
+                >
                   {formatRequestDate(approvedDate)}
                 </Link>,
-                <Link key={`${row.id}-2`} href={detailHref} className="flex h-20 items-center border-b border-line-gray pl-3 text-left text-base hover:bg-gray-50">
+                <Link
+                  key={`${row.id}-2`}
+                  href={detailHref}
+                  className="flex h-20 items-center border-b border-line-gray pl-3 text-left text-base hover:bg-gray-50"
+                >
                   <div>
                     <p className="font-medium text-black-400">
-                      {row.productLabel ? formatSummaryTitle(row.productLabel) : "—"}
+                      {row.productLabel
+                        ? formatSummaryTitle(row.productLabel)
+                        : "—"}
                     </p>
-                    <p className="mt-1 text-sm text-gray-500">총 수량: {row.totalQuantity}개</p>
+                    <p className="mt-1 text-sm text-gray-500">
+                      총 수량: {row.totalQuantity}개
+                    </p>
                   </div>
                 </Link>,
-                <Link key={`${row.id}-3`} href={detailHref} className="flex h-20 items-center justify-center border-b border-line-gray text-base text-black-400 hover:bg-gray-50">
+                <Link
+                  key={`${row.id}-3`}
+                  href={detailHref}
+                  className="flex h-20 items-center justify-center border-b border-line-gray text-base text-black-400 hover:bg-gray-50"
+                >
                   {formatAmount(row.orderAmount)}원
                 </Link>,
-                <Link key={`${row.id}-4`} href={detailHref} className="flex h-20 flex-wrap items-center justify-center gap-2 border-b border-line-gray px-2 text-base text-black-400 hover:bg-gray-50">
+                <Link
+                  key={`${row.id}-4`}
+                  href={detailHref}
+                  className="flex h-20 flex-wrap items-center justify-center gap-2 border-b border-line-gray px-2 text-base text-black-400 hover:bg-gray-50"
+                >
                   <span>김스낵</span>
                   {row.isInstantPurchase && (
                     <span
@@ -200,10 +259,18 @@ export default function AdminPurchaseHistoryPage() {
                     </span>
                   )}
                 </Link>,
-                <Link key={`${row.id}-5`} href={detailHref} className="flex h-20 items-center justify-center border-b border-line-gray text-base text-black-400 hover:bg-gray-50">
+                <Link
+                  key={`${row.id}-5`}
+                  href={detailHref}
+                  className="flex h-20 items-center justify-center border-b border-line-gray text-base text-black-400 hover:bg-gray-50"
+                >
                   {row.approver ?? "김코드"}
                 </Link>,
-                <Link key={`${row.id}-6`} href={detailHref} className="flex h-20 items-center justify-center border-b border-line-gray text-base text-black-400 hover:bg-gray-50">
+                <Link
+                  key={`${row.id}-6`}
+                  href={detailHref}
+                  className="flex h-20 items-center justify-center border-b border-line-gray text-base text-black-400 hover:bg-gray-50"
+                >
                   {formatRequestDate(approvedDate)}
                 </Link>,
               ];

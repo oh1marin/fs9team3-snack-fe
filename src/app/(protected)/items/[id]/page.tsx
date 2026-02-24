@@ -9,6 +9,7 @@ import { useModal } from "@/contexts/ModalContext";
 import { toast } from "react-toastify";
 import { getClientAccessToken } from "@/lib/api/authToken";
 import { getImageSrc } from "@/lib/utils/image";
+import { getPurchaseBadgeText } from "@/lib/utils/purchaseBadge";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
@@ -135,9 +136,8 @@ export default function ProductDetailPage() {
         price: product.price,
         image: product.image,
       });
-      const { default: AddToCartModal } = await import(
-        "@/components/AddToCartModal"
-      );
+      const { default: AddToCartModal } =
+        await import("@/components/AddToCartModal");
       openModal(
         <AddToCartModal
           onClose={closeModal}
@@ -156,11 +156,7 @@ export default function ProductDetailPage() {
 
   if (loading) {
     return (
-      <div className="mx-auto min-h-screen w-full max-w-[1920px] bg-background-peach px-4 py-8">
-        <div className="flex justify-center items-center h-96">
-          <p className="text-lg-m text-gray-400">로딩 중...</p>
-        </div>
-      </div>
+      <div className="mx-auto min-h-96 w-full max-w-[1920px] animate-pulse rounded-2xl bg-gray-200/30 px-4 py-8" />
     );
   }
 
@@ -229,7 +225,7 @@ export default function ProductDetailPage() {
               className="inline-block px-3 py-1.5 rounded text-primary-400 text-sm sm:text-md-sb"
               style={{ backgroundColor: "#FEE8B0" }}
             >
-              {product.count || 0}회 구매
+              {getPurchaseBadgeText(product.count ?? 0)}
             </span>
           </div>
 

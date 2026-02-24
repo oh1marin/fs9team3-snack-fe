@@ -70,9 +70,7 @@ export default function OrderDetailPage() {
 
   if (data === undefined) {
     return (
-      <main className="mx-auto flex min-h-[50vh] w-full max-w-[1920px] flex-col items-center justify-center bg-background-peach px-4 py-16">
-        <p className="text-gray-500">불러오는 중...</p>
-      </main>
+      <main className="mx-auto min-h-[50vh] w-full max-w-[1920px] animate-pulse rounded-2xl bg-gray-200/30 px-4 py-16" />
     );
   }
 

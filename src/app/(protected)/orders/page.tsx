@@ -176,9 +176,7 @@ export default function OrdersPage() {
 
       <div className="ml-[clamp(2rem,8.33vw,10rem)] mr-[clamp(2rem,8.33vw,10rem)] max-[1100px]:ml-0 max-[1100px]:mr-0">
         {loading ? (
-          <div className="flex min-h-[200px] items-center justify-center rounded-lg border border-line-gray bg-white">
-            <p className="text-gray-500">불러오는 중...</p>
-          </div>
+          <div className="min-h-[200px] animate-pulse rounded-lg border border-line-gray bg-gray-200/50" />
         ) : (
           <div
             className="min-w-[820px] overflow-x-auto"
@@ -382,9 +380,11 @@ export default function OrdersPage() {
             </h2>
             <div className="flex flex-col items-center gap-1">
               <p className="text-center text-base text-black-400">
-                {cancelModal.productLabel === null
-                  ? "불러오는 중..."
-                  : `${cancelModal.productLabel} 구매 요청을 취소하시겠어요?`}
+                {cancelModal.productLabel === null ? (
+                  <span className="inline-block h-5 w-48 animate-pulse rounded bg-gray-200" />
+                ) : (
+                  `${cancelModal.productLabel} 구매 요청을 취소하시겠어요?`
+                )}
               </p>
               <p className="text-center text-sm text-black-400">
                 구매 요청 취소 후에는 복구할 수 없어요!

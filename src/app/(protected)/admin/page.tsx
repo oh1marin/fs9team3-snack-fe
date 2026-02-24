@@ -342,9 +342,7 @@ function MembersSection({
         </div>
 
         {loading ? (
-          <div className="col-span-4 flex h-32 items-center justify-center border-b border-line-gray text-base text-gray-500">
-            불러오는 중...
-          </div>
+          <div className="col-span-4 flex h-32 animate-pulse items-center justify-center border-b border-line-gray bg-gray-200/30" />
         ) : loadError ? (
           <div className="col-span-4 flex h-32 items-center justify-center gap-2 border-b border-line-gray text-base text-gray-500">
             {loadError}
@@ -539,9 +537,7 @@ function MembersSection({
                   onClick={() => setRoleEditRoleOpen((o) => !o)}
                   className="flex h-16 w-full items-center justify-between rounded-[16px] border border-[#FCC49C] bg-[#FFF] px-4 text-base text-black-400 outline-none focus:border-primary-400"
                 >
-                  <span>
-                    {roleEditIsAdmin === "Y" ? "관리자" : "일반"}
-                  </span>
+                  <span>{roleEditIsAdmin === "Y" ? "관리자" : "일반"}</span>
                   {roleEditRoleOpen ? (
                     <Image
                       src="/orangeup.png"
@@ -574,9 +570,7 @@ function MembersSection({
                         type="button"
                         onClick={() => {
                           setRoleEditIsSuperAdmin("N");
-                          setRoleEditIsAdmin(
-                            opt.value === "admin" ? "Y" : "N",
-                          );
+                          setRoleEditIsAdmin(opt.value === "admin" ? "Y" : "N");
                           setRoleEditRoleOpen(false);
                         }}
                         className="flex h-[68px] w-full items-center border-b border-gray-200 px-4 text-left text-base text-black-400 last:border-b-0 hover:bg-[#FEF3EB]"
@@ -639,8 +633,8 @@ function MembersSection({
               계정 탈퇴
             </h2>
             <p className="text-center text-base text-black-400">
-              {deleteTarget.nickname || "회원"}({deleteTarget.email})님의
-              계정을 탈퇴시킬까요?
+              {deleteTarget.nickname || "회원"}({deleteTarget.email})님의 계정을
+              탈퇴시킬까요?
             </p>
             <div className="flex flex-row flex-nowrap justify-center gap-4">
               <button
@@ -882,9 +876,7 @@ function BudgetSection() {
       </h1>
 
       {loading ? (
-        <div className="mt-8 w-full text-center text-gray-500">
-          불러오는 중...
-        </div>
+        <div className="mt-8 h-32 w-full max-w-[640px] animate-pulse rounded-xl bg-gray-200/30" />
       ) : loadError ? (
         <div className="mt-8 flex flex-col items-center gap-2">
           <p className="text-gray-500">{loadError}</p>
@@ -964,7 +956,9 @@ function BudgetSection() {
               className="h-16 w-full max-w-[640px] font-semibold text-white transition-colors hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
               style={{
                 borderRadius: "16px",
-                background: isBudgetOverLimit ? "#9CA3AF" : "var(--Primary-orange-400, #F97B22)",
+                background: isBudgetOverLimit
+                  ? "#9CA3AF"
+                  : "var(--Primary-orange-400, #F97B22)",
               }}
             >
               {saving ? "수정 중..." : "수정하기"}

@@ -37,9 +37,7 @@ export default function AdminPurchaseHistoryDetailPage() {
 
   if (data === undefined) {
     return (
-      <main className="mx-auto flex min-h-[50vh] w-full max-w-[1920px] flex-col items-center justify-center bg-background-peach px-4 py-16">
-        <p className="text-gray-500">불러오는 중...</p>
-      </main>
+      <main className="mx-auto min-h-[50vh] w-full max-w-[1920px] animate-pulse rounded-2xl bg-gray-200/30 px-4 py-16" />
     );
   }
 
@@ -189,17 +187,15 @@ export default function AdminPurchaseHistoryDetailPage() {
               <textarea
                 readOnly
                 rows={4}
-                value={
-                  (() => {
-                    const productName =
-                      data.items[0]?.name ??
-                      (data.summaryTitle
-                        ? data.summaryTitle.replace(/ 및 \d+개$/, "").trim()
-                        : "") ??
-                      "상품";
-                    return `${productName} 인기가 많아요. 많이 주문하면 좋을 것 같아요!`;
-                  })()
-                }
+                value={(() => {
+                  const productName =
+                    data.items[0]?.name ??
+                    (data.summaryTitle
+                      ? data.summaryTitle.replace(/ 및 \d+개$/, "").trim()
+                      : "") ??
+                    "상품";
+                  return `${productName} 인기가 많아요. 많이 주문하면 좋을 것 같아요!`;
+                })()}
                 className="mt-1.5 w-full resize-none rounded-lg border border-line-gray bg-background-peach px-4 py-3 text-base text-black-400"
               />
             </div>
