@@ -12,6 +12,7 @@ import {
   type Order,
 } from "@/lib/api/orders";
 import { toast } from "react-toastify";
+import Image from "next/image";
 import { getImageSrc } from "@/lib/utils/image";
 
 type SortOption = "최신순" | "낮은 금액순" | "높은 금액순";
@@ -248,14 +249,13 @@ export default function OrdersPage() {
               >
                 <div className="h-14 w-14 shrink-0 min-[1082px]:hidden">
                   {row.image ? (
-                    <div className="h-14 w-14 overflow-hidden rounded-lg bg-gray-100">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
+                    <div className="relative h-14 w-14 overflow-hidden rounded-lg bg-gray-100">
+                      <Image
                         src={getImageSrc(row.image)}
                         alt={row.productLabel}
-                        className="h-full w-full object-contain"
-                        referrerPolicy="no-referrer"
-                        loading="lazy"
+                        fill
+                        className="object-contain"
+                        sizes="56px"
                       />
                     </div>
                   ) : (
@@ -280,7 +280,7 @@ export default function OrdersPage() {
                 href={`/orders/${row.id}`}
                 className="flex h-20 items-center justify-center border-b border-line-gray text-center text-base text-black-400 hover:bg-gray-50"
               >
-                {formatAmount(row.orderAmount)}원
+                {formatAmount(row.orderAmount)}
               </Link>,
               <Link
                 key={`${row.id}-4`}
@@ -367,10 +367,11 @@ export default function OrdersPage() {
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <Image
               src="/DOG!.png"
               alt=""
+              width={260}
+              height={200}
               className="h-auto w-full max-w-[260px] object-contain"
             />
             <h2

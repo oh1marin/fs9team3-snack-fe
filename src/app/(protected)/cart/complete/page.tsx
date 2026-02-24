@@ -114,7 +114,6 @@ export default function CartCompletePage() {
                     fill
                     className="object-cover"
                     sizes="96px"
-                    unoptimized
                   />
                 ) : (
                   <div className="flex h-full w-full items-center justify-center text-xs text-gray-400">

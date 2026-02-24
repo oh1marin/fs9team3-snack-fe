@@ -54,7 +54,6 @@ export default function AdminOrdersPage() {
   const [approvalMessage, setApprovalMessage] = useState("");
   const [approving, setApproving] = useState(false);
   const [budgetRemaining, setBudgetRemaining] = useState<number | null>(null);
-
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const loadOrders = useCallback(async () => {
@@ -321,14 +320,13 @@ export default function AdminOrdersPage() {
               >
                 <div className="h-14 w-14 shrink-0 min-[1082px]:hidden">
                   {row.image ? (
-                    <div className="h-14 w-14 overflow-hidden rounded-lg bg-gray-100">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
+                    <div className="relative h-14 w-14 overflow-hidden rounded-lg bg-gray-100">
+                      <Image
                         src={getImageSrc(row.image)}
                         alt={row.productLabel}
-                        className="h-full w-full object-contain"
-                        referrerPolicy="no-referrer"
-                        loading="lazy"
+                        fill
+                        className="object-contain"
+                        sizes="56px"
                       />
                     </div>
                   ) : (
@@ -586,15 +584,14 @@ export default function AdminOrdersPage() {
                           className={`flex items-start gap-3 py-3 ${idx < approvalDetail.items.length - 1 ? "border-b border-line-gray" : ""}`}
                         >
                           <div className="flex shrink-0 flex-col items-center gap-1">
-                            <div className="h-14 w-14 overflow-hidden rounded-lg bg-gray-100">
+                            <div className="relative h-14 w-14 overflow-hidden rounded-lg bg-gray-100">
                               {item.image ? (
-                                /* eslint-disable-next-line @next/next/no-img-element */
-                                <img
+                                <Image
                                   src={getImageSrc(item.image)}
                                   alt={item.name}
-                                  className="h-full w-full object-contain"
-                                  referrerPolicy="no-referrer"
-                                  loading="lazy"
+                                  fill
+                                  className="object-contain"
+                                  sizes="56px"
                                 />
                               ) : (
                                 <div className="flex h-full w-full items-center justify-center text-xs text-gray-400">
@@ -666,8 +663,8 @@ export default function AdminOrdersPage() {
                           ? formatPrice(
                               Math.max(
                                 0,
-                                budgetRemaining - approvalDetail.totalAmount
-                              )
+                                budgetRemaining - approvalDetail.totalAmount,
+                              ),
                             )
                           : "—"}
                       </span>

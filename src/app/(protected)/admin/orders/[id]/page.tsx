@@ -26,9 +26,11 @@ export default function AdminOrderDetailPage() {
   const params = useParams();
   const id = params?.id as string;
   const { refetchCart } = useCart();
+
   const [data, setData] = useState<OrderDetail | null | undefined>(undefined);
   const [resultModal, setResultModal] = useState<ResultModalType>(null);
   const [processing, setProcessing] = useState(false);
+
   const [budgetInfo, setBudgetInfo] = useState<{
     spent: number;
     remaining: number;
@@ -59,26 +61,29 @@ export default function AdminOrderDetailPage() {
     fetchBudgetCurrentAPI()
       .then((res) => {
         if (cancelled) return;
-        const b = res.budget ?? {};
+        const b = res?.budget ?? {};
         const spent =
-          typeof b.spent_amount === "number"
-            ? b.spent_amount
-            : typeof b.budget_amount === "number" &&
-                typeof b.remaining === "number"
-              ? Math.max(0, b.budget_amount - b.remaining)
+          typeof (b as any).spent_amount === "number"
+            ? (b as any).spent_amount
+            : typeof (b as any).budget_amount === "number" &&
+                typeof (b as any).remaining === "number"
+              ? Math.max(0, (b as any).budget_amount - (b as any).remaining)
               : 0;
+
         const remaining =
-          typeof b.remaining === "number"
-            ? b.remaining
-            : typeof b.budget_amount === "number" &&
-                typeof b.spent_amount === "number"
-              ? Math.max(0, b.budget_amount - b.spent_amount)
+          typeof (b as any).remaining === "number"
+            ? (b as any).remaining
+            : typeof (b as any).budget_amount === "number" &&
+                typeof (b as any).spent_amount === "number"
+              ? Math.max(0, (b as any).budget_amount - (b as any).spent_amount)
               : 0;
+
         setBudgetInfo({ spent, remaining });
       })
       .catch(() => {
         if (!cancelled) setBudgetInfo(null);
       });
+
     return () => {
       cancelled = true;
     };
@@ -152,6 +157,7 @@ export default function AdminOrderDetailPage() {
           <h2 className="mb-2 text-lg font-semibold text-black-400">
             요청 품목
           </h2>
+
           {(data.summaryTitle || data.items.length > 0) && (
             <p className="mb-4 text-base text-gray-600">
               상품이름:{" "}
@@ -163,6 +169,7 @@ export default function AdminOrderDetailPage() {
               / 총 수량: {data.totalCount}개
             </p>
           )}
+
           <div
             className="mb-6 flex flex-col overflow-y-auto"
             style={{
@@ -179,20 +186,19 @@ export default function AdminOrderDetailPage() {
           >
             {data.items.map((item, idx) => (
               <div
-                key={idx}
+                key={`${item.itemId ?? "item"}-${idx}`}
                 className="flex items-center justify-between gap-4 border-b border-line-gray pb-4 last:border-b-0 last:pb-0"
                 style={{ width: "961px", height: "80px", maxWidth: "100%" }}
               >
                 <div className="flex min-w-0 flex-1 items-center gap-4">
                   <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-gray-100">
                     {item.image ? (
-                      /* eslint-disable-next-line @next/next/no-img-element */
-                      <img
+                      <Image
                         src={getImageSrc(item.image)}
                         alt={item.name}
-                        className="h-full w-full object-contain"
-                        referrerPolicy="no-referrer"
-                        loading="lazy"
+                        fill
+                        className="object-contain"
+                        sizes="64px"
                       />
                     ) : (
                       <div className="flex h-full w-full items-center justify-center text-xs text-gray-400">
@@ -200,6 +206,7 @@ export default function AdminOrderDetailPage() {
                       </div>
                     )}
                   </div>
+
                   <div className="min-w-0">
                     <p className="text-sm text-gray-500">{item.category}</p>
                     <p className="font-medium text-black-400">{item.name}</p>
@@ -208,17 +215,19 @@ export default function AdminOrderDetailPage() {
                     </p>
                   </div>
                 </div>
+
                 <div className="shrink-0 text-right">
                   <p className="text-base text-black-400">
-                    {item.unitPrice.toLocaleString("ko-KR")}원
+                    {Number(item.unitPrice).toLocaleString("ko-KR")}원
                   </p>
                   <p className="mt-1 font-medium text-black-400">
-                    {formatPrice(item.totalPrice)}
+                    {formatPrice(Number(item.totalPrice))}
                   </p>
                 </div>
               </div>
             ))}
           </div>
+
           <div className="w-full" style={{ width: "1041px", maxWidth: "100%" }}>
             <p className="mb-6 text-right">
               <span
@@ -243,10 +252,11 @@ export default function AdminOrderDetailPage() {
                   lineHeight: "42px",
                 }}
               >
-                {data.totalAmount.toLocaleString("ko-KR")}원
+                {Number(data.totalAmount).toLocaleString("ko-KR")}원
               </span>
             </p>
           </div>
+
           <div
             className="flex flex-nowrap items-center gap-4"
             style={{ width: "1041px", maxWidth: "100%" }}
@@ -257,7 +267,7 @@ export default function AdminOrderDetailPage() {
                   type="button"
                   onClick={handleReject}
                   disabled={processing}
-                  className="flex h-16 flex-1 items-center justify-center rounded-2xl bg-[#EFEFEF] p-4 text-base font-medium text-black-400 transition-colors hover:bg-gray-200 disabled:opacity-50"
+                  className="flex h-16 flex-1 items-center justify-center rounded-2xl bg-[#EFEFEF] p-4 text-base font-medium text-black-400 transition-colors hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   요청 반려
                 </button>
@@ -265,7 +275,7 @@ export default function AdminOrderDetailPage() {
                   type="button"
                   onClick={handleApprove}
                   disabled={processing}
-                  className="flex h-16 flex-1 items-center justify-center rounded-2xl bg-primary-400 p-4 text-base font-medium text-white transition-colors hover:bg-primary-300 disabled:opacity-50"
+                  className="flex h-16 flex-1 items-center justify-center rounded-2xl bg-primary-400 p-4 text-base font-medium text-white transition-colors hover:bg-primary-300 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   요청 승인
                 </button>
@@ -290,6 +300,7 @@ export default function AdminOrderDetailPage() {
             <p className="mt-4 text-base text-black-400">
               {formatRequestDate(data.requestDate)}
             </p>
+
             <div className="mt-4">
               <label className="block text-sm font-medium text-gray-600">
                 요청인
@@ -301,6 +312,7 @@ export default function AdminOrderDetailPage() {
                 className="mt-1.5 w-full rounded-lg border border-line-gray bg-background-peach px-4 py-3 text-base text-black-400"
               />
             </div>
+
             <div className="mt-4">
               <label className="block text-sm font-medium text-gray-600">
                 요청 메시지
@@ -326,6 +338,7 @@ export default function AdminOrderDetailPage() {
             <h3 className="border-b border-line-gray pb-3 text-base font-semibold text-black-400">
               예산 정보
             </h3>
+
             {budgetInfo ? (
               <>
                 <div className="mt-4">
@@ -339,6 +352,7 @@ export default function AdminOrderDetailPage() {
                     className="mt-1.5 w-full rounded-lg border border-line-gray bg-background-peach px-4 py-3 text-base text-black-400"
                   />
                 </div>
+
                 <div className="mt-4">
                   <label className="block text-sm font-medium text-gray-600">
                     이번 달 남은 예산
@@ -350,6 +364,7 @@ export default function AdminOrderDetailPage() {
                     className="mt-1.5 w-full rounded-lg border border-line-gray bg-background-peach px-4 py-3 text-base text-black-400"
                   />
                 </div>
+
                 <div className="mt-4">
                   <label className="block text-sm font-medium text-gray-600">
                     구매 후 예산
@@ -361,7 +376,7 @@ export default function AdminOrderDetailPage() {
                       0,
                       data.status === "승인 완료"
                         ? budgetInfo.remaining
-                        : budgetInfo.remaining - data.totalAmount,
+                        : budgetInfo.remaining - Number(data.totalAmount),
                     ).toLocaleString("ko-KR")}원`}
                     className="mt-1.5 w-full rounded-lg border border-line-gray bg-background-peach px-4 py-3 text-base text-black-400"
                   />
@@ -434,13 +449,12 @@ export default function AdminOrderDetailPage() {
         >
           <div className="w-full max-w-md rounded-2xl bg-[#FBF8F4] px-6 py-8 shadow-lg">
             <div className="flex flex-col items-center">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+              <Image
                 src="/sorrydog.png"
                 alt=""
                 width={200}
                 height={120}
-                className="h-[120px] w-auto object-contain"
+                className="object-contain"
               />
               <h2
                 id="reject-complete-title"

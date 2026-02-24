@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import ProductModal from "@/components/ProductModal";
 import ProductCardSkeleton from "@/components/ProductCardSkeleton";
 import { useModal } from "@/contexts/ModalContext";
 import SortButton from "@/app/ui/SortButton";
@@ -66,7 +65,7 @@ export default function ItemsPage() {
   const mainFromUrl = searchParams.get("main");
   const subFromUrl = searchParams.get("sub");
   const [sortOption, setSortOption] = useState(() =>
-    sortFromUrl && sortOptions.includes(sortFromUrl) ? sortFromUrl : "최신순"
+    sortFromUrl && sortOptions.includes(sortFromUrl) ? sortFromUrl : "최신순",
   );
   const [categoryMain, setCategoryMain] = useState(mainFromUrl || "음료");
   const [categorySub, setCategorySub] = useState(subFromUrl || "청량·탄산음료");
@@ -85,13 +84,16 @@ export default function ItemsPage() {
   const updateListUrl = useCallback(
     (updates: { sort?: string; main?: string; sub?: string }) => {
       const params = new URLSearchParams(searchParams.toString());
-      if (updates.sort !== undefined) (updates.sort ? params.set("sort", updates.sort) : params.delete("sort"));
-      if (updates.main !== undefined) (updates.main ? params.set("main", updates.main) : params.delete("main"));
-      if (updates.sub !== undefined) (updates.sub ? params.set("sub", updates.sub) : params.delete("sub"));
+      if (updates.sort !== undefined)
+        updates.sort ? params.set("sort", updates.sort) : params.delete("sort");
+      if (updates.main !== undefined)
+        updates.main ? params.set("main", updates.main) : params.delete("main");
+      if (updates.sub !== undefined)
+        updates.sub ? params.set("sub", updates.sub) : params.delete("sub");
       const q = params.toString();
       router.replace(q ? `${pathname}?${q}` : pathname, { scroll: false });
     },
-    [searchParams, pathname, router]
+    [searchParams, pathname, router],
   );
 
   const fetchItems = async (resetPage = false, pageOverride?: number) => {
@@ -117,18 +119,21 @@ export default function ItemsPage() {
 
       if (!response.ok) {
         if (response.status === 401) {
-          const { handleTokenExpired } = await import("@/lib/api/handleTokenExpired");
+          const { handleTokenExpired } =
+            await import("@/lib/api/handleTokenExpired");
           handleTokenExpired();
           return;
         }
         const errorText = await response.text();
-        throw new Error(`데이터를 불러올 수 없습니다 (${response.status}): ${errorText}`);
+        throw new Error(
+          `데이터를 불러올 수 없습니다 (${response.status}): ${errorText}`,
+        );
       }
 
       const data: ItemsResponse = await response.json();
 
       if (resetPage) {
-        setItems(data.data); // 새로 시작
+        setItems(data.data);
         setPage(1);
       } else {
         setItems((prev) => {
@@ -152,13 +157,14 @@ export default function ItemsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [categoryMain, categorySub, sortOption]);
 
-  const handleOpenProductModal = () => {
+  const handleOpenProductModal = async () => {
+    const { default: ProductModal } = await import("@/components/ProductModal");
     openModal(
-      <ProductModal 
-        onClose={closeModal} 
-        onSuccess={() => fetchItems(true)} 
+      <ProductModal
+        onClose={closeModal}
+        onSuccess={() => fetchItems(true)}
         existingTitles={items.map((i) => i.title)}
-      />
+      />,
     );
   };
 
@@ -200,12 +206,12 @@ export default function ItemsPage() {
             "원두커피",
             "건강음료",
           ].map((subCategory) => (
-<button
-                  key={subCategory}
-                  onClick={() => {
-                    setCategorySub(subCategory);
-                    updateListUrl({ sub: subCategory });
-                  }}
+            <button
+              key={subCategory}
+              onClick={() => {
+                setCategorySub(subCategory);
+                updateListUrl({ sub: subCategory });
+              }}
               className={`whitespace-nowrap text-md-m sm:text-lg-m ${
                 categorySub === subCategory
                   ? "text-md-b sm:text-lg-b text-primary-400"
@@ -218,7 +224,11 @@ export default function ItemsPage() {
         </div>
 
         <div className="relative flex-shrink-0">
-          <SortButton sortOption={sortOption} setShowSortDropdown={setShowSortDropdown} showSortDropdown={showSortDropdown} />
+          <SortButton
+            sortOption={sortOption}
+            setShowSortDropdown={setShowSortDropdown}
+            showSortDropdown={showSortDropdown}
+          />
 
           {showSortDropdown && (
             <div className="absolute right-0 top-full z-10 mt-2 w-28 sm:w-32 rounded-lg border border-line-gray bg-white shadow-lg">
@@ -250,7 +260,7 @@ export default function ItemsPage() {
 
       {(!loading || items.length > 0) && (
         <div className="mb-12 grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-          {items.map((item) => (
+          {items.map((item, index) => (
             <div key={item.id} className="overflow-hidden rounded-2xl">
               <Link
                 href={`/items/${item.id}?from=${encodeURIComponent(`${pathname}${searchParams.toString() ? `?${searchParams.toString()}` : ""}`)}`}
@@ -263,7 +273,8 @@ export default function ItemsPage() {
                       alt={item.title}
                       fill
                       className="object-contain"
-                      unoptimized
+                      sizes="(max-width: 640px) calc(100vw - 2rem), (max-width: 768px) calc(50vw - 2rem), (max-width: 1024px) calc(33vw - 2rem), calc(25vw - 2rem)"
+                      priority={index === 0}
                     />
                   ) : (
                     <div className="flex h-full items-center justify-center text-md-m text-gray-400">
@@ -277,9 +288,9 @@ export default function ItemsPage() {
                   <p className="text-xs sm:text-sm text-gray-400">
                     {item.category_sub}
                   </p>
-                  <span 
+                  <span
                     className="px-2 py-1 rounded text-primary-400 text-xs font-semibold"
-                    style={{ backgroundColor: '#FEE8B0' }}
+                    style={{ backgroundColor: "#FEE8B0" }}
                   >
                     {item.count}회 구매
                   </span>
@@ -319,6 +330,7 @@ export default function ItemsPage() {
               width={24}
               height={12}
               className="h-2.5 w-5 sm:h-3 sm:w-6"
+              priority
             />
           </button>
         </div>

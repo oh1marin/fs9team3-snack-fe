@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "analyze": "cross-env ANALYZE=true next build --webpack"
   },
   "dependencies": {
     "jwt-decode": "^4.0.0",
@@ -17,6 +18,8 @@
     "tailwindcss": "^4.1.18"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "^16.1.6",
+    "cross-env": "^7.0.3",
     "@tailwindcss/postcss": "^4.1.18",
     "@types/node": "^20",
     "@types/react": "^19",
