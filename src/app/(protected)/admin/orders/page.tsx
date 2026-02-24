@@ -13,7 +13,7 @@ import {
   type OrderDetail,
 } from "@/lib/api/orders";
 import { toast } from "react-toastify";
-import { getImageSrc } from "@/lib/utils/image";
+import { getRawImageSrc } from "@/lib/utils/image";
 import { useCart } from "@/contexts/CartContext";
 import { fetchBudgetCurrentAPI } from "@/lib/api/superAdmin";
 
@@ -320,7 +320,7 @@ export default function AdminOrdersPage() {
                   {row.image ? (
                     <div className="relative h-14 w-14 overflow-hidden rounded-lg bg-gray-100">
                       <Image
-                        src={getImageSrc(row.image)}
+                        src={getRawImageSrc(row.image)}
                         alt={row.productLabel}
                         fill
                         className="object-contain"
@@ -583,7 +583,7 @@ export default function AdminOrdersPage() {
                             <div className="relative h-14 w-14 overflow-hidden rounded-lg bg-gray-100">
                               {item.image ? (
                                 <Image
-                                  src={getImageSrc(item.image)}
+                                  src={getRawImageSrc(item.image)}
                                   alt={item.name}
                                   fill
                                   className="object-contain"

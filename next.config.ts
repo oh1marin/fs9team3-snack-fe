@@ -7,9 +7,13 @@ const withBundleAnalyzer = bundleAnalyzer({
 });
 
 const nextConfig: NextConfig = {
-  /* config options here */
   reactCompiler: true,
+  experimental: {
+    optimizePackageImports: ["react-toastify"],
+  },
   images: {
+    loader: "custom",
+    loaderFile: "./src/lib/utils/cloudinaryLoader.ts",
     remotePatterns: [
       { protocol: "https", hostname: "via.placeholder.com" },
       { protocol: "http", hostname: "localhost" },

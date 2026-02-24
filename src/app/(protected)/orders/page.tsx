@@ -13,7 +13,7 @@ import {
 } from "@/lib/api/orders";
 import { toast } from "react-toastify";
 import Image from "next/image";
-import { getImageSrc } from "@/lib/utils/image";
+import { getRawImageSrc } from "@/lib/utils/image";
 
 type SortOption = "최신순" | "낮은 금액순" | "높은 금액순";
 
@@ -249,7 +249,7 @@ export default function OrdersPage() {
                   {row.image ? (
                     <div className="relative h-14 w-14 overflow-hidden rounded-lg bg-gray-100">
                       <Image
-                        src={getImageSrc(row.image)}
+                        src={getRawImageSrc(row.image)}
                         alt={row.productLabel}
                         fill
                         className="object-contain"

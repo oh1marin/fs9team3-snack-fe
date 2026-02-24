@@ -14,7 +14,7 @@ import {
   type CreateOrderItem,
 } from "@/lib/api/orders";
 import { fetchBudgetCurrentAPI } from "@/lib/api/superAdmin";
-import { getImageSrc } from "@/lib/utils/image";
+import { getRawImageSrc } from "@/lib/utils/image";
 
 const PURCHASE_COMPLETE_KEY = "snack_purchase_complete";
 
@@ -426,7 +426,7 @@ export default function CartPage() {
                               >
                                 {item.image ? (
                                   <Image
-                                    src={getImageSrc(item.image)}
+                                    src={getRawImageSrc(item.image)}
                                     alt={item.title}
                                     fill
                                     className="object-contain"
@@ -720,7 +720,7 @@ export default function CartPage() {
                     <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-gray-100">
                       {item.image ? (
                         <Image
-                          src={getImageSrc(item.image)}
+                          src={getRawImageSrc(item.image)}
                           alt={item.title}
                           fill
                           className="object-contain"

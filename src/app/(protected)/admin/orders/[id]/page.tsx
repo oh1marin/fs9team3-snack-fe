@@ -14,7 +14,7 @@ import {
 } from "@/lib/api/orders";
 import { fetchBudgetCurrentAPI } from "@/lib/api/superAdmin";
 import { toast } from "react-toastify";
-import { getImageSrc } from "@/lib/utils/image";
+import { getRawImageSrc } from "@/lib/utils/image";
 
 type ResultModalType = "approve" | "reject" | null;
 
@@ -192,7 +192,7 @@ export default function AdminOrderDetailPage() {
                   <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-gray-100">
                     {item.image ? (
                       <Image
-                        src={getImageSrc(item.image)}
+                        src={getRawImageSrc(item.image)}
                         alt={item.name}
                         fill
                         className="object-contain"

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { getRawImageSrc } from "@/lib/utils/image";
 import { useCart } from "@/contexts/CartContext";
 
 const PURCHASE_COMPLETE_KEY = "snack_purchase_complete";
@@ -109,7 +110,7 @@ export default function CartCompletePage() {
               >
                 {data.firstProductImage ? (
                   <Image
-                    src={data.firstProductImage}
+                    src={getRawImageSrc(data.firstProductImage)}
                     alt={data.firstProductTitle}
                     fill
                     className="object-cover"

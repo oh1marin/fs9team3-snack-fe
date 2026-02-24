@@ -19,6 +19,7 @@
 **Snack**은 기업 담당자가 사내 간식 및 음료를 관리하고 주문할 수 있는 마켓플레이스 플랫폼입니다.
 
 ### 주요 목표
+
 - 간편한 상품 검색 및 카테고리 분류
 - 직관적인 상품 등록 및 관리
 - 장바구니 · 구매 요청 · 주문 승인 워크플로우
@@ -29,15 +30,18 @@
 ## 🛠 기술 스택
 
 ### Core
+
 - **Next.js** 16.1.1 - React 프레임워크
 - **React** 19.2.3 - UI 라이브러리
 - **TypeScript** 5.x - 타입 안정성
 
 ### Styling
+
 - **Tailwind CSS** 4.1.18 - 유틸리티 CSS 프레임워크
 - **PostCSS** - CSS 후처리
 
 ### Tools
+
 - **ESLint** - 코드 품질 관리
 - **JWT Decode** - 인증 토큰 처리
 - **react-toastify** - 토스트 알림
@@ -46,6 +50,7 @@
 ### 설치 및 실행
 
 1. **의존성 설치**
+
 ```bash
 yarn install
 # or
@@ -53,13 +58,15 @@ npm install
 ```
 
 2. **환경 변수 설정** (`.env` 생성)
+
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:3001
-# Cloudinary (선택) - 이미지 CDN 최적화
+# Cloudinary (권장) - 이미지 CDN, Lighthouse 점수 개선
 # NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=your_cloud_name
 ```
 
 3. **개발 서버 실행**
+
 ```bash
 yarn dev
 # or
@@ -67,6 +74,7 @@ npm run dev
 ```
 
 4. **브라우저에서 확인**
+
 ```
 http://localhost:3000
 ```
@@ -91,16 +99,16 @@ yarn analyze
 
 - **백엔드 API**: `NEXT_PUBLIC_API_URL` 환경 변수로 API 서버 주소 설정
 - **프론트엔드**: Vercel 배포 권장
-- **이미지 CDN**: Cloudinary (선택) - `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME` 설정 시 이미지 자동 최적화
+- **이미지**: Next.js Image + Cloudinary 커스텀 로더 (외부 이미지 리사이즈·f_auto·q_auto)
 
 ---
 
 ## 🔐 환경 변수
 
-| 변수 | 필수 | 설명 |
-|------|------|------|
-| `NEXT_PUBLIC_API_URL` | ✅ | 백엔드 API 주소 (예: `http://localhost:3001`) |
-| `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME` | - | Cloudinary Cloud name (설정 시 이미지 CDN 적용) |
+| 변수                                | 필수 | 설명                                            |
+| ----------------------------------- | ---- | ----------------------------------------------- |
+| `NEXT_PUBLIC_API_URL`               | ✅   | 백엔드 API 주소 (예: `http://localhost:3001`)   |
+| `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME` | -    | Cloudinary Cloud name (설정 시 이미지 CDN 적용) |
 
 ---
 
@@ -149,24 +157,28 @@ fs9team3-snack-fe/
 ## ✨ 주요 기능
 
 ### 1. 인증 시스템
+
 - 이메일 기반 회원가입 (이메일 형식·비밀번호 8자 이상 검증)
 - 로그인/로그아웃
 - JWT 토큰 기반 인증
 - Context API 기반 인증 상태 전역 관리
 
 ### 2. 상품
+
 - 상품 목록 (카테고리 필터, 정렬: 최신순/판매순/낮은가격순/높은가격순)
 - 상품 상세
 - 상품 등록·삭제 (모달)
 - 구매 횟수 배지 (N회 구매)
 
 ### 3. 장바구니 · 주문
+
 - 장바구니 담기·수량 변경·삭제
 - 구매 요청 (일반) / 즉시 구매 (관리자)
 - 주문 목록·상세 조회
 - 구매 요청 취소
 
 ### 4. 관리자
+
 - **회원 관리**: 회원 초대, 권한 변경(일반/관리자/최고관리자)
 - **예산 관리**: 월별 예산 설정
 - **승인 대기**: 구매 요청 승인·반려
@@ -174,10 +186,12 @@ fs9team3-snack-fe/
 - **구매 내역**: 승인 완료 주문 조회
 
 ### 5. 전역 모달
+
 - Context API 기반 모달 관리
 - ProductModal, DeleteModal 등 확장 가능 구조
 
 ### 6. UI/UX
+
 - 반응형 디자인
 - 스켈레톤 로딩 (텍스트 없이 펄스 애니메이션)
 - Next.js Image + Cloudinary CDN 이미지 최적화
@@ -225,18 +239,18 @@ if (password.length < 8) {
 
 ### 라우트 구조
 
-| 경로 | 설명 |
-|------|------|
-| `/` | 랜딩 |
-| `/login`, `/signup` | 인증 (Public) |
-| `/items`, `/items/[id]` | 상품 목록·상세 |
-| `/cart`, `/cart/complete` | 장바구니, 구매 완료 |
-| `/orders`, `/orders/[id]` | 구매 요청 목록·상세 |
-| `/profile` | 프로필 |
-| `/admin` | 관리자 (회원·예산) |
-| `/admin/items` | 상품 관리 |
-| `/admin/orders`, `/admin/orders/[id]` | 승인 대기 |
-| `/admin/purchase-history`, `/admin/purchase-history/[id]` | 구매 내역 |
+| 경로                                                      | 설명                |
+| --------------------------------------------------------- | ------------------- |
+| `/`                                                       | 랜딩                |
+| `/login`, `/signup`                                       | 인증 (Public)       |
+| `/items`, `/items/[id]`                                   | 상품 목록·상세      |
+| `/cart`, `/cart/complete`                                 | 장바구니, 구매 완료 |
+| `/orders`, `/orders/[id]`                                 | 구매 요청 목록·상세 |
+| `/profile`                                                | 프로필              |
+| `/admin`                                                  | 관리자 (회원·예산)  |
+| `/admin/items`                                            | 상품 관리           |
+| `/admin/orders`, `/admin/orders/[id]`                     | 승인 대기           |
+| `/admin/purchase-history`, `/admin/purchase-history/[id]` | 구매 내역           |
 
 인증 필요 페이지는 `(protected)` 폴더 내에 위치
 
@@ -256,14 +270,17 @@ illustration-mint           /* 포인트 색상 */
 ## 📝 코딩 컨벤션
 
 ### 컴포넌트
+
 - PascalCase 사용
 - `export default function ComponentName() {}`
 
 ### 파일명
+
 - 컴포넌트: PascalCase (예: `ProductModal.tsx`)
 - 유틸리티: camelCase (예: `authService.ts`)
 
 ### 스타일
+
 - Tailwind CSS 유틸리티 클래스 우선 사용
 - 반응형 디자인: `sm:`, `md:`, `lg:` 브레이크포인트 활용
 
