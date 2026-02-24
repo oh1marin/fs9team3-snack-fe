@@ -3,11 +3,11 @@ import localFont from "next/font/local";
 import "./globals.css";
 import "react-toastify/dist/ReactToastify.css";
 import LayoutWithHeader from "@/components/LayoutWithHeader";
+import ToastProvider from "@/components/ToastProvider";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { CartProvider } from "@/contexts/CartContext";
 import { HeaderRefreshProvider } from "@/contexts/HeaderRefreshContext";
 import { ModalProvider } from "@/contexts/ModalContext";
-import { ToastContainer } from "react-toastify";
 
 const pretendard = localFont({
   src: "../assets/fonts/PretendardVariable.woff2",
@@ -40,29 +40,7 @@ export default function RootLayout({
             </CartProvider>
           </HeaderRefreshProvider>
         </AuthProvider>
-        <ToastContainer
-          position="top-right"
-          autoClose={3000}
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-          theme="light"
-        />
-        <ToastContainer
-          containerId="budget-toast"
-          position="top-center"
-          autoClose={3000}
-          hideProgressBar={false}
-          closeOnClick
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-          theme="light"
-        />
+        <ToastProvider />
       </body>
     </html>
   );

@@ -23,7 +23,6 @@ export default function LandingPage() {
             alt="mid"
             width={740}
             height={120}
-            priority
             className="h-auto w-[300px] sm:w-[520px] md:w-[620px] lg:w-[740px]"
           />
         </div>
@@ -36,6 +35,7 @@ export default function LandingPage() {
           width={1600}
           height={900}
           priority
+          fetchPriority="high"
           className="mx-auto h-auto w-full max-w-[1600px]"
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 1600px"
         />

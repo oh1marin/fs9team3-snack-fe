@@ -3,7 +3,7 @@
  * - 절대 URL(http/https) → 그대로 반환
  * - 상대 경로(/uploads/...) → NEXT_PUBLIC_API_URL 붙여서 반환
  */
-function getRawImageSrc(image: string | null | undefined): string {
+export function getRawImageSrc(image: string | null | undefined): string {
   const raw = typeof image === "string" ? image.trim() : "";
   if (!raw) return "";
   if (raw.startsWith("blob:") || raw.startsWith("data:")) return raw;
