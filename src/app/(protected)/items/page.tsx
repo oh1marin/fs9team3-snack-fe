@@ -9,7 +9,7 @@ import { useModal } from "@/contexts/ModalContext";
 import SortButton from "@/app/ui/SortButton";
 import AddProductBtn from "@/app/ui/AddProductBtn";
 import { getClientAccessToken } from "@/lib/api/authToken";
-import { getRawImageSrc } from "@/lib/utils/image";
+import { getImageSrc } from "@/lib/utils/image";
 import { getPurchaseBadgeText } from "@/lib/utils/purchaseBadge";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
@@ -270,7 +270,7 @@ export default function ItemsPage() {
                 <div className="relative aspect-square w-full bg-white">
                   {item.image ? (
                     <Image
-                      src={getRawImageSrc(item.image)}
+                      src={getImageSrc(item.image)}
                       alt={item.title}
                       fill
                       className="object-contain"

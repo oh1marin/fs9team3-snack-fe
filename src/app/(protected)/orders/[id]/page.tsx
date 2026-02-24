@@ -11,7 +11,7 @@ import {
 } from "@/lib/api/orders";
 import { toast } from "react-toastify";
 import Image from "next/image";
-import { getRawImageSrc } from "@/lib/utils/image";
+import { getImageSrc } from "@/lib/utils/image";
 
 function formatPrice(n: number) {
   return n.toLocaleString("ko-KR") + "원";
@@ -122,7 +122,7 @@ export default function OrderDetailPage() {
                   <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-gray-100">
                     {item.image ? (
                       <Image
-                        src={getRawImageSrc(item.image)}
+                        src={getImageSrc(item.image)}
                         alt={item.name}
                         fill
                         className="object-contain"

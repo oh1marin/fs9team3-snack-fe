@@ -8,7 +8,7 @@ import { useCart } from "@/contexts/CartContext";
 import { useModal } from "@/contexts/ModalContext";
 import { toast } from "react-toastify";
 import { getClientAccessToken } from "@/lib/api/authToken";
-import { getRawImageSrc } from "@/lib/utils/image";
+import { getImageSrc } from "@/lib/utils/image";
 import { getPurchaseBadgeText } from "@/lib/utils/purchaseBadge";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
@@ -195,7 +195,7 @@ export default function ProductDetailPage() {
             {product.image ? (
               <div className="relative h-full w-full">
                 <Image
-                  src={getRawImageSrc(product.image)}
+                  src={getImageSrc(product.image)}
                   alt={product.title}
                   fill
                   className="object-contain"
