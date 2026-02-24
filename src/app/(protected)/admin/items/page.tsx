@@ -3,7 +3,7 @@
 import { Fragment, useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { fetchRegisteredItems, type RegisteredItem } from "@/lib/api/items";
-import { getRawImageSrc } from "@/lib/utils/image";
+import { getImageSrc } from "@/lib/utils/image";
 import { useAuth } from "@/contexts/AuthContext";
 
 type SortOption = "최신순" | "낮은가격순" | "높은가격순";
@@ -198,7 +198,7 @@ export default function AdminItemsPage() {
                   <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-gray-100">
                     {row.image ? (
                       <Image
-                        src={getRawImageSrc(row.image)}
+                        src={getImageSrc(row.image)}
                         alt={row.title}
                         fill
                         className="object-cover"

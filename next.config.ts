@@ -12,8 +12,6 @@ const nextConfig: NextConfig = {
     optimizePackageImports: ["react-toastify"],
   },
   images: {
-    loader: "custom",
-    loaderFile: "./src/lib/utils/cloudinaryLoader.ts",
     remotePatterns: [
       { protocol: "https", hostname: "via.placeholder.com" },
       { protocol: "http", hostname: "localhost" },
