@@ -163,9 +163,7 @@ export default function AdminItemsPage() {
 
       <div className="ml-[clamp(2rem,8.33vw,10rem)] mr-[clamp(2rem,8.33vw,10rem)] max-[1100px]:ml-0 max-[1100px]:mr-0">
         {loading ? (
-          <div className="flex min-h-[200px] items-center justify-center rounded-lg border border-line-gray bg-white">
-            <p className="text-gray-500">불러오는 중...</p>
-          </div>
+          <div className="min-h-[200px] animate-pulse rounded-lg border border-line-gray bg-gray-200/50" />
         ) : (
           <div
             className="min-w-[820px] overflow-x-auto"

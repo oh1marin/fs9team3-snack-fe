@@ -127,9 +127,7 @@ export default function AdminOrderDetailPage() {
 
   if (data === undefined) {
     return (
-      <main className="mx-auto flex min-h-[50vh] w-full max-w-[1920px] flex-col items-center justify-center bg-background-peach px-4 py-16">
-        <p className="text-gray-500">불러오는 중...</p>
-      </main>
+      <main className="mx-auto min-h-[50vh] w-full max-w-[1920px] animate-pulse rounded-2xl bg-gray-200/30 px-4 py-16" />
     );
   }
 
@@ -383,9 +381,7 @@ export default function AdminOrderDetailPage() {
                 </div>
               </>
             ) : (
-              <p className="mt-4 text-base text-gray-500">
-                예산 정보를 불러오는 중...
-              </p>
+              <div className="mt-4 h-12 w-full animate-pulse rounded-lg bg-gray-200" />
             )}
           </div>
         </aside>

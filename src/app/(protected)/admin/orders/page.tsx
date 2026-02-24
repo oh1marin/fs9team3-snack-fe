@@ -232,9 +232,7 @@ export default function AdminOrdersPage() {
 
       <div className="ml-[clamp(2rem,8.33vw,10rem)] mr-[clamp(2rem,8.33vw,10rem)] max-[1100px]:ml-0 max-[1100px]:mr-0">
         {loading ? (
-          <div className="flex min-h-[200px] items-center justify-center rounded-lg border border-line-gray bg-white">
-            <p className="text-gray-500">불러오는 중...</p>
-          </div>
+          <div className="min-h-[200px] animate-pulse rounded-lg border border-line-gray bg-gray-200/50" />
         ) : orders.length === 0 ? (
           <div className="flex min-h-[300px] flex-col items-center justify-center gap-4 py-16">
             <Image src="/sadDog.png" alt="" width={388} height={304} />
@@ -549,9 +547,7 @@ export default function AdminOrdersPage() {
               style={{ marginTop: -10 }}
             >
               {approvalDetailLoading ? (
-                <div className="flex min-h-[160px] items-center justify-center py-6">
-                  <p className="text-gray-500">불러오는 중...</p>
-                </div>
+                <div className="min-h-[160px] animate-pulse rounded-xl bg-gray-200/50 py-6" />
               ) : approvalDetail ? (
                 <>
                   <div className="mb-3">

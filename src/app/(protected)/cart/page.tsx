@@ -282,9 +282,7 @@ export default function CartPage() {
       </h1>
 
       {!cartLoaded ? (
-        <div className="flex min-h-[200px] items-center justify-center">
-          <p className="text-gray-500">불러오는 중...</p>
-        </div>
+        <div className="flex min-h-[200px] animate-pulse items-center justify-center rounded-2xl bg-gray-200/50" />
       ) : items.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-2xl bg-background-peach py-16 text-center">
           <p className="mb-4 text-lg text-black-200">

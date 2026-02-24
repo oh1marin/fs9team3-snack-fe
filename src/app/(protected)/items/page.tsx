@@ -10,6 +10,7 @@ import SortButton from "@/app/ui/SortButton";
 import AddProductBtn from "@/app/ui/AddProductBtn";
 import { getClientAccessToken } from "@/lib/api/authToken";
 import { getImageSrc } from "@/lib/utils/image";
+import { getPurchaseBadgeText } from "@/lib/utils/purchaseBadge";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
@@ -292,7 +293,7 @@ export default function ItemsPage() {
                     className="px-2 py-1 rounded text-primary-400 text-xs font-semibold"
                     style={{ backgroundColor: "#FEE8B0" }}
                   >
-                    {item.count}회 구매
+                    {getPurchaseBadgeText(item.count ?? 0)}
                   </span>
                 </div>
                 <h3 className="text-lg-b text-black-400 mb-2">{item.title}</h3>
@@ -323,7 +324,7 @@ export default function ItemsPage() {
             disabled={loading}
             className="flex h-14 sm:h-16 w-full max-w-[640px] items-center justify-center gap-2 sm:gap-3 rounded-xl border-2 border-primary-400 bg-white text-lg-sb sm:text-2xl-sb text-primary-400 transition-colors hover:bg-primary-100 disabled:opacity-50"
           >
-            {loading ? "로딩 중..." : "더보기"}
+            더보기
             <Image
               src="/orangedown.png"
               alt="더보기"
