@@ -1,294 +1,205 @@
-# 🍿 Snack - 간식 마켓플레이스
+# 🍿 Snack - 기업용 간식 마켓플레이스
 
-기업용 간식 및 음료 마켓플레이스 프론트엔드 프로젝트
+기업 담당자가 사내 간식 및 음료를 관리하고 주문할 수 있는 마켓플레이스 플랫폼
 
-## 📋 목차
+> 📅 개발 기간: 2026.01.14 ~ 2026.02.25
 
-- [프로젝트 소개](#프로젝트-소개)
-- [기술 스택](#기술-스택)
-- [시작하기](#시작하기)
-- [환경 변수](#환경-변수)
-- [프로젝트 구조](#프로젝트-구조)
-- [주요 기능](#주요-기능)
-- [개발 가이드](#개발-가이드)
+<br />
 
----
+## 🔗 링크
 
-## 📖 프로젝트 소개
+| 서비스         | URL                                                              |
+| -------------- | ---------------------------------------------------------------- |
+| 🌐 배포 사이트 | [https://marin-snack.store/](https://marin-snack.store/)         |
+| 📄 API 문서    | [http://13.209.35.172/api-docs/](http://13.209.35.172/api-docs/) |
 
-**Snack**은 기업 담당자가 사내 간식 및 음료를 관리하고 주문할 수 있는 마켓플레이스 플랫폼입니다.
+<br />
 
-### 주요 목표
+## 📸 화면 미리보기
 
-- 간편한 상품 검색 및 카테고리 분류
-- 직관적인 상품 등록 및 관리
-- 장바구니 · 구매 요청 · 주문 승인 워크플로우
-- 예산 관리 및 회원 권한 관리
+> 스크린샷을 여기에 추가하세요
 
----
+|                                                    홈                                                    |                                                상품 목록                                                 |                                                상품 상세                                                 |
+| :------------------------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------------------: |
+| <img src="https://github.com/user-attachments/assets/45a3b942-4a63-488a-b768-3d16a393fb98" width="280"/> | <img src="https://github.com/user-attachments/assets/798129fe-f43d-4d11-8aed-f8726030710f" width="280"/> | <img src="https://github.com/user-attachments/assets/19bf3a41-6211-47ae-bde0-89c2714dd5d6" width="280"/> |
+
+|                                                 장바구니                                                 |                                                주문 내역                                                 |                                                  관리자                                                  |
+| :------------------------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------------------: |
+| <img src="https://github.com/user-attachments/assets/3749dd80-ffa5-44d9-a8a4-697b51b48d28" width="280"/> | <img src="https://github.com/user-attachments/assets/5f5e1cc1-56a2-463a-931d-60dc83017435" width="280"/> | <img src="https://github.com/user-attachments/assets/a1be1fb5-171a-4bea-b785-9b5d855e34e2" width="280"/> |
+
+|                                                  로그인                                                  |                                              상품 등록 모달                                              |                                             관리자 승인/반려                                             |
+| :------------------------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------------------: |
+| <img src="https://github.com/user-attachments/assets/3cca9a51-995f-4efe-85e1-a5d8ffdfc281" width="280"/> | <img src="https://github.com/user-attachments/assets/bdd5afdf-895e-4552-9e42-81124ec822ed" width="280"/> | <img src="https://github.com/user-attachments/assets/89e3677b-9a56-4eaa-8fd4-85175a91b06b" width="280"/> |
+
+<br />
+
+## 🏗 시스템 아키텍처
+
+<img src="https://github.com/user-attachments/assets/f794d086-c988-497a-b292-f6b36a560b98" width="800" />
+
+<br />
 
 ## 🛠 기술 스택
 
-### Core
+#### Frontend
 
-- **Next.js** 16.1.1 - React 프레임워크
-- **React** 19.2.3 - UI 라이브러리
-- **TypeScript** 5.x - 타입 안정성
+![Next.js](https://img.shields.io/badge/Next-black?style=for-the-badge&logo=next.js&logoColor=white)
+![React](https://img.shields.io/badge/react-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB)
+![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)
+![TailwindCSS](https://img.shields.io/badge/tailwindcss-%2338B2AC.svg?style=for-the-badge&logo=tailwind-css&logoColor=white)
 
-### Styling
+#### Backend
 
-- **Tailwind CSS** 4.1.18 - 유틸리티 CSS 프레임워크
-- **PostCSS** - CSS 후처리
+![Node.js](https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white)
+![Express.js](https://img.shields.io/badge/express.js-%23404d59.svg?style=for-the-badge&logo=express&logoColor=%2361DAFB)
+![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)
+![Prisma](https://img.shields.io/badge/Prisma-3982CE?style=for-the-badge&logo=Prisma&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/postgresql-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white)
+![JWT](https://img.shields.io/badge/JWT-black?style=for-the-badge&logo=JSON%20web%20tokens)
+![AWS S3](https://img.shields.io/badge/AWS%20S3-FF9900?style=for-the-badge&logo=amazons3&logoColor=white)
 
-### Tools
+#### Infra & Tools
 
-- **ESLint** - 코드 품질 관리
-- **JWT Decode** - 인증 토큰 처리
-- **react-toastify** - 토스트 알림
-- **@next/bundle-analyzer** - 번들 분석 (`yarn analyze`)
+![Vercel](https://img.shields.io/badge/vercel-%23000000.svg?style=for-the-badge&logo=vercel&logoColor=white)
+![Git](https://img.shields.io/badge/git-%23F05033.svg?style=for-the-badge&logo=git&logoColor=white)
+![GitHub](https://img.shields.io/badge/github-%23121212.svg?style=for-the-badge&logo=github&logoColor=white)
 
-### 설치 및 실행
+<br />
 
-1. **의존성 설치**
+## 🗄 DB 스키마
 
-```bash
-yarn install
-# or
-npm install
-```
+> DB 스키마 이미지를 여기에 추가하세요
 
-2. **환경 변수 설정** (`.env` 생성)
+<img src="https://github.com/user-attachments/assets/983e3950-15aa-4aac-b54b-86ae8c51a88f" width="800" />
 
-```env
-NEXT_PUBLIC_API_URL=http://localhost:3001
-# Cloudinary (권장) - 이미지 CDN, Lighthouse 점수 개선
-# NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=your_cloud_name
-```
+<br />
 
-3. **개발 서버 실행**
+## 👤 담당 역할
 
-```bash
-yarn dev
-# or
-npm run dev
-```
+개인 프로젝트로, 기획부터 배포까지 단독으로 진행했습니다.
 
-4. **브라우저에서 확인**
+| 분야     | 내용                                                           |
+| -------- | -------------------------------------------------------------- |
+| Frontend | 전 페이지 UI 구현, 상태 관리, 인증 흐름, 성능 최적화           |
+| Backend  | REST API 설계 및 구현, JWT 인증·권한 미들웨어, 이메일 발송     |
+| Database | Prisma 스키마 설계, PostgreSQL 마이그레이션·시드               |
+| Infra    | AWS EC2 배포, S3 이미지 업로드, Vercel, Cloudflare 도메인 연결 |
 
-```
-http://localhost:3000
-```
+<br />
 
-### 빌드 및 배포
+## ✨ 주요 기능
 
-```bash
-# 프로덕션 빌드
-yarn build
+### 1. 인증
 
-# 프로덕션 서버 실행
-yarn start
+- 이메일 기반 회원가입 / 로그인 / 로그아웃
+- JWT 토큰 기반 인증 (쿠키)
+- 최고관리자 초대 메일 발송
 
-# 린트 체크
-yarn lint
+### 2. 상품
 
-# 번들 분석 (웹팩 번들 크기 확인)
-yarn analyze
-```
+- 상품 목록 (카테고리 필터, 정렬: 최신순 / 판매순 / 가격순)
+- 상품 등록 · 수정 · 삭제
+- AWS S3 이미지 업로드
+- 누적 구매 횟수 배지
 
-### 배포 및 인프라
+### 3. 장바구니 · 주문
 
-- **백엔드 API**: `NEXT_PUBLIC_API_URL` 환경 변수로 API 서버 주소 설정
-- **프론트엔드**: Vercel 배포 권장
-- **이미지**: Next.js Image + Cloudinary 커스텀 로더 (외부 이미지 리사이즈·f_auto·q_auto)
+- 장바구니 담기 · 수량 변경 · 삭제
+- 구매 요청 (일반) / 즉시 구매 (관리자)
+- 주문 목록 · 상세 조회 · 취소
 
----
+### 4. 관리자
 
-## 🔐 환경 변수
+- **회원 관리**: 초대, 권한 변경 (일반 / 관리자 / 최고관리자)
+- **예산 관리**: 월별 예산 설정 (node-cron 자동 초기화)
+- **승인 대기**: 구매 요청 승인 · 반려
+- **상품 관리**: 등록 상품 목록 · 수정
+- **구매 내역**: 승인 완료 주문 조회
 
-| 변수                                | 필수 | 설명                                            |
-| ----------------------------------- | ---- | ----------------------------------------------- |
-| `NEXT_PUBLIC_API_URL`               | ✅   | 백엔드 API 주소 (예: `http://localhost:3001`)   |
-| `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME` | -    | Cloudinary Cloud name (설정 시 이미지 CDN 적용) |
-
----
+<br />
 
 ## 📁 프로젝트 구조
 
 ```
-fs9team3-snack-fe/
-├── src/
-│   ├── app/
-│   │   ├── (auth)/               # 인증
-│   │   │   ├── login/
-│   │   │   └── signup/
-│   │   ├── (protected)/          # 인증 필요
-│   │   │   ├── items/            # 상품 목록
-│   │   │   │   └── [id]/         # 상품 상세
-│   │   │   ├── cart/             # 장바구니
-│   │   │   │   └── complete/     # 구매 완료
-│   │   │   ├── orders/           # 구매 요청 목록
-│   │   │   │   └── [id]/         # 구매 요청 상세
-│   │   │   ├── profile/          # 프로필
-│   │   │   └── admin/            # 관리자
-│   │   │       ├── page          # 회원 관리, 예산 관리
-│   │   │       ├── items/        # 상품 관리
-│   │   │       ├── orders/       # 승인 대기
-│   │   │       │   └── [id]/     # 주문 상세·승인
-│   │   │       └── purchase-history/  # 구매 내역
-│   │   ├── ui/                   # AddProductBtn, SortButton 등
-│   │   ├── layout.tsx
-│   │   └── page.tsx              # 랜딩
-│   ├── components/
-│   │   ├── ProductModal.tsx, DeleteModal.tsx
-│   │   ├── ProductCardSkeleton.tsx, OrderSummary.tsx
-│   │   ├── LayoutWithHeader.tsx, Header.tsx, Footer.tsx
+🖥️ fs9team3-snack-fe/          # 프론트엔드
+├── 📁 src/
+│   ├── 📁 app/
+│   │   ├── 🔐 (auth)/              # 로그인, 회원가입
+│   │   ├── 🔒 (protected)/         # 인증 필요 페이지
+│   │   │   ├── 📦 items/           # 상품 목록·상세
+│   │   │   │   └── register/       # 상품 등록
+│   │   │   ├── 🛒 cart/            # 장바구니
+│   │   │   │   └── complete/       # 구매 완료
+│   │   │   ├── 📋 orders/          # 주문 목록·상세
+│   │   │   ├── 👤 profile/         # 프로필
+│   │   │   └── ⚙️ admin/           # 관리자
+│   │   │       ├── items/          # 상품 관리
+│   │   │       ├── orders/         # 승인 대기
+│   │   │       ├── purchase-history/ # 구매 내역
+│   │   │       └── users/          # 회원 관리
+│   │   ├── 📄 page.tsx             # 랜딩
+│   │   └── ui/                     # AddProductBtn, SortButton 등
+│   ├── 🧩 components/              # 공통 컴포넌트
 │   │   └── icons/
-│   ├── contexts/                 # AuthContext, CartContext, ModalContext
-│   ├── lib/
-│   │   ├── api/                  # auth, cart, orders, items, superAdmin
-│   │   └── utils/                # image, purchaseBadge
-│   └── assets/fonts/
-├── public/
-└── README.md
+│   ├── 🌐 contexts/                # AuthContext, CartContext, ModalContext
+│   ├── 🔧 lib/
+│   │   ├── api/                    # apiClient, auth, cart, items, orders, superAdmin
+│   │   ├── actions/                # Server Actions
+│   │   ├── service/                # authService, userService
+│   │   └── utils/                  # image, purchaseBadge
+│   └── layout/                     # NavBar
+
+⚙️ fs9team3-snack-be/          # 백엔드
+├── 📁 src/
+│   ├── 📄 app.ts                   # Express 앱 진입점
+│   ├── 🛣️ routes/                  # auth, items, cart, orders, users, admin, super-admin
+│   ├── 📋 controllers/             # 각 도메인 비즈니스 로직
+│   ├── 🛡️ middleware/              # JWT 인증, 권한 체크, 에러 핸들러
+│   ├── 🗄️ prisma/                  # schema.prisma, migrations, seed
+│   ├── ⏰ cron/                    # 월별 예산 초기화 스케줄러
+│   ├── 🔧 config/                  # Swagger, S3 업로드 설정
+│   ├── 📐 types/                   # 공통 타입 정의
+│   └── 🔨 utils/                   # 에러 클래스, 이메일, 이미지 URL, Prisma 싱글톤
 ```
+
+<br />
+
+## 🔌 API 문서
+
+[http://13.209.35.172/api-docs/](http://13.209.35.172/api-docs/)
+
+<br />
+
+## 트러블슈팅
+
+### 1. 헤더 로그인 상태 불안정 문제
+
+로그인 상태임에도 새로고침하면 비로그인 헤더가 깜빡이거나, 토큰이 있는데도 비로그인으로 표시되는 현상이 복합적으로 발생했다.
+
+원인은 세 가지였다.
+
+- `getMe()` 호출 중 `setUser()`와 `setIsLoading(false)`가 서로 다른 타이밍에 반영되어, `user === null`이면서 `isLoading === false`인 프레임이 한 순간 렌더링됨
+- 헤더가 `user` 값만으로 로그인 여부를 판단해, `/api/auth/me` 파싱 실패 시 토큰이 있어도 비로그인으로 인식
+- 프론트·API 포트가 달라 `Access-Control-Allow-Origin`이 명확하지 않아 브라우저가 쿠키를 전송하지 않음
+
+**해결**
+
+- `setUser()`와 로딩 상태 변경을 같은 흐름에서 처리하고, `finally`에서 무조건 `setIsLoading(false)`를 호출하던 구조를 제거
+- 서버에서 토큰 검증 결과를 `hasToken`으로 헤더에 전달해 로그인 판단 기준 추가, `AuthInitializer`로 user를 context에 미리 주입
+- 백엔드 CORS `origin`을 명확히 지정하고 `credentials: true` 유지
 
 ---
 
-## ✨ 주요 기능
+### 2. 모달 컴포넌트 지연 로드 (Dynamic Import)
 
-### 1. 인증 시스템
+`items/page.tsx`, `items/[id]/page.tsx`에서 `ProductModal`, `DeleteModal`, `AddToCartModal`을 상단 `import`로 불러오고 있었다. 모달은 버튼을 눌러야만 열리는 컴포넌트인데, 페이지 진입 시점부터 번들에 포함되어 초기 로딩에 영향을 주고 있었다.
 
-- 이메일 기반 회원가입 (이메일 형식·비밀번호 8자 이상 검증)
-- 로그인/로그아웃
-- JWT 토큰 기반 인증
-- Context API 기반 인증 상태 전역 관리
+**해결** 모달을 여는 시점에 `await import()`로 동적 로드하도록 변경했다.
 
-### 2. 상품
-
-- 상품 목록 (카테고리 필터, 정렬: 최신순/판매순/낮은가격순/높은가격순)
-- 상품 상세
-- 상품 등록·삭제 (모달)
-- 구매 횟수 배지 (N회 구매)
-
-### 3. 장바구니 · 주문
-
-- 장바구니 담기·수량 변경·삭제
-- 구매 요청 (일반) / 즉시 구매 (관리자)
-- 주문 목록·상세 조회
-- 구매 요청 취소
-
-### 4. 관리자
-
-- **회원 관리**: 회원 초대, 권한 변경(일반/관리자/최고관리자)
-- **예산 관리**: 월별 예산 설정
-- **승인 대기**: 구매 요청 승인·반려
-- **상품 관리**: 등록 상품 목록·수정
-- **구매 내역**: 승인 완료 주문 조회
-
-### 5. 전역 모달
-
-- Context API 기반 모달 관리
-- ProductModal, DeleteModal 등 확장 가능 구조
-
-### 6. UI/UX
-
-- 반응형 디자인
-- 스켈레톤 로딩 (텍스트 없이 펄스 애니메이션)
-- Next.js Image + Cloudinary CDN 이미지 최적화
-- Tailwind 커스텀 디자인 시스템, Pretendard 폰트
-
----
-
-## 💻 개발 가이드
-
-### 전역 모달 사용법
-
-```typescript
-import { useModal } from "@/contexts/ModalContext";
-import ProductModal from "@/components/ProductModal";
-
-export default function Page() {
-  const { openModal, closeModal } = useModal();
-
-  const handleOpenModal = () => {
-    openModal(<ProductModal onClose={closeModal} />);
-  };
-
-  return <button onClick={handleOpenModal}>모달 열기</button>;
-}
+```ts
+const { default: ProductModal } = await import("@/components/ProductModal");
+const { default: DeleteModal } = await import("@/components/DeleteModal");
+const { default: AddToCartModal } = await import("@/components/AddToCartModal");
 ```
 
-### 이메일 검증 정규식
-
-```typescript
-const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-```
-
-- `@` 기호 필수
-- 도메인과 확장자 필수
-- 공백 불가
-
-### 비밀번호 검증
-
-```typescript
-// 최소 8자 이상
-if (password.length < 8) {
-  setError("비밀번호는 최소 8자 이상이어야 합니다.");
-}
-```
-
-### 라우트 구조
-
-| 경로                                                      | 설명                |
-| --------------------------------------------------------- | ------------------- |
-| `/`                                                       | 랜딩                |
-| `/login`, `/signup`                                       | 인증 (Public)       |
-| `/items`, `/items/[id]`                                   | 상품 목록·상세      |
-| `/cart`, `/cart/complete`                                 | 장바구니, 구매 완료 |
-| `/orders`, `/orders/[id]`                                 | 구매 요청 목록·상세 |
-| `/profile`                                                | 프로필              |
-| `/admin`                                                  | 관리자 (회원·예산)  |
-| `/admin/items`                                            | 상품 관리           |
-| `/admin/orders`, `/admin/orders/[id]`                     | 승인 대기           |
-| `/admin/purchase-history`, `/admin/purchase-history/[id]` | 구매 내역           |
-
-인증 필요 페이지는 `(protected)` 폴더 내에 위치
-
-### 스타일링 가이드
-
-프로젝트는 Tailwind v4 + `globals.css`의 `@theme`로 커스텀 컬러를 정의합니다:
-
-```css
-/* globals.css @theme 예시 */
-primary-300, primary-400    /* 주요 색상 */
-background-peach            /* 배경색 */
-illustration-mint           /* 포인트 색상 */
-```
-
----
-
-## 📝 코딩 컨벤션
-
-### 컴포넌트
-
-- PascalCase 사용
-- `export default function ComponentName() {}`
-
-### 파일명
-
-- 컴포넌트: PascalCase (예: `ProductModal.tsx`)
-- 유틸리티: camelCase (예: `authService.ts`)
-
-### 스타일
-
-- Tailwind CSS 유틸리티 클래스 우선 사용
-- 반응형 디자인: `sm:`, `md:`, `lg:` 브레이크포인트 활용
-
----
-
-## 🔗 관련 링크
-
-- [Next.js 공식 문서](https://nextjs.org/docs)
-- [React 공식 문서](https://react.dev)
-- [Tailwind CSS 공식 문서](https://tailwindcss.com/docs)
-- [TypeScript 공식 문서](https://www.typescriptlang.org/docs)
+초기 번들 크기가 줄었고, 모달처럼 조건부로만 필요한 컴포넌트는 dynamic import가 적합하다는 것을 확인했다.
