@@ -28,6 +28,24 @@ export const metadata: Metadata = {
     title: "Snack - 기업용 간식 마켓플레이스",
     description:
       "기업 담당자가 사내 간식 및 음료를 관리하고 주문할 수 있는 마켓플레이스",
+    url: "https://marin-snack.store",
+    siteName: "Snack",
+    type: "website",
+    locale: "ko_KR",
+    images: [
+      {
+        url: "/landingpageall.png",
+        width: 1600,
+        height: 900,
+        alt: "Snack 기업용 간식 마켓플레이스",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Snack - 기업용 간식 마켓플레이스",
+    description:
+      "기업 담당자가 사내 간식 및 음료를 관리하고 주문할 수 있는 마켓플레이스",
   },
 };
 

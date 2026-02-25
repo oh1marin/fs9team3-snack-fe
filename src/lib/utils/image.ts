@@ -7,10 +7,15 @@ export function getRawImageSrc(image: string | null | undefined): string {
   const raw = typeof image === "string" ? image.trim() : "";
   if (!raw) return "";
   if (raw.startsWith("blob:") || raw.startsWith("data:")) return raw;
-  if (raw.startsWith("http://") || raw.startsWith("https://") || raw.startsWith("//")) {
+  if (
+    raw.startsWith("http://") ||
+    raw.startsWith("https://") ||
+    raw.startsWith("//")
+  ) {
     return raw;
   }
-  const base = (typeof process !== "undefined" && process.env.NEXT_PUBLIC_API_URL) || "";
+  const base =
+    (typeof process !== "undefined" && process.env.NEXT_PUBLIC_API_URL) || "";
   const baseClean = base.replace(/\/$/, "");
   const path = raw.startsWith("/") ? raw : `/${raw}`;
   return baseClean ? `${baseClean}${path}` : path;
@@ -24,7 +29,7 @@ export function getRawImageSrc(image: string | null | undefined): string {
  */
 export function getImageSrc(
   image: string | null | undefined,
-  width = 800
+  width = 800,
 ): string {
   const src = getRawImageSrc(image);
   if (!src) return "";
