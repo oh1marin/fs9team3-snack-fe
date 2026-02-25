@@ -17,8 +17,18 @@ const pretendard = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Snack",
-  description: "포토카드 마켓플레이스",
+  metadataBase: new URL("https://marin-snack.store"),
+  title: {
+    default: "Snack - 기업용 간식 마켓플레이스",
+    template: "%s | Snack",
+  },
+  description:
+    "기업 담당자가 사내 간식 및 음료를 관리하고 주문할 수 있는 마켓플레이스",
+  openGraph: {
+    title: "Snack - 기업용 간식 마켓플레이스",
+    description:
+      "기업 담당자가 사내 간식 및 음료를 관리하고 주문할 수 있는 마켓플레이스",
+  },
 };
 
 export default function RootLayout({

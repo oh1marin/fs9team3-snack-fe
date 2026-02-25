@@ -18,9 +18,9 @@ export default function LandingPage() {
         />
 
         <div className="mt-8">
-          <Image
-            src="/mid.png"
-            alt="mid"
+        <Image
+          src="/mid.png"
+          alt="Snack 간식 마켓플레이스"
             width={740}
             height={120}
             className="h-auto w-[300px] sm:w-[520px] md:w-[620px] lg:w-[740px]"
@@ -31,7 +31,7 @@ export default function LandingPage() {
       <div className="mt-10 w-full px-6 lg:absolute lg:bottom-0 lg:left-1/2 lg:mt-0 lg:w-full lg:-translate-x-1/2">
         <Image
           src="/landingpageall.png"
-          alt="all"
+          alt="Snack 상품 카테고리"
           width={1600}
           height={900}
           priority
