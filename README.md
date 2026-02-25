@@ -1,6 +1,6 @@
 # 🍿 Snack - 기업용 간식 마켓플레이스
 
-<img src="https://github.com/user-attachments/assets/84a96a34-57de-4b1a-9d52-1f5422b45f9e" width="642" />
+<img src="https://github.com/user-attachments/assets/84a96a34-57de-4b1a-9d52-1f5422b45f9e" width="100%" />
 
 기업 담당자가 사내 간식 및 음료를 관리하고 주문할 수 있는 마켓플레이스 플랫폼
 
@@ -170,7 +170,10 @@
 
 <br />
 
-## 트러블슈팅
+<details>
+<summary>🐛 트러블슈팅</summary>
+
+<br />
 
 ### 1. 헤더 로그인 상태 불안정 문제
 
@@ -203,3 +206,5 @@ const { default: AddToCartModal } = await import("@/components/AddToCartModal");
 ```
 
 초기 번들 크기가 줄었고, 모달처럼 조건부로만 필요한 컴포넌트는 dynamic import가 적합하다는 것을 확인했다.
+
+</details>
