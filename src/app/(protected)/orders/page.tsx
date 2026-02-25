@@ -369,7 +369,7 @@ export default function OrdersPage() {
           >
             <Image
               src="/DOG!.png"
-              alt=""
+              alt="구매 요청 취소"
               width={260}
               height={200}
               loading="lazy"

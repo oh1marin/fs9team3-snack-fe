@@ -173,7 +173,7 @@ export default function AdminPurchaseHistoryPage() {
           <div className="min-h-[200px] animate-pulse rounded-lg border border-line-gray bg-gray-200/50" />
         ) : orders.length === 0 ? (
           <div className="flex min-h-[300px] flex-col items-center justify-center py-16">
-            <Image src="/sadDog.png" alt="" width={388} height={304} />
+            <Image src="/sadDog.png" alt="결과 없음" width={388} height={304} />
           </div>
         ) : (
           <div
