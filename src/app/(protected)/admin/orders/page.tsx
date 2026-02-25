@@ -236,9 +236,9 @@ export default function AdminOrdersPage() {
         ) : orders.length === 0 ? (
           <div className="flex min-h-[300px] flex-col items-center justify-center gap-4 py-16">
             <Image src="/sadDog.png" alt="결과 없음" width={388} height={304} />
-            <p className="text-center text-gray-500">
-              {loadError ? loadError : "승인 대기 중인 구매 요청이 없습니다."}
-            </p>
+            {loadError && (
+              <p className="text-center text-gray-500">{loadError}</p>
+            )}
             {loadError && (
               <button
                 type="button"
