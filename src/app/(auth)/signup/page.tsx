@@ -15,12 +15,12 @@ function SignupForm() {
 
   const { register } = useAuth();
   const [formData, setFormData] = useState({
-    name: "",
+    name: "코드잇",
     email: "",
     password: "",
     passwordConfirm: "",
-    companyName: "",
-    businessNumber: "",
+    companyName: "코드잇",
+    businessNumber: "1234",
   });
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -73,7 +73,9 @@ function SignupForm() {
     }
 
     if (isInvitation && !invitationToken) {
-      toast.error("초대 링크가 올바르지 않습니다. 이메일의 링크를 확인해 주세요.");
+      toast.error(
+        "초대 링크가 올바르지 않습니다. 이메일의 링크를 확인해 주세요.",
+      );
       return;
     }
 
@@ -86,6 +88,8 @@ function SignupForm() {
         formData.password,
         formData.passwordConfirm,
         invitationToken,
+        formData.companyName || undefined,
+        formData.businessNumber || undefined,
       );
       toast.success("회원가입이 완료되었습니다!");
       router.push("/items");
@@ -173,11 +177,7 @@ function SignupForm() {
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"
                   >
-                    {showPassword ? (
-                      <EyeIcon />
-                    ) : (
-                      <EyeOffIcon />
-                    )}
+                    {showPassword ? <EyeIcon /> : <EyeOffIcon />}
                   </button>
                 </div>
                 {passwordError && (
@@ -199,16 +199,10 @@ function SignupForm() {
                   />
                   <button
                     type="button"
-                    onClick={() =>
-                      setShowPasswordConfirm(!showPasswordConfirm)
-                    }
+                    onClick={() => setShowPasswordConfirm(!showPasswordConfirm)}
                     className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"
                   >
-                    {showPasswordConfirm ? (
-                      <EyeIcon />
-                    ) : (
-                      <EyeOffIcon />
-                    )}
+                    {showPasswordConfirm ? <EyeIcon /> : <EyeOffIcon />}
                   </button>
                 </div>
               </label>
@@ -337,11 +331,7 @@ function SignupForm() {
                   onClick={() => setShowPasswordConfirm(!showPasswordConfirm)}
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"
                 >
-                  {showPasswordConfirm ? (
-                    <EyeIcon />
-                  ) : (
-                    <EyeOffIcon />
-                  )}
+                  {showPasswordConfirm ? <EyeIcon /> : <EyeOffIcon />}
                 </button>
               </div>
             </label>

@@ -1,7 +1,10 @@
 "use client";
 
 import { logoutAction } from "@/lib/actions/auth";
-import { setClientAccessToken, setClientRefreshToken } from "@/lib/api/authToken";
+import {
+  setClientAccessToken,
+  setClientRefreshToken,
+} from "@/lib/api/authToken";
 import { authService } from "@/lib/service/authService";
 import { userService } from "@/lib/service/userService";
 
@@ -44,6 +47,8 @@ interface AuthContextType {
     password: string,
     passwordConfirmation: string,
     invitationToken?: string,
+    companyName?: string,
+    businessNumber?: string,
   ) => Promise<string | undefined>;
 }
 
@@ -96,6 +101,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     password: string,
     passwordConfirmation: string,
     invitationToken?: string,
+    companyName?: string,
+    businessNumber?: string,
   ) => {
     const res = await fetch("/api/auth/signup", {
       method: "POST",
@@ -107,6 +114,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         password,
         passwordConfirmation,
         ...(invitationToken ? { invitationToken } : {}),
+        ...(companyName ? { companyName } : {}),
+        ...(businessNumber ? { businessNumber } : {}),
       }),
     });
     const result = await res.json();
