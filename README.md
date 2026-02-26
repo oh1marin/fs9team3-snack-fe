@@ -39,7 +39,7 @@
 
 ## 🏗 시스템 아키텍처
 
-<img src="https://github.com/user-attachments/assets/fe5a6118-cd00-48ae-b767-b5b70b301a54" width="800" />
+<img src="https://github.com/user-attachments/assets/6701a7b1-b00a-45a3-b779-4045fafbe694" width="800" />
 
 <br />
 
@@ -58,8 +58,6 @@
 ![Express.js](https://img.shields.io/badge/express.js-%23404d59.svg?style=for-the-badge&logo=express&logoColor=%2361DAFB)
 ![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)
 ![JWT](https://img.shields.io/badge/JWT-black?style=for-the-badge&logo=JSON%20web%20tokens)
-![Nodemailer](https://img.shields.io/badge/Nodemailer-22B573?style=for-the-badge&logo=gmail&logoColor=white)
-![node-cron](https://img.shields.io/badge/node--cron-FF6B6B?style=for-the-badge&logo=clockify&logoColor=white)
 
 #### Database & Storage
 
@@ -71,7 +69,7 @@
 
 ![Vercel](https://img.shields.io/badge/vercel-%23000000.svg?style=for-the-badge&logo=vercel&logoColor=white)
 ![AWS EC2](https://img.shields.io/badge/AWS%20EC2-FF9900?style=for-the-badge&logo=amazonec2&logoColor=white)
-![AWS RDS](https://img.shields.io/badge/AWS%20RDS-527FFF?style=for-the-badge&logo=amazonrds&logoColor=white)
+![Nginx](https://img.shields.io/badge/nginx-%23009639.svg?style=for-the-badge&logo=nginx&logoColor=white)
 ![Cloudflare](https://img.shields.io/badge/Cloudflare-F38020?style=for-the-badge&logo=Cloudflare&logoColor=white)
 
 <br />
