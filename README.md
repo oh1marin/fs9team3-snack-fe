@@ -37,7 +37,7 @@
 
 ## 🏗 시스템 아키텍처
 
-<img src="https://github.com/user-attachments/assets/f794d086-c988-497a-b292-f6b36a560b98" width="800" />
+<img src="https://github.com/user-attachments/assets/fe5a6118-cd00-48ae-b767-b5b70b301a54" width="800" />
 
 <br />
 
