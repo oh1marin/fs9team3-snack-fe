@@ -17,6 +17,12 @@ export async function POST(request: NextRequest) {
     if (body.invitationToken) {
       backendBody.invitationToken = body.invitationToken;
     }
+    if (body.companyName) {
+      backendBody.companyName = body.companyName;
+    }
+    if (body.businessNumber) {
+      backendBody.businessNumber = body.businessNumber;
+    }
 
     const backendRes = await fetch(`${API_URL}/api/auth/signup`, {
       method: "POST",
